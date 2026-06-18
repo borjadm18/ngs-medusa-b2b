@@ -1,3 +1,4 @@
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import {
   authenticate,
   AuthenticatedMedusaRequest,
@@ -19,7 +20,7 @@ const ensureApprovalType = async (
 ) => {
   const { id } = req.params;
 
-  const query = req.scope.resolve("query");
+  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
 
   const {
     data: [approval],

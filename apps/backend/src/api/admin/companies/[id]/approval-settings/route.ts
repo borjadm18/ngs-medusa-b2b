@@ -18,7 +18,7 @@ export const GET = async (
     fields: adminApprovalSettingsFields,
     filters: req.filterableFields,
     pagination: {
-      ...req.remoteQueryConfig.pagination,
+      ...req.queryConfig.pagination,
     },
   });
 

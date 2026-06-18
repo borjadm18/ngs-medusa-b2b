@@ -2,7 +2,7 @@ import {
   createWorkflow,
   WorkflowData,
   WorkflowResponse,
-} from "@medusajs/workflows-sdk";
+} from "@medusajs/framework/workflows-sdk";
 import { deleteEmployeesStep } from "../steps";
 
 export const deleteEmployeesWorkflow = createWorkflow(

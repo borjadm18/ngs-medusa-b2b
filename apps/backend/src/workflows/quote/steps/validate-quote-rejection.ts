@@ -3,7 +3,7 @@ import { createStep } from "@medusajs/framework/workflows-sdk";
 import { QueryQuote } from "../../../types";
 
 export const validateQuoteRejectionStep = createStep(
-  "validate-quote-rejection-step",
+  "validate-quote-rejection",
   async function ({ quote }: { quote: QueryQuote }) {
     if (["accepted"].includes(quote.status)) {
       throw new MedusaError(

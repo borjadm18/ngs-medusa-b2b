@@ -5,7 +5,7 @@ import {
   QueryApprovalSettings,
   QueryApprovalStatus,
 } from "./query";
-import { HttpTypes } from "@medusajs/types";
+import { HttpTypes } from "@medusajs/framework/types";
 
 /* Admin */
 export type AdminApprovalSettings = QueryApprovalSettings;

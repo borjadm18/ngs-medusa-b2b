@@ -1,7 +1,7 @@
 /* Entity: Company */
 
 import { CustomerGroupDTO } from "@medusajs/framework/types";
-import { CustomerDTO } from "@medusajs/types";
+import { CustomerDTO } from "@medusajs/framework/types";
 import { ModuleApprovalSettings } from "../approval/module";
 
 export enum ModuleCompanySpendingLimitResetFrequency {

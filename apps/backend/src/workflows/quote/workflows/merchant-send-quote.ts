@@ -1,5 +1,5 @@
 import { useRemoteQueryStep } from "@medusajs/core-flows";
-import { createWorkflow } from "@medusajs/workflows-sdk";
+import { createWorkflow } from "@medusajs/framework/workflows-sdk";
 import { updateQuotesWorkflow } from "./update-quote";
 
 /*
@@ -10,7 +10,7 @@ import { updateQuotesWorkflow } from "./update-quote";
   it over to the customer.
 */
 export const merchantSendQuoteWorkflow = createWorkflow(
-  "merchant-send-quote-workflow",
+  "merchant-send-quote",
   function (input: { quote_id: string }) {
     useRemoteQueryStep({
       entry_point: "quote",

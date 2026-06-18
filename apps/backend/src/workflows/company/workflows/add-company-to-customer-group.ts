@@ -1,4 +1,4 @@
-import { createWorkflow, WorkflowResponse } from "@medusajs/workflows-sdk";
+import { createWorkflow, WorkflowResponse } from "@medusajs/framework/workflows-sdk";
 import { createRemoteLinkStep } from "@medusajs/core-flows";
 import { COMPANY_MODULE } from "../../../modules/company";
 import { Modules } from "@medusajs/framework/utils";
