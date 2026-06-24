@@ -1,5 +1,5 @@
 import { useRemoteQueryStep } from "@medusajs/core-flows";
-import { createWorkflow } from "@medusajs/workflows-sdk";
+import { createWorkflow } from "@medusajs/framework/workflows-sdk";
 import { QueryQuote } from "../../../types";
 import { validateQuoteRejectionStep } from "../steps/validate-quote-rejection";
 import { updateQuotesWorkflow } from "./update-quote";
@@ -10,7 +10,7 @@ import { updateQuotesWorkflow } from "./update-quote";
   Once the merchant rejects the quote, we update the status of the quote to a rejection by merchant.
 */
 export const merchantRejectQuoteWorkflow = createWorkflow(
-  "merchant-reject-quote-workflow",
+  "merchant-reject-quote",
   function (input: { quote_id: string }) {
     const quote: QueryQuote = useRemoteQueryStep({
       entry_point: "quote",

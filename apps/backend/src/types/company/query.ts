@@ -1,4 +1,4 @@
-import { CustomerDTO } from "@medusajs/types";
+import { CustomerDTO } from "@medusajs/framework/types";
 import { ModuleCompany, ModuleEmployee } from "./module";
 import { QueryApprovalSettings } from "../approval/query";
 import { HttpTypes } from "@medusajs/framework/types";

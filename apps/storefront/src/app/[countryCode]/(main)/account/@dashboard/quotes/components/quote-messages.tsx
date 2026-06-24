@@ -57,8 +57,8 @@ const QuoteMessages = ({
   }, [quote.draft_order])
 
   const previewItemsMap = useMemo(() => {
-    return new Map<string, AdminOrderLineItem>(
-      preview?.items?.map((item: AdminOrderLineItem) => [item.id, item])
+    return new Map<string, AdminOrderPreview["items"][0]>(
+      preview?.items?.map((item) => [item.id, item])
     )
   }, [preview])
 

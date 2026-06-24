@@ -3,7 +3,7 @@ import {
   useRemoteQueryStep,
 } from "@medusajs/core-flows";
 import { OrderStatus } from "@medusajs/framework/utils";
-import { createWorkflow } from "@medusajs/workflows-sdk";
+import { createWorkflow } from "@medusajs/framework/workflows-sdk";
 import { updateOrderWorkflow } from "../../order/workflows/update-order";
 import { validateQuoteAcceptanceStep } from "../steps/validate-quote-acceptance";
 import { updateQuotesWorkflow } from "./update-quote";
@@ -15,7 +15,7 @@ import { updateQuotesWorkflow } from "./update-quote";
   The draft order is then converted to an actual order ready for processing.
 */
 export const customerAcceptQuoteWorkflow = createWorkflow(
-  "customer-accept-quote-workflow",
+  "customer-accept-quote",
   function (input: { quote_id: string; customer_id: string }) {
     const quote = useRemoteQueryStep({
       entry_point: "quote",

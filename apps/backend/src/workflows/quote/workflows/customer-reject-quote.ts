@@ -1,5 +1,5 @@
 import { useRemoteQueryStep } from "@medusajs/core-flows";
-import { createWorkflow } from "@medusajs/workflows-sdk";
+import { createWorkflow } from "@medusajs/framework/workflows-sdk";
 import { updateQuotesWorkflow } from "./update-quote";
 
 /*
@@ -9,7 +9,7 @@ import { updateQuotesWorkflow } from "./update-quote";
   any further adjustments, or let it remain in a rejected state.
 */
 export const customerRejectQuoteWorkflow = createWorkflow(
-  "customer-reject-quote-workflow",
+  "customer-reject-quote",
   function (input: { quote_id: string }) {
     useRemoteQueryStep({
       entry_point: "quote",
