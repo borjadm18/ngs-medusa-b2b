@@ -1,0 +1,20 @@
+{
+  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": "npm run build",
+  "env": {
+    "NEXT_PUBLIC_MEDUSA_BACKEND_URL": "https://ngs-medusa-backend.onrender.com",
+    "NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY": "pk_f3e3ef58a0a0c6e4adbb6a6d0398e22b25957aaf24dd188d8a23c168990f61e1",
+    "NEXT_PUBLIC_DEFAULT_REGION": "es",
+    "NEXT_PUBLIC_MEDUSA_PAYMENTS_PUBLISHABLE_KEY": "",
+    "NEXT_PUBLIC_MEDUSA_PAYMENTS_ACCOUNT_ID": ""
+  },
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_MEDUSA_BACKEND_URL": "https://ngs-medusa-backend.onrender.com",
+      "NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY": "pk_f3e3ef58a0a0c6e4adbb6a6d0398e22b25957aaf24dd188d8a23c168990f61e1",
+      "NEXT_PUBLIC_DEFAULT_REGION": "es",
+      "NEXT_PUBLIC_MEDUSA_PAYMENTS_PUBLISHABLE_KEY": "",
+      "NEXT_PUBLIC_MEDUSA_PAYMENTS_ACCOUNT_ID": ""
+    }
+  }
+}
