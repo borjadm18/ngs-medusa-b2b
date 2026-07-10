@@ -39,6 +39,29 @@ const categoryImages = [
   "/images/ngs/home-hero-speakers.jpg",
 ]
 
+const detailBlocks = [
+  {
+    title: "Materiales y acabado",
+    body: "Una presentacion mas cuidada para gamas premium, bundles y lineales de distribucion.",
+    image: "/images/ngs/home-texture-wood.jpg",
+  },
+  {
+    title: "Conectividad",
+    body: "Accesorios, cables y componentes como parte del surtido B2B ampliado.",
+    image: "/images/ngs/home-detail-cable.jpg",
+  },
+  {
+    title: "Texturas de producto",
+    body: "Detalle visual para reforzar calidad percibida sin convertir el portal en una landing B2C.",
+    image: "/images/ngs/home-texture-fabric.jpg",
+  },
+  {
+    title: "Entorno profesional",
+    body: "Una direccion visual tecnologica que acompana al catalogo y al backoffice Medusa.",
+    image: "/images/ngs/home-panel-acoustic.jpg",
+  },
+]
+
 export default async function Home(props: {
   params: Promise<{ countryCode: string }>
 }) {
@@ -229,6 +252,56 @@ export default async function Home(props: {
                 </div>
               </LocalizedClientLink>
             ))}
+        </div>
+      </section>
+
+      <section className="border-y border-neutral-200 bg-neutral-950 text-white">
+        <div className="content-container py-10">
+          <div className="mb-6 flex flex-col justify-between gap-4 small:flex-row small:items-end">
+            <div className="max-w-3xl">
+              <p className="text-xs font-semibold uppercase text-[#ff4b4f]">
+                Detalles de producto
+              </p>
+              <h2 className="mt-2 text-3xl font-semibold">
+                Una demo B2B tambien necesita deseabilidad visual.
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-neutral-300">
+                Estas escenas aportan textura, material y tecnologia sin perder el
+                foco operativo: comprar, presupuestar y gestionar cuentas.
+              </p>
+            </div>
+            <LocalizedClientLink
+              href="/store"
+              className="border border-neutral-600 px-4 py-3 text-sm font-semibold transition hover:border-white"
+            >
+              Explorar catalogo
+            </LocalizedClientLink>
+          </div>
+          <div className="grid gap-3 xsmall:grid-cols-2 small:grid-cols-4">
+            {detailBlocks.map((block) => (
+              <article
+                key={block.title}
+                className="overflow-hidden rounded-lg border border-neutral-800 bg-neutral-900"
+              >
+                <div className="relative aspect-[5/4]">
+                  <Image
+                    src={block.image}
+                    alt={block.title}
+                    fill
+                    sizes="(min-width: 1024px) 25vw, 50vw"
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/10" />
+                </div>
+                <div className="p-5">
+                  <h3 className="text-base font-semibold">{block.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-neutral-400">
+                    {block.body}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
