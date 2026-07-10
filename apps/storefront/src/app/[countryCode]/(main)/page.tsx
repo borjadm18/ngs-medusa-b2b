@@ -5,6 +5,7 @@ import LocalizedClientLink from "@/modules/common/components/localized-client-li
 import ProductPreview from "@/modules/products/components/product-preview"
 import SkeletonFeaturedProducts from "@/modules/skeletons/templates/skeleton-featured-products"
 import { Metadata } from "next"
+import Image from "next/image"
 import { Suspense } from "react"
 
 export const metadata: Metadata = {
@@ -12,6 +13,31 @@ export const metadata: Metadata = {
   description:
     "Portal B2B NGS conectado a Medusa para distribuidores, empresas y compras recurrentes.",
 }
+
+const capabilityBlocks = [
+  {
+    title: "Catalogo para canal",
+    body: "Rangos NGS organizados para compras por empresa, reposicion y campanas de distribucion.",
+    image: "/images/ngs/home-detail-tweeter.jpg",
+  },
+  {
+    title: "Ficha comercial rica",
+    body: "Producto, variantes, precio, stock y documentacion listos para integrar con ERP o PIM.",
+    image: "/images/ngs/home-detail-brand.jpg",
+  },
+  {
+    title: "Compra recurrente",
+    body: "Carrito B2B, presupuestos y aprobaciones para equipos con limites de compra.",
+    image: "/images/ngs/home-range-speakers.jpg",
+  },
+]
+
+const categoryImages = [
+  "/images/ngs/home-range-speakers.jpg",
+  "/images/ngs/home-detail-tweeter.jpg",
+  "/images/ngs/home-detail-brand.jpg",
+  "/images/ngs/home-hero-speakers.jpg",
+]
 
 export default async function Home(props: {
   params: Promise<{ countryCode: string }>
@@ -35,8 +61,8 @@ export default async function Home(props: {
   return (
     <main className="bg-white text-neutral-950">
       <section className="border-b border-neutral-200 bg-neutral-950 text-white">
-        <div className="content-container grid gap-8 py-10 small:grid-cols-[1.05fr_0.95fr] small:py-16">
-          <div className="flex flex-col justify-center gap-6">
+        <div className="content-container grid gap-8 py-8 small:grid-cols-[0.92fr_1.08fr] small:items-stretch small:py-12">
+          <div className="flex min-h-[560px] flex-col justify-center gap-6">
             <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-normal text-neutral-300">
               <span className="border border-neutral-700 px-3 py-1">
                 Medusa B2B real
@@ -46,8 +72,8 @@ export default async function Home(props: {
               </span>
             </div>
             <div>
-              <h1 className="max-w-3xl text-[42px] font-semibold leading-[1.03] small:text-[68px]">
-                Compra profesional NGS con precios, stock y aprobaciones por empresa.
+              <h1 className="max-w-3xl text-[38px] font-semibold leading-[1.04] small:text-[64px]">
+                Portal mayorista NGS para vender mejor al canal profesional.
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-7 text-neutral-300 small:text-lg">
                 Un portal Medusa para cuentas B2B: catalogo conectado al backend,
@@ -69,23 +95,39 @@ export default async function Home(props: {
                 Area de empresa
               </LocalizedClientLink>
             </div>
+            <div className="grid gap-3 pt-4 text-sm text-neutral-300 xsmall:grid-cols-3">
+              {[
+                ["8", "productos demo desde Medusa"],
+                ["4", "categorias comerciales"],
+                ["B2B", "quotes, empresas y approvals"],
+              ].map(([value, label]) => (
+                <div key={label} className="border-l border-neutral-700 pl-4">
+                  <p className="text-2xl font-semibold text-white">{value}</p>
+                  <p className="mt-1 leading-5">{label}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="grid gap-3 small:grid-cols-2">
-            {[
-              ["Audio", "Altavoces, party speakers y auriculares para canal retail."],
-              ["PC y gaming", "Perifericos, webcams, hubs y accesorios con rotacion."],
-              ["Movilidad", "Maletines, cargadores y soluciones para movilidad profesional."],
-              ["Ofertas B2B", "Reposicion por volumen y condiciones negociadas."],
-            ].map(([title, body]) => (
-              <div
-                key={title}
-                className="min-h-[150px] border border-neutral-800 bg-neutral-900 p-5"
-              >
-                <p className="text-xl font-semibold">{title}</p>
-                <p className="mt-3 text-sm leading-6 text-neutral-400">{body}</p>
-              </div>
-            ))}
+          <div className="relative min-h-[520px] overflow-hidden rounded-lg border border-neutral-800 bg-neutral-900 small:min-h-[620px]">
+            <Image
+              src="/images/ngs/home-hero-speakers.jpg"
+              alt="Altavoces NGS en entorno premium"
+              fill
+              priority
+              sizes="(min-width: 1024px) 54vw, 100vw"
+              className="object-cover"
+            />
+            <div className="absolute inset-0 bg-black/25" />
+            <div className="absolute bottom-0 left-0 right-0 border-t border-white/15 bg-black/70 p-5 backdrop-blur-sm">
+              <p className="text-xs font-semibold uppercase text-[#ff4b4f]">
+                Imagen de producto para demo comercial
+              </p>
+              <p className="mt-2 max-w-xl text-lg font-semibold">
+                Una entrada visual mas cercana a una marca de tecnologia que a una
+                plantilla generica.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -107,6 +149,41 @@ export default async function Home(props: {
       </section>
 
       <section className="content-container py-10">
+        <div className="mb-6 max-w-3xl">
+          <p className="text-xs font-semibold uppercase text-[#d71920]">
+            Experiencia comercial
+          </p>
+          <h2 className="mt-2 text-3xl font-semibold">
+            Visual de marca, datos de Medusa y flujos de compra B2B.
+          </h2>
+        </div>
+        <div className="grid gap-3 small:grid-cols-3">
+          {capabilityBlocks.map((block) => (
+            <article
+              key={block.title}
+              className="overflow-hidden rounded-lg border border-neutral-200 bg-white"
+            >
+              <div className="relative aspect-[16/10] bg-neutral-100">
+                <Image
+                  src={block.image}
+                  alt={block.title}
+                  fill
+                  sizes="(min-width: 1024px) 33vw, 100vw"
+                  className="object-cover"
+                />
+              </div>
+              <div className="p-5">
+                <h3 className="text-lg font-semibold">{block.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-neutral-600">
+                  {block.body}
+                </p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="content-container py-10">
         <div className="mb-6 flex flex-col justify-between gap-3 small:flex-row small:items-end">
           <div>
             <p className="text-xs font-semibold uppercase text-[#d71920]">
@@ -121,23 +198,31 @@ export default async function Home(props: {
             Ver todo el catalogo
           </LocalizedClientLink>
         </div>
-        <div className="grid gap-3 small:grid-cols-3">
+        <div className="grid gap-3 xsmall:grid-cols-2 small:grid-cols-4">
           {categories
             .filter((category) => !category.parent_category)
-            .slice(0, 6)
-            .map((category) => (
+            .slice(0, 4)
+            .map((category, index) => (
               <LocalizedClientLink
                 key={category.id}
                 href={`/categories/${category.handle}`}
-                className="group border border-neutral-200 bg-white p-5 transition hover:border-neutral-950"
+                className="group overflow-hidden rounded-lg border border-neutral-200 bg-white transition hover:border-neutral-950"
               >
-                <div className="flex min-h-[110px] flex-col justify-between">
-                  <div>
-                    <p className="text-lg font-semibold">{category.name}</p>
-                    <p className="mt-2 text-sm text-neutral-600">
-                      Catalogo, variantes y precio calculado por region.
-                    </p>
-                  </div>
+                <div className="relative aspect-[4/3] bg-neutral-100">
+                  <Image
+                    src={categoryImages[index % categoryImages.length]}
+                    alt={category.name}
+                    fill
+                    sizes="(min-width: 1024px) 25vw, 50vw"
+                    className="object-cover transition duration-200 group-hover:scale-[1.02]"
+                  />
+                  <div className="absolute inset-0 bg-black/20" />
+                </div>
+                <div className="flex min-h-[150px] flex-col justify-between p-5">
+                  <p className="text-lg font-semibold">{category.name}</p>
+                  <p className="mt-2 text-sm leading-6 text-neutral-600">
+                    Catalogo, variantes y precio calculado por region.
+                  </p>
                   <span className="mt-5 text-sm font-semibold text-[#d71920]">
                     Entrar
                   </span>
