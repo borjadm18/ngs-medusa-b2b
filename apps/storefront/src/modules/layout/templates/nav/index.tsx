@@ -4,7 +4,6 @@ import AccountButton from "@/modules/account/components/account-button"
 import CartButton from "@/modules/cart/components/cart-button"
 import LocalizedClientLink from "@/modules/common/components/localized-client-link"
 import FilePlus from "@/modules/common/icons/file-plus"
-import LogoIcon from "@/modules/common/icons/logo"
 import { MegaMenuWrapper } from "@/modules/layout/components/mega-menu"
 import { RequestQuoteConfirmation } from "@/modules/quotes/components/request-quote-confirmation"
 import { RequestQuotePrompt } from "@/modules/quotes/components/request-quote-prompt"
@@ -26,10 +25,12 @@ export async function NavigationHeader() {
               className="hover:text-ui-fg-base flex items-center w-fit"
               href="/"
             >
-              <h1 className="small:text-base text-sm font-medium flex items-center">
-                <LogoIcon className="inline mr-2" />
-                Medusa B2B Starter
-              </h1>
+              <span className="small:text-base text-sm font-medium flex items-center">
+                <span className="mr-2 inline-flex h-7 w-12 items-center justify-center bg-[#d71920] text-sm font-bold text-white">
+                  NGS
+                </span>
+                B2B Portal
+              </span>
             </LocalizedClientLink>
 
             <nav>
@@ -47,8 +48,8 @@ export async function NavigationHeader() {
               <input
                 disabled
                 type="text"
-                placeholder="Search for products"
-                className="bg-gray-100 text-zinc-900 px-4 py-2 rounded-full pr-10 shadow-borders-base hidden small:inline-block hover:cursor-not-allowed"
+                placeholder="Buscar por producto o SKU"
+                className="hidden bg-gray-100 px-4 py-2 pr-10 text-zinc-900 shadow-borders-base hover:cursor-not-allowed small:inline-block"
                 title="Install a search provider to enable product search"
               />
             </div>
@@ -58,18 +59,18 @@ export async function NavigationHeader() {
             {customer && cart?.items && cart.items.length > 0 ? (
               <RequestQuoteConfirmation>
                 <button
-                  className="flex gap-1.5 items-center rounded-2xl bg-none shadow-none border-none hover:bg-neutral-100 px-2 py-1"
+                  className="flex gap-1.5 items-center bg-none px-2 py-1 shadow-none border-none hover:bg-neutral-100"
                   // disabled={isPendingApproval}
                 >
                   <FilePlus />
-                  <span className="hidden small:inline-block">Quote</span>
+                  <span className="hidden small:inline-block">Presupuesto</span>
                 </button>
               </RequestQuoteConfirmation>
             ) : (
               <RequestQuotePrompt>
-                <button className="flex gap-1.5 items-center rounded-2xl bg-none shadow-none border-none hover:bg-neutral-100 px-2 py-1">
+                <button className="flex gap-1.5 items-center bg-none px-2 py-1 shadow-none border-none hover:bg-neutral-100">
                   <FilePlus />
-                  <span className="hidden small:inline-block">Quote</span>
+                  <span className="hidden small:inline-block">Presupuesto</span>
                 </button>
               </RequestQuotePrompt>
             )}

@@ -4,7 +4,7 @@ import { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Log in",
-  description: "Log in to your Medusa Store account.",
+  description: "Accede a tu cuenta B2B NGS.",
 }
 
 export default async function Login() {

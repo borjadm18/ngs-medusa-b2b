@@ -306,8 +306,8 @@ export default async function initial_data_seed({
     input: {
       collections: [
         {
-          title: "Featured",
-          handle: "featured",
+          title: "Destacados B2B",
+          handle: "destacados-b2b",
         },
       ],
     },
@@ -319,19 +319,19 @@ export default async function initial_data_seed({
     input: {
       product_categories: [
         {
-          name: "Laptops",
+          name: "Audio",
           is_active: true,
         },
         {
-          name: "Accessories",
+          name: "PC y Gaming",
           is_active: true,
         },
         {
-          name: "Phones",
+          name: "Movilidad",
           is_active: true,
         },
         {
-          name: "Monitors",
+          name: "Accesorios",
           is_active: true,
         },
       ],
@@ -372,14 +372,13 @@ export default async function initial_data_seed({
     input: {
       products: [
         {
-          title:
-            '16" Ultra-Slim AI Laptop | 3K OLED | 1.1cm Thin | 6-Speaker Audio',
+          title: "NGS WILD SPACE 3 | Altavoz party speaker profesional",
           collection_id: collection.id,
           category_ids: [
-            categoryResult.find((cat) => cat.name === "Laptops")?.id!,
+            categoryResult.find((cat) => cat.name === "Audio")?.id!,
           ],
           description:
-            "This ultra-thin 16-inch laptop is a sophisticated, high-performance machine for the new era of artificial intelligence. It has been completely redesigned from the inside out. The cabinet features an exquisite new ceramic-aluminum composite material in a range of nature-inspired colors. This material provides durability while completing the ultra-slim design and resisting the test of time. This innovative computer utilizes the latest AI-enhanced processor with quiet ambient cooling. It's designed to enrich your lifestyle on the go with an astonishingly thin 1.1cm chassis that houses an advanced 16-inch 3K OLED display and immersive six-speaker audio.",
+            "Altavoz NGS orientado a canal retail y distribuidores, con foco en rotacion, disponibilidad y compra por volumen para campanas de audio.",
           weight: 400,
           status: ProductStatus.PUBLISHED,
           images: [
@@ -404,34 +403,34 @@ export default async function initial_data_seed({
             {
               id: colorOption.id,
               value_ids: [
-                valueId(colorOption, "Blue"),
+                valueId(colorOption, "Black"),
                 valueId(colorOption, "Red"),
               ],
             },
           ],
           variants: [
             {
-              title: "256 GB / Blue",
-              sku: "256-BLUE",
+              title: "Caja 1 unidad / Negro",
+              sku: "NGS-WILD-SPACE-3-BLK",
               options: {
                 Storage: "256 GB",
-                Color: "Blue",
+                Color: "Black",
               },
               manage_inventory: false,
               prices: [
                 {
-                  amount: 1299,
+                  amount: 271.2,
                   currency_code: "eur",
                 },
                 {
-                  amount: 1299,
+                  amount: 271.2,
                   currency_code: "usd",
                 },
               ],
             },
             {
-              title: "512 GB / Red",
-              sku: "512-RED",
+              title: "Caja 1 unidad / Rojo",
+              sku: "NGS-WILD-SPACE-3-RED",
               options: {
                 Storage: "512 GB",
                 Color: "Red",
@@ -439,11 +438,11 @@ export default async function initial_data_seed({
               manage_inventory: false,
               prices: [
                 {
-                  amount: 1259,
+                  amount: 279.2,
                   currency_code: "eur",
                 },
                 {
-                  amount: 1259,
+                  amount: 279.2,
                   currency_code: "usd",
                 },
               ],
@@ -463,12 +462,12 @@ export default async function initial_data_seed({
     input: {
       products: [
         {
-          title: "1080p HD Pro Webcam | Superior Video | Privacy enabled",
+          title: "NGS XPRESSCAM 1080 | Webcam profesional",
           category_ids: [
-            categoryResult.find((cat) => cat.name === "Accessories")?.id!,
+            categoryResult.find((cat) => cat.name === "Accesorios")?.id!,
           ],
           description:
-            "High-quality 1080p HD webcam that elevates your work environment with superior video and audio that outperforms standard laptop cameras. Achieve top-tier video collaboration at a cost-effective price point, ideal for widespread deployment across your organization.",
+            "Webcam 1080p para empresas, educacion y distribuidores IT. Producto adecuado para reposicion recurrente y packs por volumen.",
           weight: 400,
           status: ProductStatus.PUBLISHED,
           images: [
@@ -490,37 +489,37 @@ export default async function initial_data_seed({
           ],
           variants: [
             {
-              title: "Webcam Black",
-              sku: "WEBCAM-BLACK",
+              title: "XPRESSCAM 1080 Black",
+              sku: "NGS-XPRESSCAM-1080-BLK",
               options: {
                 Color: "Black",
               },
               manage_inventory: false,
               prices: [
                 {
-                  amount: 59,
+                  amount: 47.92,
                   currency_code: "eur",
                 },
                 {
-                  amount: 59,
+                  amount: 47.92,
                   currency_code: "usd",
                 },
               ],
             },
             {
-              title: "Webcam White",
-              sku: "WEBCAM-WHITE",
+              title: "XPRESSCAM 1080 White",
+              sku: "NGS-XPRESSCAM-1080-WHT",
               options: {
                 Color: "White",
               },
               manage_inventory: false,
               prices: [
                 {
-                  amount: 65,
+                  amount: 51.92,
                   currency_code: "eur",
                 },
                 {
-                  amount: 65,
+                  amount: 51.92,
                   currency_code: "usd",
                 },
               ],
@@ -540,13 +539,13 @@ export default async function initial_data_seed({
     input: {
       products: [
         {
-          title: `6.5" Ultra HD Smartphone | 3x Impact-Resistant Screen`,
+          title: "NGS POWERPUMP 10W | Powerbank movilidad",
           collection_id: collection.id,
           category_ids: [
-            categoryResult.find((cat) => cat.name === "Phones")?.id!,
+            categoryResult.find((cat) => cat.name === "Movilidad")?.id!,
           ],
           description:
-            'This premium smartphone is crafted from durable and lightweight aerospace-grade aluminum, featuring an expansive 6.5" Ultra-High Definition AMOLED display. It boasts exceptional durability with a cutting-edge nanocrystal glass front, offering three times the impact resistance of standard smartphone screens. The device combines sleek design with robust protection, setting a new standard for smartphone resilience and visual excellence. Copy',
+            "Powerbank NGS para canal movilidad, ideal para compra por caja, programas de empresa y promociones retail.",
           weight: 400,
           status: ProductStatus.PUBLISHED,
           images: [
@@ -578,8 +577,8 @@ export default async function initial_data_seed({
           ],
           variants: [
             {
-              title: "256 GB Purple",
-              sku: "PHONE-256-PURPLE",
+              title: "POWERPUMP 10W Purple",
+              sku: "NGS-POWERPUMP-10W-PUR",
               options: {
                 Memory: "256 GB",
                 Color: "Purple",
@@ -587,18 +586,18 @@ export default async function initial_data_seed({
               manage_inventory: false,
               prices: [
                 {
-                  amount: 999,
+                  amount: 24.9,
                   currency_code: "eur",
                 },
                 {
-                  amount: 999,
+                  amount: 24.9,
                   currency_code: "usd",
                 },
               ],
             },
             {
-              title: "256 GB Red",
-              sku: "PHONE-256-RED",
+              title: "POWERPUMP 10W Red",
+              sku: "NGS-POWERPUMP-10W-RED",
               options: {
                 Memory: "256 GB",
                 Color: "Red",
@@ -606,11 +605,11 @@ export default async function initial_data_seed({
               manage_inventory: false,
               prices: [
                 {
-                  amount: 959,
+                  amount: 22.9,
                   currency_code: "eur",
                 },
                 {
-                  amount: 959,
+                  amount: 22.9,
                   currency_code: "usd",
                 },
               ],
@@ -630,13 +629,13 @@ export default async function initial_data_seed({
     input: {
       products: [
         {
-          title: `34" QD-OLED Curved Gaming Monitor | Ultra-Wide | Infinite Contrast | 175Hz`,
+          title: "NGS GMX-27 | Monitor gaming distribucion",
           collection_id: collection.id,
           category_ids: [
-            categoryResult.find((cat) => cat.name === "Monitors")?.id!,
+            categoryResult.find((cat) => cat.name === "PC y Gaming")?.id!,
           ],
           description:
-            "Experience the pinnacle of display technology with this 34-inch curved monitor. By merging OLED panels and Quantum Dot technology, this QD-OLED screen delivers exceptional contrast, deep blacks, unlimited viewing angles, and vivid colors. The curved design provides an immersive experience, allowing you to enjoy the best of both worlds in one cutting-edge display. This innovative monitor represents the ultimate fusion of visual performance and immersive design.",
+            "Monitor gaming NGS para surtido de canal, con disponibilidad y precio B2B por region para pedidos recurrentes.",
           weight: 400,
           status: ProductStatus.PUBLISHED,
           images: [
@@ -664,37 +663,37 @@ export default async function initial_data_seed({
           ],
           variants: [
             {
-              title: "ACME Monitor 4k White",
-              sku: "ACME-MONITOR-WHITE",
+              title: "GMX-27 White",
+              sku: "NGS-GMX-27-WHT",
               options: {
                 Color: "White",
               },
               manage_inventory: false,
               prices: [
                 {
-                  amount: 599,
+                  amount: 159.9,
                   currency_code: "eur",
                 },
                 {
-                  amount: 599,
+                  amount: 159.9,
                   currency_code: "usd",
                 },
               ],
             },
             {
-              title: "ACME Monitor 4k White",
-              sku: "ACME-MONITOR-BLACK",
+              title: "GMX-27 Black",
+              sku: "NGS-GMX-27-BLK",
               options: {
                 Color: "Black",
               },
               manage_inventory: false,
               prices: [
                 {
-                  amount: 599,
+                  amount: 149.9,
                   currency_code: "eur",
                 },
                 {
-                  amount: 599,
+                  amount: 149.9,
                   currency_code: "usd",
                 },
               ],
@@ -714,12 +713,12 @@ export default async function initial_data_seed({
     input: {
       products: [
         {
-          title: "Hi-Fi Gaming Headset | Pro-Grade DAC | Hi-Res Certified",
+          title: "NGS GHX-600 | Auricular gaming",
           collection_id: collection.id,
           category_ids: [
-            categoryResult.find((cat) => cat.name === "Accessories")?.id!,
+            categoryResult.find((cat) => cat.name === "Audio")?.id!,
           ],
-          description: `Experience studio-quality audio with this advanced acoustic system, which pairs premium hardware with high-fidelity sound and innovative audio software for an immersive listening experience. The integrated digital-to-analog converter (DAC) enhances the audio setup with high-resolution certification and a built-in amplifier, delivering exceptional sound clarity and depth. This comprehensive audio solution brings professional-grade sound to your personal environment, whether for gaming, music production, or general entertainment.`,
+          description: `Auricular gaming NGS para lineales retail, bundles y reposicion por volumen en cuentas B2B.`,
           weight: 400,
           status: ProductStatus.PUBLISHED,
           images: [
@@ -744,37 +743,37 @@ export default async function initial_data_seed({
           ],
           variants: [
             {
-              title: "Headphone Black",
-              sku: "HEADPHONE-BLACK",
+              title: "GHX-600 Black",
+              sku: "NGS-GHX-600-BLK",
               options: {
                 Color: "Black",
               },
               manage_inventory: false,
               prices: [
                 {
-                  amount: 149,
+                  amount: 31.99,
                   currency_code: "eur",
                 },
                 {
-                  amount: 149,
+                  amount: 31.99,
                   currency_code: "usd",
                 },
               ],
             },
             {
-              title: "Headphone White",
-              sku: "HEADPHONE-WHITE",
+              title: "GHX-600 White",
+              sku: "NGS-GHX-600-WHT",
               options: {
                 Color: "White",
               },
               manage_inventory: false,
               prices: [
                 {
-                  amount: 149,
+                  amount: 34.99,
                   currency_code: "eur",
                 },
                 {
-                  amount: 149,
+                  amount: 34.99,
                   currency_code: "usd",
                 },
               ],
@@ -794,11 +793,11 @@ export default async function initial_data_seed({
     input: {
       products: [
         {
-          title: "Wireless Keyboard | Touch ID | Numeric Keypad",
+          title: "NGS FUNKY KIT | Teclado y raton profesional",
           category_ids: [
-            categoryResult.find((cat) => cat.name === "Accessories")?.id!,
+            categoryResult.find((cat) => cat.name === "PC y Gaming")?.id!,
           ],
-          description: `This wireless keyboard offers a comfortable typing experience with a numeric keypad and Touch ID. It features navigation buttons, full-sized arrow keys, and is ideal for spreadsheets and gaming. The rechargeable battery lasts about a month. It pairs automatically with compatible computers and includes a USB-C to Lightning cable for charging and pairing.`,
+          description: `Pack teclado y raton NGS para empresas, aulas, integradores y distribuidores IT.`,
           weight: 400,
           status: ProductStatus.PUBLISHED,
           images: [
@@ -820,37 +819,37 @@ export default async function initial_data_seed({
           ],
           variants: [
             {
-              title: "Keyboard Black",
-              sku: "KEYBOARD-BLACK",
+              title: "FUNKY KIT Black",
+              sku: "NGS-FUNKY-KIT-BLK",
               options: {
                 Color: "Black",
               },
               manage_inventory: false,
               prices: [
                 {
-                  amount: 99,
+                  amount: 18.9,
                   currency_code: "eur",
                 },
                 {
-                  amount: 99,
+                  amount: 18.9,
                   currency_code: "usd",
                 },
               ],
             },
             {
-              title: "Keyboard White",
-              sku: "KEYBOARD-WHITE",
+              title: "FUNKY KIT White",
+              sku: "NGS-FUNKY-KIT-WHT",
               options: {
                 Color: "White",
               },
               manage_inventory: false,
               prices: [
                 {
-                  amount: 99,
+                  amount: 19.9,
                   currency_code: "eur",
                 },
                 {
-                  amount: 99,
+                  amount: 19.9,
                   currency_code: "usd",
                 },
               ],
@@ -870,11 +869,11 @@ export default async function initial_data_seed({
     input: {
       products: [
         {
-          title: "Wireless Rechargeable Mouse | Multi-Touch Surface",
+          title: "NGS EVO MOUSE | Raton inalambrico",
           category_ids: [
-            categoryResult.find((cat) => cat.name === "Accessories")?.id!,
+            categoryResult.find((cat) => cat.name === "PC y Gaming")?.id!,
           ],
-          description: `This wireless keyboard offers a comfortable typing experience with a numeric keypad and Touch ID. It features navigation buttons, full-sized arrow keys, and is ideal for spreadsheets and gaming. The rechargeable battery lasts about a month. It pairs automatically with compatible computers and includes a USB-C to Lightning cable for charging and pairing.`,
+          description: `Raton inalambrico NGS para pedidos por lote, renovacion de puestos y canal informatico.`,
           weight: 400,
           status: ProductStatus.PUBLISHED,
           images: [
@@ -896,37 +895,37 @@ export default async function initial_data_seed({
           ],
           variants: [
             {
-              title: "Mouse Black",
-              sku: "MOUSE-BLACK",
+              title: "EVO MOUSE Black",
+              sku: "NGS-EVO-MOUSE-BLK",
               options: {
                 Color: "Black",
               },
               manage_inventory: false,
               prices: [
                 {
-                  amount: 79,
+                  amount: 9.9,
                   currency_code: "eur",
                 },
                 {
-                  amount: 79,
+                  amount: 9.9,
                   currency_code: "usd",
                 },
               ],
             },
             {
-              title: "Mouse White",
-              sku: "MOUSE-WHITE",
+              title: "EVO MOUSE White",
+              sku: "NGS-EVO-MOUSE-WHT",
               options: {
                 Color: "White",
               },
               manage_inventory: false,
               prices: [
                 {
-                  amount: 79,
+                  amount: 10.9,
                   currency_code: "eur",
                 },
                 {
-                  amount: 79,
+                  amount: 10.9,
                   currency_code: "usd",
                 },
               ],
@@ -946,11 +945,11 @@ export default async function initial_data_seed({
     input: {
       products: [
         {
-          title: "Conference Speaker | High-Performance | Budget-Friendly",
+          title: "NGS WILD BASH COMPACT | Altavoz portatil",
           category_ids: [
-            categoryResult.find((cat) => cat.name === "Accessories")?.id!,
+            categoryResult.find((cat) => cat.name === "Audio")?.id!,
           ],
-          description: `This compact, powerful conference speaker offers exceptional, high-performance features at a surprisingly affordable price. Packed with advanced productivity-enhancing technology, it delivers premium functionality without the premium price tag. Experience better meetings and improved communication, regardless of where your team members are calling from.`,
+          description: `Altavoz compacto NGS con precio B2B, buen margen y alta rotacion para distribuidores.`,
           weight: 400,
           status: ProductStatus.PUBLISHED,
           images: [
@@ -972,37 +971,37 @@ export default async function initial_data_seed({
           ],
           variants: [
             {
-              title: "Speaker Black",
-              sku: "SPEAKER-BLACK",
+              title: "WILD BASH COMPACT Black",
+              sku: "NGS-WILD-BASH-COMPACT-BLK",
               options: {
                 Color: "Black",
               },
               manage_inventory: false,
               prices: [
                 {
-                  amount: 79,
+                  amount: 87.2,
                   currency_code: "eur",
                 },
                 {
-                  amount: 79,
+                  amount: 87.2,
                   currency_code: "usd",
                 },
               ],
             },
             {
-              title: "Speaker White",
-              sku: "SPEAKER-WHITE",
+              title: "WILD BASH COMPACT White",
+              sku: "NGS-WILD-BASH-COMPACT-WHT",
               options: {
                 Color: "White",
               },
               manage_inventory: false,
               prices: [
                 {
-                  amount: 55,
+                  amount: 89.2,
                   currency_code: "eur",
                 },
                 {
-                  amount: 55,
+                  amount: 89.2,
                   currency_code: "usd",
                 },
               ],

@@ -13,8 +13,8 @@ import { Suspense } from "react"
 export const dynamicParams = true
 
 export const metadata: Metadata = {
-  title: "Store",
-  description: "Explore all of our products.",
+  title: "Catalogo B2B NGS",
+  description: "Catalogo mayorista NGS con filtros, precios por region y disponibilidad.",
 }
 
 type Params = {
@@ -45,6 +45,20 @@ export default async function StorePage(props: Params) {
 
   return (
     <div className="bg-neutral-100">
+      <section className="border-b border-neutral-200 bg-white">
+        <div className="content-container py-8">
+          <p className="text-xs font-semibold uppercase text-[#d71920]">
+            Catalogo profesional
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold">
+            Productos NGS para compra B2B
+          </h1>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-600">
+            Filtra por categoria y atributos, revisa precio calculado por region
+            y anade unidades al carrito para pedido o solicitud de presupuesto.
+          </p>
+        </div>
+      </section>
       <div
         className="flex flex-col py-6 content-container gap-4"
         data-testid="category-container"
@@ -72,4 +86,3 @@ export default async function StorePage(props: Params) {
     </div>
   )
 }
-;``

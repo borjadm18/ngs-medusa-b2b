@@ -1,0 +1,54 @@
+services:
+  - type: keyvalue
+    name: ngs-medusa-redis
+    plan: free
+    region: frankfurt
+    maxmemoryPolicy: allkeys-lru
+    persistenceMode: off
+    ipAllowList: []
+
+  - type: web
+    name: ngs-medusa-backend
+    runtime: node
+    plan: free
+    region: frankfurt
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /health
+    buildCommand: corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install --frozen-lockfile && pnpm --filter @b2b-starter/backend build
+    preDeployCommand: cd apps/backend && pnpm medusa db:migrate --execute-safe-links
+    initialDeployHook: cd apps/backend && pnpm medusa exec ./src/migration-scripts/initial-data-seed.ts
+    startCommand: cd apps/backend && pnpm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: STORE_CORS
+        value: http://localhost:8000,https://ngs-medusa-poc-vercel.vercel.app
+      - key: ADMIN_CORS
+        value: https://ngs-medusa-backend.onrender.com,https://dashboard.render.com
+      - key: AUTH_CORS
+        value: https://ngs-medusa-backend.onrender.com,https://dashboard.render.com
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ngs-medusa-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: ngs-medusa-redis
+          type: keyvalue
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: COOKIE_SECRET
+        generateValue: true
+
+databases:
+  - name: ngs-medusa-postgres
+    databaseName: ngs_medusa
+    user: ngs_medusa
+    plan: free
+    region: frankfurt
+    postgresMajorVersion: "15"
+    ipAllowList: []
