@@ -216,7 +216,7 @@ const ProductVariantsTable = ({
         />
         {totalUnits === 0
           ? "Selecciona cantidades"
-          : `Anadir ${totalPackages} bulto${
+          : `Añadir ${totalPackages} bulto${
               totalPackages === 1 ? "" : "s"
             } (${totalUnits} uds) al carrito`}
       </Button>
