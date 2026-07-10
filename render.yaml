@@ -12,13 +12,13 @@ services:
     runtime: node
     plan: free
     region: frankfurt
+    repo: https://github.com/borjadm18/ngs-medusa-b2b
     branch: main
     autoDeploy: true
     healthCheckPath: /health
     buildCommand: corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install --frozen-lockfile && pnpm --filter @b2b-starter/backend build
-    preDeployCommand: cd apps/backend && pnpm medusa db:migrate --execute-safe-links
     initialDeployHook: cd apps/backend && pnpm medusa exec ./src/migration-scripts/initial-data-seed.ts
-    startCommand: cd apps/backend && pnpm start
+    startCommand: cd apps/backend && pnpm medusa db:migrate --execute-safe-links && pnpm start
     envVars:
       - key: NODE_ENV
         value: production
