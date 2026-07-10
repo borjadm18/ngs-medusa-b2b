@@ -16,12 +16,14 @@ services:
     branch: main
     autoDeploy: true
     healthCheckPath: /health
-    buildCommand: npm install -g pnpm@9.15.0 && pnpm install --frozen-lockfile && pnpm --filter @b2b-starter/backend build
+    buildCommand: npm install -g pnpm@9.15.0 && pnpm install --frozen-lockfile --prod=false && pnpm --filter @b2b-starter/backend build
     initialDeployHook: cd apps/backend && pnpm medusa exec ./src/migration-scripts/initial-data-seed.ts
     startCommand: cd apps/backend && pnpm medusa db:migrate --execute-safe-links && pnpm start
     envVars:
       - key: NODE_ENV
         value: production
+      - key: NODE_VERSION
+        value: 22.19.0
       - key: PORT
         value: 10000
       - key: STORE_CORS
