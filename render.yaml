@@ -16,9 +16,9 @@ services:
     branch: main
     autoDeploy: true
     healthCheckPath: /health
-    buildCommand: npm install -g pnpm@9.15.0 && pnpm install --frozen-lockfile --prod=false && pnpm --filter @b2b-starter/backend build
+    buildCommand: npm install -g pnpm@9.15.0 && pnpm install --frozen-lockfile --prod=false && pnpm --filter @b2b-starter/backend build && cd apps/backend/.medusa/server && pnpm install --prod --no-frozen-lockfile
     initialDeployHook: cd apps/backend && pnpm medusa exec ./src/migration-scripts/initial-data-seed.ts
-    startCommand: cd apps/backend && pnpm medusa db:migrate --execute-safe-links && pnpm start
+    startCommand: cd apps/backend/.medusa/server && pnpm medusa db:migrate --execute-safe-links && pnpm start
     envVars:
       - key: NODE_ENV
         value: production
@@ -32,6 +32,8 @@ services:
         value: https://ngs-medusa-backend.onrender.com,https://dashboard.render.com
       - key: AUTH_CORS
         value: https://ngs-medusa-backend.onrender.com,https://dashboard.render.com
+      - key: MEDUSA_BACKEND_URL
+        value: https://ngs-medusa-backend.onrender.com
       - key: DATABASE_URL
         fromDatabase:
           name: ngs-medusa-postgres
