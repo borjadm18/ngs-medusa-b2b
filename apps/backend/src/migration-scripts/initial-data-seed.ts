@@ -34,6 +34,23 @@ export default async function initial_data_seed({
   );
 
   const countries = ["gb", "de", "dk", "se", "fr", "es", "it"];
+  const query = container.resolve(ContainerRegistrationKeys.QUERY);
+
+  const { data: existingProducts } = await query.graph({
+    entity: "product",
+    fields: ["id"],
+    filters: {
+      title: "NGS WILD SPACE 3 | Altavoz party speaker profesional",
+    },
+    pagination: {
+      take: 1,
+    },
+  });
+
+  if (existingProducts.length) {
+    logger.info("Initial NGS seed data already exists. Skipping seed.");
+    return;
+  }
 
   logger.info("Seeding store data...");
   const {
