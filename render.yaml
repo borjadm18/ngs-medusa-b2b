@@ -16,7 +16,7 @@ services:
     branch: main
     autoDeploy: true
     healthCheckPath: /health
-    buildCommand: corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install --frozen-lockfile && pnpm --filter @b2b-starter/backend build
+    buildCommand: npm install -g pnpm@9.15.0 && pnpm install --frozen-lockfile && pnpm --filter @b2b-starter/backend build
     initialDeployHook: cd apps/backend && pnpm medusa exec ./src/migration-scripts/initial-data-seed.ts
     startCommand: cd apps/backend && pnpm medusa db:migrate --execute-safe-links && pnpm start
     envVars:
