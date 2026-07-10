@@ -1,7 +1,6 @@
 import { MedusaContainer } from "@medusajs/framework";
 import {
   ContainerRegistrationKeys,
-  FeatureFlag,
   ModuleRegistrationName,
   Modules,
   ProductStatus,
@@ -36,80 +35,6 @@ export default async function initial_data_seed({
 
   const countries = ["gb", "de", "dk", "se", "fr", "es", "it"];
   const query = container.resolve(ContainerRegistrationKeys.QUERY);
-  const adminEmail = process.env.NGS_ADMIN_EMAIL || "admin@ngs.local";
-  const adminPassword = process.env.NGS_ADMIN_PASSWORD;
-
-  if (adminPassword) {
-    const { data: existingAdminUsers } = await query.graph({
-      entity: "user",
-      fields: ["id"],
-      filters: {
-        email: adminEmail,
-      },
-      pagination: {
-        take: 1,
-      },
-    });
-
-    if (!existingAdminUsers.length) {
-      logger.info(`Creating NGS admin user ${adminEmail}...`);
-
-      const authService = container.resolve(Modules.AUTH);
-      const workflowService = container.resolve(Modules.WORKFLOW_ENGINE);
-      let userRoles: string[] = [];
-
-      if (FeatureFlag.isFeatureEnabled("rbac")) {
-        const rbacService = container.resolve(Modules.RBAC);
-        const superAdminRoles = await rbacService.listRbacRoles({
-          id: "role_super_admin",
-        });
-
-        if (superAdminRoles.length > 0) {
-          userRoles = [superAdminRoles[0].id];
-        }
-      }
-
-      const { result: users } = await workflowService.run(
-        "create-users-workflow",
-        {
-          input: {
-            users: [
-              {
-                email: adminEmail,
-                roles: userRoles,
-              },
-            ],
-          },
-        }
-      );
-
-      const { authIdentity, error } = await authService.register("emailpass", {
-        body: {
-          email: adminEmail,
-          password: adminPassword,
-        },
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      if (!authIdentity) {
-        throw new Error(`Auth identity was not created for ${adminEmail}`);
-      }
-
-      await authService.updateAuthIdentities({
-        id: authIdentity.id,
-        app_metadata: {
-          user_id: users[0].id,
-        },
-      });
-
-      logger.info("NGS admin user created.");
-    } else {
-      logger.info(`NGS admin user ${adminEmail} already exists. Skipping.`);
-    }
-  }
 
   const { data: existingProducts } = await query.graph({
     entity: "product",
