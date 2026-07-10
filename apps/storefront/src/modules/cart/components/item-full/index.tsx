@@ -1,6 +1,7 @@
 "use client"
 
 import { useCart } from "@/lib/context/cart-context"
+import { getCartLinePackaging } from "@/lib/util/b2b-packaging"
 import AddNoteButton from "@/modules/cart/components/add-note-button"
 import DeleteButton from "@/modules/common/components/delete-button"
 import LineItemPrice from "@/modules/common/components/line-item-price"
@@ -85,6 +86,7 @@ const ItemFull = ({
   }
 
   const maxQuantity = item.variant?.inventory_quantity ?? 100
+  const packaging = getCartLinePackaging(item.metadata, item.quantity)
 
   return (
     <Container
@@ -111,6 +113,12 @@ const ItemFull = ({
             <span className="text-neutral-600 text-xs">
               {item.variant?.title}
             </span>
+            {packaging && (
+              <span className="mt-1 text-xs text-neutral-600">
+                {packaging.packageQuantity} cajas x {packaging.unitsPerBox} uds
+                /caja = {packaging.unitQuantity} uds
+              </span>
+            )}
           </div>
           <div className="flex small:flex-row flex-col gap-2">
             <LineItemPrice

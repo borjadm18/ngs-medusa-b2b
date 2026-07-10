@@ -35,6 +35,7 @@ export type AddToCartEventPayload = {
       product: StoreProduct
     }
     quantity: number
+    metadata?: Record<string, unknown>
   }[]
   regionId: string
 }
@@ -97,8 +98,12 @@ export function CartProvider({
           const newItems: StoreCartLineItem[] = [...items]
 
           for (const lineItem of lineItems) {
+            const lineItemMetadata = lineItem.metadata ?? {}
             const existingItemIndex = newItems.findIndex(
-              ({ variant }) => variant?.id === lineItem.productVariant.id
+              ({ variant, metadata }) =>
+                variant?.id === lineItem.productVariant.id &&
+                getLineItemMetadataSignature(metadata) ===
+                  getLineItemMetadataSignature(lineItemMetadata)
             )
 
             if (existingItemIndex > -1) {
@@ -109,7 +114,8 @@ export function CartProvider({
                 quantity: item.quantity + lineItem.quantity,
                 total: (item.total || 0) + lineItem.quantity * item.unit_price,
                 original_total:
-                  (item.original_total || 0) + lineItem.quantity * item.unit_price,
+                  (item.original_total || 0) +
+                  lineItem.quantity * item.unit_price,
               }
 
               continue
@@ -139,6 +145,7 @@ export function CartProvider({
               tax_total: 0,
               title: lineItem.productVariant.title || "",
               total: priceAmount * lineItem.quantity,
+              metadata: lineItemMetadata,
               thumbnail:
                 lineItem.productVariant.product?.thumbnail || undefined,
               unit_price: priceAmount,
@@ -165,6 +172,7 @@ export function CartProvider({
           lineItems: payload.lineItems.map((lineItem) => ({
             variant_id: lineItem.productVariant.id,
             quantity: lineItem.quantity,
+            metadata: lineItem.metadata,
           })),
           countryCode: countryCode as string,
         }).catch((e) => {
@@ -337,6 +345,15 @@ function generateOptimisticItemId(variantId: string) {
 
 export function isOptimisticItemId(id: string) {
   return id.startsWith(OPTIMISTIC_ITEM_ID_PREFIX)
+}
+
+function getLineItemMetadataSignature(
+  metadata: Record<string, unknown> | null | undefined
+) {
+  return [
+    metadata?.purchase_unit ?? "unit",
+    metadata?.units_per_box ?? "",
+  ].join(":")
 }
 
 function calculateCartTotal(cartItems: StoreCartLineItem[]) {

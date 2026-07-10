@@ -7,6 +7,7 @@ export type AddToCartEventPayload = {
       product: StoreProduct
     }
     quantity: number
+    metadata?: Record<string, unknown>
   }[]
   regionId: string
 }
@@ -27,6 +28,7 @@ export const addToCartEventBus: CartAddEventBus = {
       track("add_to_cart", {
         product_name: lineItem.productVariant.title,
         quantity: lineItem.quantity,
+        purchase_unit: lineItem.metadata?.purchase_unit as string | undefined,
       })
     }
   },

@@ -13,6 +13,7 @@ export const StoreAddLineItemsBulk = z
       z.object({
         variant_id: z.string(),
         quantity: z.number(),
+        metadata: z.record(z.string(), z.unknown()).optional(),
       })
     ),
   })
