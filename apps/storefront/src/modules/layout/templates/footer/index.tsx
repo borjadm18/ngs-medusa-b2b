@@ -1,4 +1,5 @@
 import { listCategories } from "@/lib/data/categories"
+import BrandLogo from "@/modules/common/components/brand-logo"
 import LocalizedClientLink from "@/modules/common/components/localized-client-link"
 
 const footerGroups = [
@@ -71,9 +72,9 @@ export default async function Footer() {
           <div>
             <LocalizedClientLink
               href="/"
-              className="text-[32px] font-semibold leading-none"
+              className="inline-flex items-center"
             >
-              NGS
+              <BrandLogo className="h-12 w-[188px] border border-neutral-800" />
             </LocalizedClientLink>
             <p className="mt-5 max-w-xs text-sm leading-6 text-neutral-400">
               Soluciones de sonido profesional disenadas para negocios que

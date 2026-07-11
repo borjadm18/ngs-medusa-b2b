@@ -1,4 +1,5 @@
 import LocalizedClientLink from "@/modules/common/components/localized-client-link"
+import BrandLogo from "@/modules/common/components/brand-logo"
 
 export default function CheckoutLayout({
   children,
@@ -11,9 +12,7 @@ export default function CheckoutLayout({
         <nav className="flex h-full items-center content-container justify-between">
           <LocalizedClientLink className="hover:text-ui-fg-base" href="/">
             <span className="text-base font-medium flex items-center">
-              <span className="mr-2 inline-flex h-7 w-12 items-center justify-center bg-[#d71920] text-sm font-bold text-white">
-                NGS
-              </span>
+              <BrandLogo className="mr-3 h-8 w-[124px]" />
               B2B Portal
             </span>
           </LocalizedClientLink>

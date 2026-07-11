@@ -3,6 +3,7 @@ import { listCategories } from "@/lib/data/categories"
 import { retrieveCustomer } from "@/lib/data/customer"
 import AccountButton from "@/modules/account/components/account-button"
 import CartButton from "@/modules/cart/components/cart-button"
+import BrandLogo from "@/modules/common/components/brand-logo"
 import LocalizedClientLink from "@/modules/common/components/localized-client-link"
 import FilePlus from "@/modules/common/icons/file-plus"
 import { MobileNavigation } from "@/modules/layout/components/mobile-navigation"
@@ -26,10 +27,10 @@ export async function NavigationHeader() {
           <MobileNavigation categories={categories} />
           <div className="flex items-center gap-8">
             <LocalizedClientLink
-              className="flex w-fit items-center text-[32px] font-semibold leading-none tracking-normal text-neutral-950"
+              className="flex w-fit items-center"
               href="/"
             >
-              NGS
+              <BrandLogo className="h-10 w-[156px]" />
             </LocalizedClientLink>
 
             <nav className="hidden items-center gap-7 text-sm font-semibold medium:flex">

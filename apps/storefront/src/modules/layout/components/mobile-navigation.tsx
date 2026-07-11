@@ -1,6 +1,7 @@
 "use client"
 
 import LocalizedClientLink from "@/modules/common/components/localized-client-link"
+import BrandLogo from "@/modules/common/components/brand-logo"
 import { BarsThree, ChevronDownMini, XMark } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
 import { useState } from "react"
@@ -34,7 +35,7 @@ export function MobileNavigation({
         <div className="fixed inset-0 z-[80] bg-black/30">
           <div className="ml-auto flex h-full w-full max-w-sm flex-col bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
-              <span className="text-xl font-semibold text-neutral-950">NGS</span>
+              <BrandLogo className="h-9 w-[140px]" />
               <button
                 type="button"
                 aria-label="Cerrar navegación"
