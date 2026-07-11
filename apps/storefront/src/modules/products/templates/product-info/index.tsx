@@ -38,7 +38,7 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
       </div>
 
       <h1
-        className="mt-4 text-[36px] font-semibold leading-[1.02] tracking-normal text-neutral-950 small:text-[52px]"
+        className="mt-3 text-[24px] font-semibold leading-[1.08] tracking-normal text-neutral-950 small:text-[32px]"
         data-testid="product-title"
       >
         {product.title}
@@ -55,7 +55,7 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
         )}
         {category && (
           <span>
-            Categoría:{" "}
+            Categoria:{" "}
             <strong className="font-semibold text-neutral-950">
               {category}
             </strong>
@@ -63,7 +63,7 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
         )}
         {product.collection?.title && (
           <span>
-            Colección:{" "}
+            Coleccion:{" "}
             <strong className="font-semibold text-neutral-950">
               {product.collection.title}
             </strong>
@@ -79,14 +79,14 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
       </p>
 
       {highlights.length > 0 && (
-        <ul className="mt-7 grid grid-cols-2 gap-3 medium:grid-cols-4">
+        <ul className="mt-5 grid grid-cols-2 gap-2 medium:grid-cols-4">
           {highlights.map((highlight) => (
-            <li key={highlight.label} className="rounded-lg bg-white p-3">
-              <CheckCircleSolid className="mb-2 h-5 w-5 text-neutral-950" />
-              <p className="text-base font-semibold text-neutral-950">
+            <li key={highlight.label} className="rounded-lg bg-white p-2.5">
+              <CheckCircleSolid className="mb-1.5 h-4 w-4 text-neutral-950" />
+              <p className="text-sm font-semibold text-neutral-950">
                 {highlight.value}
               </p>
-              <p className="mt-1 text-xs leading-4 text-neutral-500">
+              <p className="mt-0.5 text-[11px] leading-4 text-neutral-500">
                 {highlight.label}
               </p>
             </li>

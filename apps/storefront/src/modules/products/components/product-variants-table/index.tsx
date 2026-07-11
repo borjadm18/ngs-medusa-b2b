@@ -1,6 +1,7 @@
 import { addToCartEventBus } from "@/lib/data/cart-event-bus"
 import { getVariantPackaging, PurchaseUnit } from "@/lib/util/b2b-packaging"
 import { getProductPrice } from "@/lib/util/get-product-price"
+import { convertToLocale } from "@/lib/util/money"
 import Button from "@/modules/common/components/button"
 import FilePlus from "@/modules/common/icons/file-plus"
 import ShoppingBag from "@/modules/common/icons/shopping-bag"
@@ -34,11 +35,34 @@ const ProductVariantsTable = ({
     (acc, curr) => acc + curr.quantity,
     0
   )
-  const totalPackages = Array.from(lineItemsMap.values()).reduce(
-    (acc, curr) => acc + curr.packageQuantity,
-    0
-  )
   const { cheapestPrice } = getProductPrice({ product })
+  const totalPrice = Array.from(lineItemsMap.values()).reduce((acc, lineItem) => {
+    const { variantPrice } = getProductPrice({
+      product,
+      variantId: lineItem.id,
+    })
+    const unitPrice = Number(variantPrice?.calculated_price_number || 0)
+
+    return acc + unitPrice * lineItem.quantity
+  }, 0)
+  const totalCurrency =
+    Array.from(lineItemsMap.values())
+      .map((lineItem) =>
+        getProductPrice({
+          product,
+          variantId: lineItem.id,
+        }).variantPrice?.currency_code
+      )
+      .find(Boolean) ||
+    cheapestPrice?.currency_code ||
+    region.currency_code
+  const formattedTotal =
+    totalUnits > 0
+      ? convertToLocale({
+          amount: totalPrice,
+          currency_code: totalCurrency,
+        })
+      : null
 
   const handleLineItemChange = (
     variantId: string,
@@ -111,7 +135,7 @@ const ProductVariantsTable = ({
   return (
     <div className="flex w-full flex-col gap-4">
       <div className="rounded-lg border border-neutral-200 bg-white shadow-borders-base">
-        <div className="border-b border-neutral-200 px-5 py-5">
+        <div className="border-b border-neutral-200 px-5 py-4">
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-lg font-semibold text-neutral-950">
@@ -131,7 +155,7 @@ const ProductVariantsTable = ({
             </div>
           </div>
 
-          <div className="mt-5 grid grid-cols-3 overflow-hidden rounded-lg border border-neutral-200 text-center text-xs">
+          <div className="mt-4 grid grid-cols-3 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-50 text-center text-[11px]">
             {[
               ["5-9 uds", "5% dto."],
               ["10-19 uds", "10% dto."],
@@ -139,10 +163,10 @@ const ProductVariantsTable = ({
             ].map(([range, discount]) => (
               <div
                 key={range}
-                className="border-r border-neutral-200 p-3 last:border-r-0"
+                className="border-r border-neutral-200 px-2 py-2 last:border-r-0"
               >
                 <p className="font-semibold text-neutral-950">{range}</p>
-                <p className="mt-1 text-neutral-500">{discount}</p>
+                <p className="mt-0.5 text-neutral-500">{discount}</p>
               </div>
             ))}
           </div>
@@ -172,6 +196,7 @@ const ProductVariantsTable = ({
               >
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
+                    <VariantSwatches options={visibleOptions} />
                     <p className="text-sm font-semibold text-neutral-950">
                       {visibleOptions && visibleOptions.length > 0
                         ? visibleOptions
@@ -253,9 +278,7 @@ const ProductVariantsTable = ({
         />
         {totalUnits === 0
           ? "Selecciona cantidades"
-          : `Anadir ${totalPackages} bulto${
-              totalPackages === 1 ? "" : "s"
-            } (${totalUnits} uds) al carrito`}
+          : `Anadir ${formattedTotal} (${totalUnits} uds) al carrito`}
       </Button>
 
       <Button
@@ -298,6 +321,69 @@ const PurchaseUnitToggle = ({
         </button>
       ))}
     </div>
+  )
+}
+
+const COLOR_SWATCHES: Record<string, string> = {
+  black: "#111111",
+  blanco: "#ffffff",
+  blue: "#2563eb",
+  gris: "#737373",
+  grey: "#737373",
+  negro: "#111111",
+  red: "#d71920",
+  rojo: "#d71920",
+  silver: "#c0c0c0",
+  white: "#ffffff",
+}
+
+const VariantSwatches = ({
+  options,
+}: {
+  options?: HttpTypes.StoreProductVariant["options"]
+}) => {
+  const colorOptions = options?.filter((option) => {
+    const optionTitle = [
+      (option as any).option?.title,
+      (option as any).option?.value,
+      (option as any).option_title,
+      (option as any).title,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase()
+
+    return (
+      optionTitle.includes("color") ||
+      optionTitle.includes("colour") ||
+      !!COLOR_SWATCHES[String(option.value).toLowerCase()]
+    )
+  })
+
+  if (!colorOptions?.length) {
+    return null
+  }
+
+  return (
+    <span className="flex items-center gap-1">
+      {colorOptions.map((option) => {
+        const color = COLOR_SWATCHES[String(option.value).toLowerCase()]
+
+        if (!color) {
+          return null
+        }
+
+        return (
+          <span
+            key={option.id}
+            aria-label={`Color ${option.value}`}
+            title={String(option.value)}
+            className="inline-block h-4 w-4 rounded-full border border-neutral-300"
+            style={{ backgroundColor: color }}
+          />
+        )
+      })}
+    </span>
   )
 }
 

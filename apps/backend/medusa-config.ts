@@ -2,6 +2,7 @@ import { QUOTE_MODULE } from "./src/modules/quote";
 import { APPROVAL_MODULE } from "./src/modules/approval";
 import { COMPANY_MODULE } from "./src/modules/company";
 import { HOMEPAGE_MODULE } from "./src/modules/homepage";
+import { PRODUCT_PACKAGING_MODULE } from "./src/modules/product-packaging";
 import { loadEnv, defineConfig } from "@medusajs/framework/utils";
 
 loadEnv(process.env.NODE_ENV || "development", process.cwd());
@@ -30,6 +31,9 @@ module.exports = defineConfig({
     },
     [HOMEPAGE_MODULE]: {
       resolve: "./modules/homepage",
+    },
+    [PRODUCT_PACKAGING_MODULE]: {
+      resolve: "./modules/product-packaging",
     },
   },
 });

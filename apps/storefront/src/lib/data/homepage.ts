@@ -47,21 +47,22 @@ export type HomepageContent = {
 export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
   heroBadgePrimary: "Audio profesional NGS",
   heroBadgeSecondary: "Portal B2B",
-  heroTitle: "Sonido profesional. Negocios que suenan más alto.",
+  heroTitle: "Sonido profesional. Negocios que suenan mas alto.",
   heroBody:
-    "Altavoces diseñados para impulsar tu marca, tus proyectos y tus espacios.",
-  primaryCtaLabel: "Explorar catálogo",
+    "Altavoces disenados para impulsar tu marca, tus proyectos y tus espacios.",
+  primaryCtaLabel: "Explorar catalogo",
   primaryCtaHref: "/store",
   secondaryCtaLabel: "Solicitar asesoramiento",
   secondaryCtaHref: "/account",
   heroImage: "/images/ngs/home-hero-ngs-speakers.png",
   heroImageAlt: "Altavoces profesionales NGS en una escena premium",
   heroImageEyebrow: "Gama profesional",
-  heroImageTitle: "Soluciones de sonido para espacios comerciales y proyectos B2B.",
+  heroImageTitle:
+    "Soluciones de sonido para espacios comerciales y proyectos B2B.",
   metrics: [
-    { value: "24/48h", label: "entrega ágil según stock" },
+    { value: "24/48h", label: "entrega agil segun stock" },
     { value: "B2B", label: "precios por cuenta" },
-    { value: "Medusa", label: "catálogo conectado" },
+    { value: "Medusa", label: "catalogo conectado" },
   ],
   trustBlocks: [
     {
@@ -69,12 +70,17 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
       body: "Rendimiento probado",
       image: "",
     },
-    { title: "Stock y disponibilidad", body: "Entregas ágiles y fiables", image: "" },
+    {
+      title: "Stock y disponibilidad",
+      body: "Entregas agiles y fiables",
+      image: "",
+    },
     { title: "Precios B2B", body: "Descuentos por volumen", image: "" },
     { title: "Soporte dedicado", body: "Asesoramiento experto", image: "" },
   ],
   capabilityEyebrow: "Soluciones para cada negocio",
-  capabilityTitle: "Sonido profesional para instalaciones, retail y espacios comerciales.",
+  capabilityTitle:
+    "Sonido profesional para instalaciones, retail y espacios comerciales.",
   capabilityBlocks: [
     {
       title: "Instalaciones fijas",
@@ -83,21 +89,21 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
     },
     {
       title: "Eventos y directo",
-      body: "Sistemas para proyectos que necesitan potencia, control y montaje rápido.",
+      body: "Sistemas para proyectos que necesitan potencia, control y montaje rapido.",
       image: "/images/ngs/home-detail-brand.jpg",
     },
     {
-      title: "Distribución B2B",
-      body: "Catálogo, precios por cuenta y compras recurrentes conectadas con Medusa.",
+      title: "Distribucion B2B",
+      body: "Catalogo, precios por cuenta y compras recurrentes conectadas con Medusa.",
       image: "/images/ngs/home-range-speakers.jpg",
     },
   ],
-  categoryEyebrow: "Categorías",
-  categoryTitle: "Categorías destacadas",
+  categoryEyebrow: "Categorias",
+  categoryTitle: "Categorias destacadas",
   detailEyebrow: "Soluciones para cada negocio",
   detailTitle: "Soluciones de audio para cada necesidad.",
   detailBody:
-    "Desde instalaciones fijas hasta eventos en vivo, tenemos la solución que tu proyecto necesita.",
+    "Desde instalaciones fijas hasta eventos en vivo, tenemos la solucion que tu proyecto necesita.",
   detailCtaLabel: "Descubrir soluciones",
   detailCtaHref: "/store",
   detailBlocks: [
@@ -122,7 +128,7 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
       image: "/images/ngs/home-panel-acoustic.jpg",
     },
   ],
-  catalogEyebrow: "Catálogo conectado",
+  catalogEyebrow: "Catalogo conectado",
   catalogTitle: "Productos destacados",
   operationsEyebrow: "Operativa B2B",
   operationsTitle: "Lo que el backoffice aporta a NGS",

@@ -3,10 +3,12 @@ import { adminCompaniesMiddlewares } from "./companies/middlewares";
 import { adminQuotesMiddlewares } from "./quotes/middlewares";
 import { adminApprovalsMiddlewares } from "./approvals/middlewares";
 import { adminHomepageMiddlewares } from "./homepage/middlewares";
+import { adminProductPackagingMiddlewares } from "./product-packaging/middlewares";
 
 export const adminMiddlewares: MiddlewareRoute[] = [
   ...adminCompaniesMiddlewares,
   ...adminQuotesMiddlewares,
   ...adminApprovalsMiddlewares,
   ...adminHomepageMiddlewares,
+  ...adminProductPackagingMiddlewares,
 ];
