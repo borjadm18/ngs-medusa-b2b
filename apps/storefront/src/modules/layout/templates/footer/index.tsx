@@ -8,7 +8,7 @@ const footerGroups = [
       ["Instalaciones fijas", "/store"],
       ["Eventos en vivo", "/store"],
       ["Retail", "/store"],
-      ["Hostelería", "/store"],
+      ["Hosteleria", "/store"],
       ["Empresas", "/store"],
       ["Ver todas las soluciones", "/store"],
     ],
@@ -16,10 +16,10 @@ const footerGroups = [
   {
     title: "Recursos",
     links: [
-      ["Documentación", "/store"],
+      ["Documentacion", "/store"],
       ["Especificaciones", "/store"],
-      ["Catálogos", "/store"],
-      ["Casos de éxito", "/store"],
+      ["Catalogos", "/store"],
+      ["Casos de exito", "/store"],
       ["Blog", "/store"],
     ],
   },
@@ -37,7 +37,7 @@ const footerGroups = [
     title: "Soporte",
     links: [
       ["Centro de ayuda", "/account"],
-      ["Garantías", "/account"],
+      ["Garantias", "/account"],
       ["Devoluciones", "/account"],
       ["Estado de pedidos", "/account"],
     ],
@@ -65,7 +65,7 @@ export default async function Footer() {
         ]
 
   return (
-    <footer className="border-t border-neutral-200 bg-white text-neutral-950">
+    <footer className="border-t border-neutral-900 bg-neutral-950 text-white">
       <div className="content-container mx-auto w-full">
         <div className="grid gap-10 py-10 small:grid-cols-[1.35fr_3fr]">
           <div>
@@ -75,18 +75,18 @@ export default async function Footer() {
             >
               NGS
             </LocalizedClientLink>
-            <p className="mt-5 max-w-xs text-sm leading-6 text-neutral-600">
-              Soluciones de sonido profesional diseñadas para negocios que
-              buscan la máxima calidad.
+            <p className="mt-5 max-w-xs text-sm leading-6 text-neutral-400">
+              Soluciones de sonido profesional disenadas para negocios que
+              buscan la maxima calidad.
             </p>
-            <div className="mt-6 flex gap-3 text-xs font-semibold text-neutral-600">
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded border border-neutral-200">
+            <div className="mt-6 flex gap-3 text-xs font-semibold text-neutral-400">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded border border-neutral-800">
                 in
               </span>
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded border border-neutral-200">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded border border-neutral-800">
                 ig
               </span>
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded border border-neutral-200">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded border border-neutral-800">
                 yt
               </span>
             </div>
@@ -95,12 +95,12 @@ export default async function Footer() {
           <div className="grid gap-8 xsmall:grid-cols-2 medium:grid-cols-5">
             <div>
               <h3 className="text-sm font-semibold">Productos</h3>
-              <ul className="mt-4 grid gap-2 text-sm text-neutral-600">
+              <ul className="mt-4 grid gap-2 text-sm text-neutral-400">
                 {productLinks.map(([label, href]) => (
                   <li key={label}>
                     <LocalizedClientLink
                       href={href}
-                      className="transition hover:text-neutral-950"
+                      className="transition hover:text-white"
                     >
                       {label}
                     </LocalizedClientLink>
@@ -109,9 +109,9 @@ export default async function Footer() {
                 <li>
                   <LocalizedClientLink
                     href="/store"
-                    className="transition hover:text-neutral-950"
+                    className="transition hover:text-white"
                   >
-                    Ver catálogo completo
+                    Ver catalogo completo
                   </LocalizedClientLink>
                 </li>
               </ul>
@@ -120,12 +120,12 @@ export default async function Footer() {
             {footerGroups.map((group) => (
               <div key={group.title}>
                 <h3 className="text-sm font-semibold">{group.title}</h3>
-                <ul className="mt-4 grid gap-2 text-sm text-neutral-600">
+                <ul className="mt-4 grid gap-2 text-sm text-neutral-400">
                   {group.links.map(([label, href]) => (
                     <li key={label}>
                       <LocalizedClientLink
                         href={href}
-                        className="transition hover:text-neutral-950"
+                        className="transition hover:text-white"
                       >
                         {label}
                       </LocalizedClientLink>
@@ -137,11 +137,17 @@ export default async function Footer() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-neutral-200 py-6 text-xs text-neutral-500 small:flex-row small:items-center small:justify-between">
-          <p>© {new Date().getFullYear()} NGS. Todos los derechos reservados.</p>
+        <div className="flex flex-col gap-3 border-t border-neutral-800 py-6 text-xs text-neutral-500 small:flex-row small:items-center small:justify-between">
+          <p>
+            (c) {new Date().getFullYear()} NGS. Todos los derechos reservados.
+          </p>
           <div className="flex flex-wrap gap-4">
-            <LocalizedClientLink href="/store">Términos y condiciones</LocalizedClientLink>
-            <LocalizedClientLink href="/store">Política de privacidad</LocalizedClientLink>
+            <LocalizedClientLink href="/store">
+              Terminos y condiciones
+            </LocalizedClientLink>
+            <LocalizedClientLink href="/store">
+              Politica de privacidad
+            </LocalizedClientLink>
             <LocalizedClientLink href="/store">Cookies</LocalizedClientLink>
           </div>
         </div>

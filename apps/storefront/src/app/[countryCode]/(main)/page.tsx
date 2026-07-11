@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     title: "NGS | Audio profesional B2B",
     description:
       "Altavoces profesionales y soluciones de audio para empresas, retail, hostelería, eventos e instalaciones.",
-    images: ["/images/ngs/home-hero-speakers.jpg"],
+    images: ["/images/ngs/home-hero-ngs-speakers.png"],
   },
 }
 

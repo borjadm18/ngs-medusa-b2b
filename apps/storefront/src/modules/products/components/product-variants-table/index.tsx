@@ -2,6 +2,7 @@ import { addToCartEventBus } from "@/lib/data/cart-event-bus"
 import { getVariantPackaging, PurchaseUnit } from "@/lib/util/b2b-packaging"
 import { getProductPrice } from "@/lib/util/get-product-price"
 import Button from "@/modules/common/components/button"
+import FilePlus from "@/modules/common/icons/file-plus"
 import ShoppingBag from "@/modules/common/icons/shopping-bag"
 import { HttpTypes, StoreProduct, StoreProductVariant } from "@medusajs/types"
 import { clx } from "@medusajs/ui"
@@ -37,6 +38,7 @@ const ProductVariantsTable = ({
     (acc, curr) => acc + curr.packageQuantity,
     0
   )
+  const { cheapestPrice } = getProductPrice({ product })
 
   const handleLineItemChange = (
     variantId: string,
@@ -109,14 +111,41 @@ const ProductVariantsTable = ({
   return (
     <div className="flex w-full flex-col gap-4">
       <div className="rounded-lg border border-neutral-200 bg-white shadow-borders-base">
-        <div className="border-b border-neutral-200 px-4 py-3">
-          <p className="text-sm font-semibold text-neutral-950">
-            Compra B2B por variante
-          </p>
-          <p className="mt-1 text-xs leading-5 text-neutral-500">
-            Elige unidades sueltas o cajas completas. El carrito recibirá la
-            cantidad total de unidades.
-          </p>
+        <div className="border-b border-neutral-200 px-5 py-5">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-lg font-semibold text-neutral-950">
+                Configura tu pedido
+              </p>
+              <p className="mt-1 text-xs leading-5 text-neutral-500">
+                Compra por unidad o caja completa. El carrito recibira la
+                cantidad total de unidades.
+              </p>
+            </div>
+            <div className="shrink-0 text-right">
+              <p className="text-xs text-neutral-500">Desde</p>
+              <p className="text-2xl font-semibold text-neutral-950">
+                {cheapestPrice?.calculated_price || "Consultar"}
+              </p>
+              <p className="text-[11px] uppercase text-neutral-500">Sin IVA</p>
+            </div>
+          </div>
+
+          <div className="mt-5 grid grid-cols-3 overflow-hidden rounded-lg border border-neutral-200 text-center text-xs">
+            {[
+              ["5-9 uds", "5% dto."],
+              ["10-19 uds", "10% dto."],
+              ["20+ uds", "15% dto."],
+            ].map(([range, discount]) => (
+              <div
+                key={range}
+                className="border-r border-neutral-200 p-3 last:border-r-0"
+              >
+                <p className="font-semibold text-neutral-950">{range}</p>
+                <p className="mt-1 text-neutral-500">{discount}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="divide-y divide-neutral-200">
@@ -135,7 +164,7 @@ const ProductVariantsTable = ({
               <article
                 key={variant.id}
                 className={clx(
-                  "grid gap-4 px-4 py-4 transition-colors small:grid-cols-[minmax(0,1fr)_auto] small:items-center",
+                  "grid gap-4 px-5 py-4 transition-colors small:grid-cols-[minmax(0,1fr)_auto] small:items-center",
                   selectedLineItem?.quantity
                     ? "bg-neutral-50"
                     : "bg-white hover:bg-neutral-50"
@@ -145,7 +174,9 @@ const ProductVariantsTable = ({
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-sm font-semibold text-neutral-950">
                       {visibleOptions && visibleOptions.length > 0
-                        ? visibleOptions.map((option) => option.value).join(" / ")
+                        ? visibleOptions
+                            .map((option) => option.value)
+                            .join(" / ")
                         : variant.title}
                     </p>
                     {variant.sku && (
@@ -222,9 +253,21 @@ const ProductVariantsTable = ({
         />
         {totalUnits === 0
           ? "Selecciona cantidades"
-          : `Añadir ${totalPackages} bulto${
+          : `Anadir ${totalPackages} bulto${
               totalPackages === 1 ? "" : "s"
             } (${totalUnits} uds) al carrito`}
+      </Button>
+
+      <Button
+        variant="secondary"
+        className="h-11 w-full rounded-lg text-sm"
+        disabled={totalUnits === 0}
+        onClick={handleAddToCart}
+      >
+        <FilePlus />
+        {totalUnits === 0
+          ? "Solicitar presupuesto"
+          : "Anadir seleccion al presupuesto"}
       </Button>
     </div>
   )
@@ -245,7 +288,7 @@ const PurchaseUnitToggle = ({
           type="button"
           onClick={() => onChange(unit)}
           className={clx(
-            "h-7 flex-1 rounded-md px-2 text-xs font-medium transition-colors",
+            "h-8 flex-1 rounded-md px-2 text-xs font-medium transition-colors",
             value === unit
               ? "bg-neutral-950 text-white"
               : "text-neutral-600 hover:bg-neutral-100"

@@ -8,7 +8,9 @@ import SkeletonRelatedProducts from "@/modules/skeletons/templates/skeleton-rela
 import { notFound } from "next/navigation"
 import React, { Suspense } from "react"
 import ProductActionsWrapper from "./product-actions-wrapper"
-import ProductFacts from "../components/product-facts"
+import { ProductBenefitsBar } from "../components/product-benefits-bar"
+import { ProductBreadcrumbs } from "../components/product-breadcrumbs"
+import { ProductSupportPanels } from "../components/product-support-panels"
 
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
@@ -26,20 +28,21 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   }
 
   return (
-    <div className="flex flex-col gap-y-2 my-2">
+    <div className="flex flex-col bg-white">
+      <ProductBenefitsBar />
+      <ProductBreadcrumbs product={product} />
       <div
-        className="content-container grid grid-cols-1 md:grid-cols-2 gap-2 w-full h-fit"
+        className="content-container grid grid-cols-1 gap-8 pb-10 medium:grid-cols-[minmax(0,1.05fr)_minmax(420px,0.95fr)]"
         data-testid="product-container"
       >
         <ImageGallery product={product} />
-        <div className="flex flex-col bg-neutral-100 w-full gap-6 items-start justify-center small:p-20 p-6 h-full">
+        <div className="flex h-fit w-full flex-col items-start gap-7 rounded-lg bg-neutral-50 p-6 small:p-10 medium:sticky medium:top-24">
           <ProductInfo product={product} />
           <Suspense
             fallback={<ProductActions product={product} region={region} />}
           >
             <ProductActionsWrapper id={product.id} region={region} />
           </Suspense>
-          <ProductFacts product={product} />
         </div>
       </div>
       <div className="content-container">
@@ -53,6 +56,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
           <RelatedProducts product={product} countryCode={countryCode} />
         </Suspense>
       </div>
+      <ProductSupportPanels />
     </div>
   )
 }

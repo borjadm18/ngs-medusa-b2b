@@ -54,7 +54,7 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
   primaryCtaHref: "/store",
   secondaryCtaLabel: "Solicitar asesoramiento",
   secondaryCtaHref: "/account",
-  heroImage: "/images/ngs/home-hero-speakers.jpg",
+  heroImage: "/images/ngs/home-hero-ngs-speakers.png",
   heroImageAlt: "Altavoces profesionales NGS en una escena premium",
   heroImageEyebrow: "Gama profesional",
   heroImageTitle: "Soluciones de sonido para espacios comerciales y proyectos B2B.",

@@ -31,7 +31,7 @@ export function ProductSearchForm() {
         id="site-product-search"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
-        placeholder="Buscar productos..."
+        placeholder="Buscar productos, referencias..."
         className="h-11 w-full rounded-lg border border-neutral-200 bg-white px-4 pr-11 text-sm text-neutral-950 outline-none transition placeholder:text-neutral-400 focus:border-neutral-950"
       />
       <button

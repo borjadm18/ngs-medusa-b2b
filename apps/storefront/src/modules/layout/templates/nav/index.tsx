@@ -60,7 +60,7 @@ export async function NavigationHeader() {
                 </div>
               </div>
               <LocalizedClientLink href="/store">Soluciones</LocalizedClientLink>
-              <LocalizedClientLink href="/account">Empresa</LocalizedClientLink>
+              <LocalizedClientLink href="/store">Sectores</LocalizedClientLink>
               <LocalizedClientLink href="/store">Recursos</LocalizedClientLink>
               <LocalizedClientLink href="/account">Soporte</LocalizedClientLink>
             </nav>

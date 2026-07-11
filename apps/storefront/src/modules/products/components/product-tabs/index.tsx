@@ -1,107 +1,143 @@
 "use client"
 
+import {
+  getProductDocuments,
+  getProductSpecGroups,
+} from "@/lib/util/product-technical-profile"
+import { DocumentText, ChevronRightMini } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
-import { Table, Text } from "@medusajs/ui"
+import { clx } from "@medusajs/ui"
 import Markdown from "react-markdown"
-import Accordion from "./accordion"
+import { useState } from "react"
 
 type ProductTabsProps = {
   product: HttpTypes.StoreProduct
 }
 
+const tabLabels = [
+  "Descripcion",
+  "Especificaciones",
+  "Documentacion",
+  "Entrega",
+]
+
 const ProductTabs = ({ product }: ProductTabsProps) => {
-  const tabs = [
-    {
-      label: "Description",
-      component: <ProductSpecsTab product={product} />,
-    },
-    {
-      label: "Specifications",
-      component: <ProductSpecificationsTab product={product} />,
-    },
-  ]
+  const [activeTab, setActiveTab] = useState(tabLabels[1])
+  const specGroups = getProductSpecGroups(product)
+  const documents = getProductDocuments(product)
 
   return (
-    <div className="w-full">
-      <Accordion type="multiple" className="flex flex-col gap-y-2">
-        {tabs.map((tab, i) => (
-          <Accordion.Item
-            className="bg-neutral-100 small:px-24 px-6"
-            key={i}
-            title={tab.label}
-            headingSize="medium"
-            value={tab.label}
-          >
-            {tab.component}
-          </Accordion.Item>
-        ))}
-      </Accordion>
-    </div>
-  )
-}
-
-const ProductSpecsTab = ({ product }: ProductTabsProps) => {
-  return (
-    <div className="text-small-regular py-8 xl:w-2/3">
-      <Markdown
-        components={{
-          p: ({ children }) => (
-            <Text className="text-neutral-950 mb-2">{children}</Text>
-          ),
-          h2: ({ children }) => (
-            <Text className="text-xl text-neutral-950 my-4 font-semibold">
-              {children}
-            </Text>
-          ),
-          h3: ({ children }) => (
-            <Text className="text-lg text-neutral-950 mb-2">{children}</Text>
-          ),
-        }}
+    <section className="rounded-lg border border-neutral-200 bg-white">
+      <div
+        role="tablist"
+        aria-label="Informacion de producto"
+        className="flex overflow-x-auto border-b border-neutral-200"
       >
-        {product.description ? product.description : "-"}
-      </Markdown>
-    </div>
-  )
-}
+        {tabLabels.map((label) => (
+          <button
+            key={label}
+            role="tab"
+            aria-selected={activeTab === label}
+            onClick={() => setActiveTab(label)}
+            className={clx(
+              "min-h-12 shrink-0 border-b-2 px-6 text-sm font-semibold transition",
+              activeTab === label
+                ? "border-neutral-950 text-neutral-950"
+                : "border-transparent text-neutral-500 hover:text-neutral-950"
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
 
-const ProductSpecificationsTab = ({ product }: ProductTabsProps) => {
-  return (
-    <div className="text-small-regular py-8">
-      <Table className="rounded-lg shadow-borders-base overflow-hidden border-none">
-        <Table.Body>
-          {product.weight && (
-            <Table.Row>
-              <Table.Cell className="border-r">
-                <span className="font-semibold">Weight</span>
-              </Table.Cell>
-              <Table.Cell className="px-4">{product.weight} grams</Table.Cell>
-            </Table.Row>
-          )}
-          {(product.height || product.width || product.length) && (
-            <Table.Row>
-              <Table.Cell className="border-r">
-                <span className="font-semibold">Dimensions (HxWxL)</span>
-              </Table.Cell>
-              <Table.Cell className="px-4">
-                {product.height}mm x {product.width}mm x {product.length}mm
-              </Table.Cell>
-            </Table.Row>
-          )}
+      <div className="p-6 small:p-8">
+        {activeTab === "Descripcion" && (
+          <div className="max-w-3xl text-sm leading-7 text-neutral-700">
+            {product.description ? (
+              <Markdown>{product.description}</Markdown>
+            ) : (
+              <p>No hay descripcion ampliada publicada para este producto.</p>
+            )}
+          </div>
+        )}
 
-          {product.metadata &&
-            Object.entries(product.metadata).map(([key, value]) => (
-              <Table.Row key={key}>
-                <Table.Cell className="border-r">
-                  <span className="font-semibold">{key}</span>
-                </Table.Cell>
-                <Table.Cell className="px-4">
-                  <p>{value as string}</p>
-                </Table.Cell>
-              </Table.Row>
+        {activeTab === "Especificaciones" && (
+          <div className="grid gap-8 medium:grid-cols-2">
+            {specGroups.map((group) => (
+              <div key={group.title}>
+                <h3 className="mb-3 text-sm font-semibold text-neutral-950">
+                  {group.title}
+                </h3>
+                <dl className="divide-y divide-neutral-200 text-sm">
+                  {group.rows.map((row) => (
+                    <div
+                      key={`${group.title}-${row.label}`}
+                      className="grid grid-cols-[0.9fr_1fr] gap-4 py-3"
+                    >
+                      <dt className="text-neutral-500">{row.label}</dt>
+                      <dd className="font-semibold text-neutral-950">
+                        {row.value}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
             ))}
-        </Table.Body>
-      </Table>
-    </div>
+          </div>
+        )}
+
+        {activeTab === "Documentacion" && (
+          <div className="grid gap-3">
+            {documents.length > 0 ? (
+              documents.map((document) => (
+                <a
+                  key={document.title}
+                  href={document.url}
+                  className="flex items-center justify-between rounded-lg border border-neutral-200 p-4 transition hover:border-neutral-950"
+                >
+                  <span className="flex items-center gap-3">
+                    <DocumentText className="h-5 w-5 text-neutral-950" />
+                    <span>
+                      <span className="block text-sm font-semibold text-neutral-950">
+                        {document.title}
+                      </span>
+                      <span className="text-xs text-neutral-500">
+                        {document.type} - {document.detail}
+                      </span>
+                    </span>
+                  </span>
+                  <ChevronRightMini className="h-4 w-4" />
+                </a>
+              ))
+            ) : (
+              <div className="rounded-lg border border-dashed border-neutral-300 bg-neutral-50 p-6 text-sm text-neutral-600">
+                No hay documentos tecnicos publicados para este producto. La
+                arquitectura queda preparada para conectar fichas, manuales,
+                certificados y planos desde Medusa.
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === "Entrega" && (
+          <div className="grid gap-4 text-sm text-neutral-700 small:grid-cols-3">
+            <div className="rounded-lg bg-neutral-50 p-4">
+              <p className="font-semibold text-neutral-950">Disponibilidad</p>
+              <p className="mt-2">Gestionada por region y canal de venta.</p>
+            </div>
+            <div className="rounded-lg bg-neutral-50 p-4">
+              <p className="font-semibold text-neutral-950">Embalaje</p>
+              <p className="mt-2">Unidad o caja segun variante seleccionada.</p>
+            </div>
+            <div className="rounded-lg bg-neutral-50 p-4">
+              <p className="font-semibold text-neutral-950">Soporte</p>
+              <p className="mt-2">Equipo tecnico disponible para preventa.</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
   )
 }
 
