@@ -8,17 +8,24 @@ import { HttpTypes } from "@medusajs/types"
 import { Container, Text, clx, toast } from "@medusajs/ui"
 import { useState } from "react"
 
+type CustomerFormData = Pick<
+  HttpTypes.StoreUpdateCustomer,
+  "first_name" | "last_name" | "phone"
+> & {
+  first_name: string
+  last_name: string
+  phone: string
+}
+
 const ProfileCard = ({ customer }: { customer: B2BCustomer }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
-  const { first_name, last_name, phone } = customer
-
-  const [customerData, setCustomerData] = useState({
-    first_name,
-    last_name,
-    phone,
-  } as HttpTypes.StoreUpdateCustomer)
+  const [customerData, setCustomerData] = useState<CustomerFormData>({
+    first_name: customer.first_name || "",
+    last_name: customer.last_name || "",
+    phone: customer.phone || "",
+  })
 
   const handleSave = async () => {
     setIsSaving(true)

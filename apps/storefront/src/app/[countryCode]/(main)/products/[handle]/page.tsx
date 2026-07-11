@@ -1,7 +1,5 @@
-import { sdk } from "@/lib/config"
-import { getAuthHeaders } from "@/lib/data/cookies"
 import { getProductByHandle } from "@/lib/data/products"
-import { getRegion, listRegions } from "@/lib/data/regions"
+import { getRegion } from "@/lib/data/regions"
 import ProductTemplate from "@/modules/products/templates"
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
@@ -13,37 +11,7 @@ type Props = {
 }
 
 export async function generateStaticParams() {
-  try {
-    const countryCodes = await listRegions().then((regions) =>
-      regions?.map((r) => r.countries?.map((c) => c.iso_2)).flat()
-    )
-
-    if (!countryCodes) {
-      return []
-    }
-
-    const { products } = await sdk.store.product.list(
-      { fields: "handle" },
-      { next: { tags: ["products"] }, ...(await getAuthHeaders()) }
-    )
-
-    return countryCodes
-      .map((countryCode) =>
-        products.map((product) => ({
-          countryCode,
-          handle: product.handle,
-        }))
-      )
-      .flat()
-      .filter((param) => param.handle)
-  } catch (error) {
-    console.error(
-      `Failed to generate static paths for product pages: ${
-        error instanceof Error ? error.message : "Unknown error"
-      }.`
-    )
-    return []
-  }
+  return []
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {

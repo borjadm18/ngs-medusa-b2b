@@ -26,9 +26,6 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
   return (
     <>
       <NavigationHeader />
-      <div className="flex items-center justify-center bg-neutral-950 p-2 text-center text-sm text-neutral-50 small:p-3">
-        Pedidos profesionales NGS: tarifas por cuenta, presupuestos y aprobaciones desde Medusa.
-      </div>
 
       {customer && cart && (
         <CartMismatchBanner customer={customer} cart={cart} />

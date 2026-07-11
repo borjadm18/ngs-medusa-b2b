@@ -9,15 +9,14 @@ import ApprovalStatusBanner from "@/modules/cart/components/approval-status-bann
 import ItemsTemplate from "@/modules/cart/templates/items"
 import Button from "@/modules/common/components/button"
 import LocalizedClientLink from "@/modules/common/components/localized-client-link"
-import ShoppingBag from "@/modules/common/icons/shopping-bag"
 import FreeShippingPriceNudge from "@/modules/shipping/components/free-shipping-price-nudge"
 import { B2BCustomer } from "@/types"
 import { StoreFreeShippingPrice } from "@/types/shipping-option/http"
-import { ExclamationCircle, LockClosedSolidMini } from "@medusajs/icons"
+import { ExclamationCircle, LockClosedSolidMini, ShoppingBag } from "@medusajs/icons"
 import { StoreCart } from "@medusajs/types"
 import { Drawer, Text } from "@medusajs/ui"
 import { usePathname } from "next/navigation"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 type CartDrawerProps = {
   customer: B2BCustomer | null
@@ -29,9 +28,9 @@ const CartDrawer = ({
   freeShippingPrices,
   ...props
 }: CartDrawerProps) => {
-  const [activeTimer, setActiveTimer] = useState<NodeJS.Timer | undefined>(
-    undefined
-  )
+  const [activeTimer, setActiveTimer] = useState<
+    ReturnType<typeof setTimeout> | undefined
+  >(undefined)
   const [isOpen, setIsOpen] = useState(false)
 
   const open = () => setIsOpen(true)
@@ -79,11 +78,11 @@ const CartDrawer = ({
 
   const pathname = usePathname()
 
-  const cancelTimer = () => {
+  const cancelTimer = useCallback(() => {
     if (activeTimer) {
       clearTimeout(activeTimer)
     }
-  }
+  }, [activeTimer])
 
   // open cart dropdown when modifying the cart items, but only if we're not on the cart page
   useEffect(() => {
@@ -102,7 +101,7 @@ const CartDrawer = ({
   useEffect(() => {
     cancelTimer()
     close()
-  }, [pathname])
+  }, [cancelTimer, pathname])
 
   const checkoutStep = cart ? getCheckoutStep(cart) : undefined
   const checkoutPath = customer
@@ -124,19 +123,14 @@ const CartDrawer = ({
         {...(props as any)}
       >
         <Drawer.Trigger asChild>
-          <button className="transition-fg relative inline-flex w-fit items-center justify-center overflow-hidden outline-none txt-compact-small-plus gap-x-1.5 px-3 py-1.5 rounded-full hover:bg-neutral-100">
-            <ShoppingBag />
-            <span className="text-sm font-normal hidden small:inline-block">
-              {cart && items && items.length > 0
-                ? convertToLocale({
-                    amount: subtotal,
-                    currency_code: cart.currency_code,
-                  })
-                : "Cart"}
-            </span>
-            <div className="bg-blue-500 text-white text-xs px-1.5 py-px rounded-full">
+          <button
+            aria-label={`Abrir carrito, ${totalItems} artículos`}
+            className="relative inline-flex h-10 w-10 items-center justify-center rounded bg-white text-neutral-950 outline-none transition hover:bg-neutral-100"
+          >
+            <ShoppingBag className="h-5 w-5" />
+            <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-neutral-950 px-1 text-[11px] font-semibold text-white">
               {totalItems}
-            </div>
+            </span>
           </button>
         </Drawer.Trigger>
         <Drawer.Content

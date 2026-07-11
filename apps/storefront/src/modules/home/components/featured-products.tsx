@@ -1,0 +1,101 @@
+import { getProductPrice } from "@/lib/util/get-product-price"
+import LocalizedClientLink from "@/modules/common/components/localized-client-link"
+import PlaceholderImage from "@/modules/common/icons/placeholder-image"
+import { ArrowRight } from "@medusajs/icons"
+import { HttpTypes } from "@medusajs/types"
+import Image from "next/image"
+import { Container } from "./container"
+import { SectionHeading } from "./section-heading"
+
+const fallbackProductImages = [
+  "/images/ngs/home-range-speakers.jpg",
+  "/images/ngs/home-detail-tweeter.jpg",
+  "/images/ngs/home-detail-brand.jpg",
+  "/images/ngs/home-texture-fabric.jpg",
+  "/images/ngs/home-detail-cable.jpg",
+]
+
+function ProductCard({
+  product,
+  image,
+}: {
+  product: HttpTypes.StoreProduct
+  image: string
+}) {
+  const { cheapestPrice } = getProductPrice({ product })
+  const productImage = product.thumbnail || product.images?.[0]?.url || image
+  const category =
+    product.categories?.[0]?.name || product.collection?.title || "Producto NGS"
+
+  return (
+    <LocalizedClientLink
+      href={`/products/${product.handle}`}
+      className="group flex min-w-[240px] flex-col rounded-lg border border-neutral-200 bg-white p-4 transition hover:border-neutral-950 hover:shadow-[0_14px_35px_rgba(15,23,42,0.08)]"
+    >
+      <div className="relative aspect-[4/3] overflow-hidden rounded bg-neutral-100">
+        {productImage ? (
+          <Image
+            src={productImage}
+            alt={product.title}
+            fill
+            sizes="(min-width: 1024px) 20vw, (min-width: 640px) 33vw, 80vw"
+            className="object-contain p-3 transition duration-200 group-hover:scale-[1.02]"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center">
+            <PlaceholderImage size={32} />
+          </div>
+        )}
+      </div>
+      <div className="mt-4 flex flex-1 flex-col">
+        <p className="text-[11px] font-semibold uppercase text-neutral-500">
+          {category}
+        </p>
+        <h3 className="mt-1 line-clamp-2 min-h-[42px] text-base font-semibold leading-5 text-neutral-950">
+          {product.title}
+        </h3>
+        <p className="mt-2 text-sm font-semibold text-neutral-950">
+          {cheapestPrice?.calculated_price || "Consultar precio"}
+        </p>
+        <span className="mt-4 inline-flex min-h-10 items-center justify-center rounded bg-neutral-100 px-4 text-sm font-semibold text-neutral-950 transition group-hover:bg-neutral-950 group-hover:text-white">
+          Ver detalles
+        </span>
+      </div>
+    </LocalizedClientLink>
+  )
+}
+
+export function FeaturedProducts({
+  products,
+}: {
+  products: HttpTypes.StoreProduct[]
+}) {
+  return (
+    <section className="bg-white py-10 small:py-12">
+      <Container>
+        <SectionHeading
+          title="Productos destacados"
+          href="/store"
+          action="Ver todos los productos"
+        />
+        {products.length > 0 ? (
+          <div className="-mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2 medium:mx-0 medium:grid medium:grid-cols-5 medium:overflow-visible medium:px-0">
+            {products.slice(0, 5).map((product, index) => (
+              <div key={product.id} className="snap-start">
+                <ProductCard
+                  product={product}
+                  image={fallbackProductImages[index % fallbackProductImages.length]}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-6 text-sm text-neutral-600">
+            Cuando el backend Medusa devuelva productos para esta región, aquí
+            aparecerán con imagen, precio calculado y enlace a PDP.
+          </div>
+        )}
+      </Container>
+    </section>
+  )
+}
