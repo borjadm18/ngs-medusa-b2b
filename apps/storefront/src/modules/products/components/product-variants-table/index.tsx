@@ -1,4 +1,5 @@
 import { addToCartEventBus } from "@/lib/data/cart-event-bus"
+import { StoreProductPackaging } from "@/lib/data/product-packaging"
 import { getVariantPackaging, PurchaseUnit } from "@/lib/util/b2b-packaging"
 import { getProductPrice } from "@/lib/util/get-product-price"
 import { convertToLocale } from "@/lib/util/money"
@@ -13,9 +14,11 @@ import BulkTableQuantity from "../bulk-table-quantity"
 const ProductVariantsTable = ({
   product,
   region,
+  packagingByVariantId = {},
 }: {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
+  packagingByVariantId?: Record<string, StoreProductPackaging>
 }) => {
   const [isAdding, setIsAdding] = useState(false)
   const [lineItemsMap, setLineItemsMap] = useState<
@@ -27,6 +30,8 @@ const ProductVariantsTable = ({
         packageQuantity: number
         purchaseUnit: PurchaseUnit
         unitsPerBox: number
+        minimumOrderQuantity: number
+        quantityIncrement: number
       }
     >
   >(new Map())
@@ -78,19 +83,32 @@ const ProductVariantsTable = ({
       }
 
       const existing = prev.get(variantId)
-      const packaging = getVariantPackaging(product, variant)
+      const packaging = getVariantPackaging(
+        product,
+        variant,
+        packagingByVariantId[variantId]
+      )
       const nextPurchaseUnit = purchaseUnit ?? existing?.purchaseUnit ?? "unit"
+      const normalizedPackageQuantity = normalizePackageQuantity({
+        packageQuantity,
+        purchaseUnit: nextPurchaseUnit,
+        unitsPerBox: packaging.unitsPerBox,
+        minimumOrderQuantity: packaging.minimumOrderQuantity,
+        quantityIncrement: packaging.quantityIncrement,
+      })
       const quantity =
         nextPurchaseUnit === "box"
-          ? packageQuantity * packaging.unitsPerBox
-          : packageQuantity
+          ? normalizedPackageQuantity * packaging.unitsPerBox
+          : normalizedPackageQuantity
 
       newLineItems.set(variantId, {
         ...(existing ?? variant),
         product,
-        packageQuantity,
+        packageQuantity: normalizedPackageQuantity,
         purchaseUnit: nextPurchaseUnit,
         unitsPerBox: packaging.unitsPerBox,
+        minimumOrderQuantity: packaging.minimumOrderQuantity,
+        quantityIncrement: packaging.quantityIncrement,
         quantity,
       })
 
@@ -109,6 +127,8 @@ const ProductVariantsTable = ({
           packageQuantity,
           purchaseUnit,
           unitsPerBox,
+          minimumOrderQuantity,
+          quantityIncrement,
           ...variant
         }) => ({
           productVariant: {
@@ -120,6 +140,8 @@ const ProductVariantsTable = ({
             package_quantity: packageQuantity,
             units_per_box: unitsPerBox,
             unit_quantity: quantity,
+            minimum_order_quantity: minimumOrderQuantity,
+            quantity_increment: quantityIncrement,
           },
         })
       )
@@ -178,7 +200,11 @@ const ProductVariantsTable = ({
               product,
               variantId: variant.id,
             })
-            const packaging = getVariantPackaging(product, variant)
+            const packaging = getVariantPackaging(
+              product,
+              variant,
+              packagingByVariantId[variant.id]
+            )
             const selectedLineItem = lineItemsMap.get(variant.id)
             const visibleOptions = variant.options?.filter(
               (option) => option.value !== "Default option value"
@@ -231,6 +257,22 @@ const ProductVariantsTable = ({
                         </strong>
                       </span>
                     )}
+                    {packaging.minimumOrderQuantity > 1 && (
+                      <span>
+                        <span className="text-neutral-500">Min.</span>{" "}
+                        <strong className="font-semibold text-neutral-950">
+                          {packaging.minimumOrderQuantity} uds
+                        </strong>
+                      </span>
+                    )}
+                    {packaging.quantityIncrement > 1 && (
+                      <span>
+                        <span className="text-neutral-500">Multiplo</span>{" "}
+                        <strong className="font-semibold text-neutral-950">
+                          {packaging.quantityIncrement}
+                        </strong>
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -247,6 +289,7 @@ const ProductVariantsTable = ({
                   />
                   <BulkTableQuantity
                     variantId={variant.id}
+                    value={selectedLineItem?.packageQuantity ?? 0}
                     compact
                     label={
                       selectedLineItem?.purchaseUnit === "box"
@@ -322,6 +365,44 @@ const PurchaseUnitToggle = ({
       ))}
     </div>
   )
+}
+
+const normalizePackageQuantity = ({
+  packageQuantity,
+  purchaseUnit,
+  unitsPerBox,
+  minimumOrderQuantity,
+  quantityIncrement,
+}: {
+  packageQuantity: number
+  purchaseUnit: PurchaseUnit
+  unitsPerBox: number
+  minimumOrderQuantity: number
+  quantityIncrement: number
+}) => {
+  if (packageQuantity <= 0) {
+    return 0
+  }
+
+  if (purchaseUnit === "box") {
+    let boxes = Math.max(
+      packageQuantity,
+      Math.ceil(minimumOrderQuantity / unitsPerBox)
+    )
+
+    while ((boxes * unitsPerBox) % quantityIncrement !== 0) {
+      boxes += 1
+    }
+
+    return boxes
+  }
+
+  const minimum = Math.max(minimumOrderQuantity, 1)
+  const increment = Math.max(quantityIncrement, 1)
+  const units = Math.max(packageQuantity, minimum)
+  const remainder = (units - minimum) % increment
+
+  return remainder === 0 ? units : units + increment - remainder
 }
 
 const COLOR_SWATCHES: Record<string, string> = {

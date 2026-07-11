@@ -7,3 +7,4 @@ export * from "./regions";
 export * from "./variants";
 export * from "./customers";
 export * from "./homepage";
+export * from "./product-packaging";

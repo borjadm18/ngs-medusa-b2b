@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 
 type BulkTableQuantityProps = {
   variantId: string
+  value?: number
   label?: string
   compact?: boolean
   onChange: (variantId: string, quantity: number) => void
@@ -11,6 +12,7 @@ type BulkTableQuantityProps = {
 
 const BulkTableQuantity = ({
   variantId,
+  value,
   label = "uds",
   compact = false,
   onChange,
@@ -57,6 +59,14 @@ const BulkTableQuantity = ({
       handleSubtract()
     }
   }
+
+  useEffect(() => {
+    if (value === undefined) {
+      return
+    }
+
+    setQuantity(value.toString())
+  }, [value])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

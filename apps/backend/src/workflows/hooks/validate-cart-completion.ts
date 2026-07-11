@@ -3,7 +3,7 @@ import { StepResponse } from "@medusajs/framework/workflows-sdk";
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 import { getCartApprovalStatus } from "../../utils/get-cart-approval-status";
 import { checkSpendingLimit } from "../../utils/check-spending-limit";
-import { HttpTypes } from "@medusajs/framework/types";
+import { validateProductPackagingLines } from "../../utils/validate-product-packaging";
 completeCartWorkflow.hooks.validate(async ({ cart }, { container }) => {
   const query = container.resolve(ContainerRegistrationKeys.QUERY);
 
@@ -11,7 +11,7 @@ completeCartWorkflow.hooks.validate(async ({ cart }, { container }) => {
     data: [queryCart],
   } = await query.graph({
     entity: "cart",
-    fields: ["approvals.*", "customer_id", "total"],
+    fields: ["approvals.*", "customer_id", "total", "items.*"],
     filters: {
       id: cart.id,
     },
@@ -47,6 +47,17 @@ completeCartWorkflow.hooks.validate(async ({ cart }, { container }) => {
       }
     }
   }
+
+  await validateProductPackagingLines(
+    container,
+    (queryCart.items || [])
+      .filter((item): item is NonNullable<typeof item> => !!item)
+      .map((item) => ({
+        variant_id: item.variant_id,
+        quantity: item.quantity,
+        metadata: item.metadata as Record<string, unknown> | null | undefined,
+      }))
+  );
 
   return new StepResponse(undefined, null);
 });

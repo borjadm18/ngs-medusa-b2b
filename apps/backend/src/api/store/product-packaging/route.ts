@@ -1,13 +1,25 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework";
 import { PRODUCT_PACKAGING_MODULE } from "../../../modules/product-packaging";
 
+const normalizeVariantIds = (variantId: unknown): string[] => {
+  if (Array.isArray(variantId)) {
+    return variantId.flatMap((id) => String(id).split(",")).filter(Boolean);
+  }
+
+  if (typeof variantId === "string") {
+    return variantId.split(",").filter(Boolean);
+  }
+
+  return [];
+};
+
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   const productPackagingModule = req.scope.resolve<any>(
     PRODUCT_PACKAGING_MODULE
   );
-  const variantId = req.query.variant_id as string | undefined;
+  const variantIds = normalizeVariantIds(req.query.variant_id);
 
-  if (!variantId) {
+  if (!variantIds.length) {
     res.json({
       packaging: [],
     });
@@ -15,7 +27,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   }
 
   const packaging = await productPackagingModule.listProductPackagings({
-    variant_id: variantId,
+    variant_id: variantIds,
   });
 
   res.json({

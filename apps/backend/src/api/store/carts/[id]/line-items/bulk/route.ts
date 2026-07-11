@@ -2,6 +2,7 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework";
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils";
 import { addToCartWorkflowId } from "@medusajs/core-flows";
 import { StoreAddLineItemsBulkType } from "../../../validators";
+import { validateProductPackagingLines } from "../../../../../../utils/validate-product-packaging";
 
 export async function POST(
   req: MedusaRequest<StoreAddLineItemsBulkType>,
@@ -23,6 +24,8 @@ export async function POST(
   );
 
   const workflowEngine = req.scope.resolve(Modules.WORKFLOW_ENGINE);
+
+  await validateProductPackagingLines(req.scope, line_items);
 
   await workflowEngine.run(addToCartWorkflowId, {
     input: {

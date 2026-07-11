@@ -10,6 +10,10 @@ export type VariantPackaging = {
   unitsPerBox: number
   unitLabel: string
   boxLabel: string
+  minimumOrderQuantity: number
+  quantityIncrement: number
+  packageWeight?: number
+  packageDimensions?: string
   palletUnits?: number
 }
 
@@ -96,12 +100,21 @@ const fallbackUnitsPerBox = (
 
 export const getVariantPackaging = (
   product: HttpTypes.StoreProduct | StoreProduct,
-  variant?: HttpTypes.StoreProductVariant | StoreProductVariant
+  variant?: HttpTypes.StoreProductVariant | StoreProductVariant,
+  override?: {
+    units_per_box?: number | null
+    minimum_order_quantity?: number | null
+    quantity_increment?: number | null
+    boxes_per_pallet?: number | null
+    package_weight?: number | null
+    package_dimensions?: string | null
+  }
 ): VariantPackaging => {
   const productMetadata = (product as MetadataSource).metadata
   const variantMetadata = (variant as MetadataSource | undefined)?.metadata
 
   const unitsPerBox =
+    toNumber(override?.units_per_box) ??
     readMetadataNumber(variantMetadata, [
       "units_per_box",
       "unitsPerBox",
@@ -117,6 +130,7 @@ export const getVariantPackaging = (
     fallbackUnitsPerBox(product as StoreProduct, variant as StoreProductVariant)
 
   const palletUnits =
+    toNumber(override?.boxes_per_pallet) ??
     readMetadataNumber(variantMetadata, ["pallet_units", "palletUnits"]) ??
     readMetadataNumber(productMetadata, ["pallet_units", "palletUnits"])
 
@@ -124,6 +138,10 @@ export const getVariantPackaging = (
     unitsPerBox,
     unitLabel: "unidad",
     boxLabel: unitsPerBox === 1 ? "caja" : `caja (${unitsPerBox} uds)`,
+    minimumOrderQuantity: toNumber(override?.minimum_order_quantity) ?? 1,
+    quantityIncrement: toNumber(override?.quantity_increment) ?? 1,
+    packageWeight: toNumber(override?.package_weight),
+    packageDimensions: override?.package_dimensions || undefined,
     palletUnits,
   }
 }

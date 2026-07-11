@@ -6,6 +6,18 @@ import { PRODUCT_PACKAGING_MODULE } from "../../../modules/product-packaging";
 import { upsertProductPackagingWorkflow } from "../../../workflows/product-packaging/workflows";
 import { AdminUpsertProductPackagingType } from "./validators";
 
+const normalizeVariantIds = (variantId: unknown): string[] => {
+  if (Array.isArray(variantId)) {
+    return variantId.flatMap((id) => String(id).split(",")).filter(Boolean);
+  }
+
+  if (typeof variantId === "string") {
+    return variantId.split(",").filter(Boolean);
+  }
+
+  return [];
+};
+
 export const GET = async (
   req: AuthenticatedMedusaRequest,
   res: MedusaResponse
@@ -13,8 +25,8 @@ export const GET = async (
   const productPackagingModule = req.scope.resolve<any>(
     PRODUCT_PACKAGING_MODULE
   );
-  const variantId = req.query.variant_id as string | undefined;
-  const filters = variantId ? { variant_id: variantId } : {};
+  const variantIds = normalizeVariantIds(req.query.variant_id);
+  const filters = variantIds.length ? { variant_id: variantIds } : {};
   const packaging = await productPackagingModule.listProductPackagings(filters);
 
   res.json({

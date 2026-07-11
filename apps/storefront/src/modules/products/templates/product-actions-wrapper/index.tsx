@@ -1,4 +1,5 @@
 import { getProductsById } from "@/lib/data/products"
+import { listProductPackaging } from "@/lib/data/product-packaging"
 import { HttpTypes } from "@medusajs/types"
 import ProductActions from "@/modules/products/components/product-actions"
 
@@ -21,5 +22,15 @@ export default async function ProductActionsWrapper({
     return null
   }
 
-  return <ProductActions product={product} region={region} />
+  const packagingByVariantId = await listProductPackaging(
+    product.variants?.map((variant) => variant.id).filter(Boolean) || []
+  )
+
+  return (
+    <ProductActions
+      product={product}
+      region={region}
+      packagingByVariantId={packagingByVariantId}
+    />
+  )
 }
