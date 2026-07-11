@@ -1,16 +1,18 @@
 import { MinusMini, PlusMini } from "@medusajs/icons"
-import { IconButton, Input } from "@medusajs/ui"
+import { IconButton, Input, clx } from "@medusajs/ui"
 import { useEffect, useState } from "react"
 
 type BulkTableQuantityProps = {
   variantId: string
   label?: string
+  compact?: boolean
   onChange: (variantId: string, quantity: number) => void
 }
 
 const BulkTableQuantity = ({
   variantId,
   label = "uds",
+  compact = false,
   onChange,
 }: BulkTableQuantityProps) => {
   const [quantity, setQuantity] = useState("0")
@@ -79,11 +81,18 @@ const BulkTableQuantity = ({
   }, [])
 
   return (
-    <div className="flex flex-col gap-1 w-full min-w-[132px]">
-      <div className="flex flex-row justify-between gap-2 w-full">
+    <div
+      className={clx("flex w-full flex-col gap-1", {
+        "min-w-[132px]": !compact,
+        "min-w-0": compact,
+      })}
+    >
+      <div className="flex w-full flex-row justify-between gap-1">
         <IconButton
           onClick={() => handleSubtract()}
-          className="rounded-md hover:bg-neutral-200"
+          className={clx("rounded-md hover:bg-neutral-200", {
+            "h-9 w-9": compact,
+          })}
           variant="transparent"
         >
           <MinusMini />
@@ -93,11 +102,16 @@ const BulkTableQuantity = ({
           onChange={(e) => handleChange(e)}
           onKeyDown={handleKeyDown}
           type="number"
-          className="max-w-10 text-center items-center justify-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className={clx(
+            "text-center items-center justify-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+            compact ? "max-w-12" : "max-w-10"
+          )}
         />
         <IconButton
           onClick={() => handleAdd()}
-          className="rounded-md hover:bg-neutral-200"
+          className={clx("rounded-md hover:bg-neutral-200", {
+            "h-9 w-9": compact,
+          })}
           variant="transparent"
         >
           <PlusMini />

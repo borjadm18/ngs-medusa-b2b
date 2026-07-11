@@ -4,7 +4,7 @@ import { getProductPrice } from "@/lib/util/get-product-price"
 import Button from "@/modules/common/components/button"
 import ShoppingBag from "@/modules/common/icons/shopping-bag"
 import { HttpTypes, StoreProduct, StoreProductVariant } from "@medusajs/types"
-import { clx, Table } from "@medusajs/ui"
+import { clx } from "@medusajs/ui"
 import { useState } from "react"
 import BulkTableQuantity from "../bulk-table-quantity"
 
@@ -107,105 +107,111 @@ const ProductVariantsTable = ({
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="overflow-x-auto p-px">
-        <Table className="w-full rounded-lg overflow-hidden shadow-borders-base border-none">
-          <Table.Header className="border-t-0">
-            <Table.Row className="bg-neutral-100 border-none hover:!bg-neutral-100">
-              <Table.HeaderCell className="px-4">SKU</Table.HeaderCell>
-              {product.options?.map((option) => {
-                if (option.title === "Default option") {
-                  return null
-                }
+    <div className="flex w-full flex-col gap-4">
+      <div className="rounded-lg border border-neutral-200 bg-white shadow-borders-base">
+        <div className="border-b border-neutral-200 px-4 py-3">
+          <p className="text-sm font-semibold text-neutral-950">
+            Compra B2B por variante
+          </p>
+          <p className="mt-1 text-xs leading-5 text-neutral-500">
+            Elige unidades sueltas o cajas completas. El carrito recibirá la
+            cantidad total de unidades.
+          </p>
+        </div>
 
-                return (
-                  <Table.HeaderCell key={option.id} className="px-4 border-x">
-                    {option.title}
-                  </Table.HeaderCell>
-                )
-              })}
-              <Table.HeaderCell className="px-4 border-x">
-                Precio
-              </Table.HeaderCell>
-              <Table.HeaderCell className="px-4 border-x">
-                Compra
-              </Table.HeaderCell>
-              <Table.HeaderCell className="px-4 border-x">
-                Caja
-              </Table.HeaderCell>
-              <Table.HeaderCell className="px-4">Cantidad</Table.HeaderCell>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body className="border-none">
-            {product.variants?.map((variant, index) => {
-              const { variantPrice } = getProductPrice({
-                product,
-                variantId: variant.id,
-              })
-              const packaging = getVariantPackaging(product, variant)
-              const selectedLineItem = lineItemsMap.get(variant.id)
+        <div className="divide-y divide-neutral-200">
+          {product.variants?.map((variant) => {
+            const { variantPrice } = getProductPrice({
+              product,
+              variantId: variant.id,
+            })
+            const packaging = getVariantPackaging(product, variant)
+            const selectedLineItem = lineItemsMap.get(variant.id)
+            const visibleOptions = variant.options?.filter(
+              (option) => option.value !== "Default option value"
+            )
 
-              return (
-                <Table.Row
-                  key={variant.id}
-                  className={clx({
-                    "border-b-0": index === product.variants?.length! - 1,
-                  })}
-                >
-                  <Table.Cell className="px-4">{variant.sku}</Table.Cell>
-                  {variant.options?.map((option) => {
-                    if (option.value === "Default option value") {
-                      return null
+            return (
+              <article
+                key={variant.id}
+                className={clx(
+                  "grid gap-4 px-4 py-4 transition-colors small:grid-cols-[minmax(0,1fr)_auto] small:items-center",
+                  selectedLineItem?.quantity
+                    ? "bg-neutral-50"
+                    : "bg-white hover:bg-neutral-50"
+                )}
+              >
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-sm font-semibold text-neutral-950">
+                      {visibleOptions && visibleOptions.length > 0
+                        ? visibleOptions.map((option) => option.value).join(" / ")
+                        : variant.title}
+                    </p>
+                    {variant.sku && (
+                      <span className="rounded border border-neutral-200 bg-white px-2 py-1 text-[11px] font-medium uppercase text-neutral-500">
+                        {variant.sku}
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-neutral-600">
+                    <span>
+                      <span className="text-neutral-500">Precio</span>{" "}
+                      <strong className="font-semibold text-neutral-950">
+                        {variantPrice?.calculated_price ?? "Consultar"}
+                      </strong>
+                    </span>
+                    <span>
+                      <span className="text-neutral-500">Caja</span>{" "}
+                      <strong className="font-semibold text-neutral-950">
+                        {packaging.unitsPerBox} uds
+                      </strong>
+                    </span>
+                    {packaging.palletUnits && (
+                      <span>
+                        <span className="text-neutral-500">Pallet</span>{" "}
+                        <strong className="font-semibold text-neutral-950">
+                          {packaging.palletUnits} uds
+                        </strong>
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid gap-3 xsmall:grid-cols-[150px_132px] xsmall:items-center small:grid-cols-[142px_126px]">
+                  <PurchaseUnitToggle
+                    value={selectedLineItem?.purchaseUnit ?? "unit"}
+                    onChange={(purchaseUnit) =>
+                      handleLineItemChange(
+                        variant.id,
+                        selectedLineItem?.packageQuantity ?? 0,
+                        purchaseUnit
+                      )
                     }
-
-                    return (
-                      <Table.Cell key={option.id} className="px-4 border-x">
-                        {option.value}
-                      </Table.Cell>
-                    )
-                  })}
-                  <Table.Cell className="px-4 border-x">
-                    {variantPrice?.calculated_price}
-                  </Table.Cell>
-                  <Table.Cell className="px-4 border-x">
-                    <PurchaseUnitToggle
-                      value={selectedLineItem?.purchaseUnit ?? "unit"}
-                      onChange={(purchaseUnit) =>
-                        handleLineItemChange(
-                          variant.id,
-                          selectedLineItem?.packageQuantity ?? 0,
-                          purchaseUnit
-                        )
-                      }
-                    />
-                  </Table.Cell>
-                  <Table.Cell className="px-4 border-x text-xs text-neutral-600">
-                    {packaging.unitsPerBox} uds/caja
-                  </Table.Cell>
-                  <Table.Cell className="pl-1 !pr-1">
-                    <BulkTableQuantity
-                      variantId={variant.id}
-                      label={
-                        selectedLineItem?.purchaseUnit === "box"
-                          ? "cajas"
-                          : "unidades"
-                      }
-                      onChange={(variantId, quantity) =>
-                        handleLineItemChange(variantId, quantity)
-                      }
-                    />
-                  </Table.Cell>
-                </Table.Row>
-              )
-            })}
-          </Table.Body>
-        </Table>
+                  />
+                  <BulkTableQuantity
+                    variantId={variant.id}
+                    compact
+                    label={
+                      selectedLineItem?.purchaseUnit === "box"
+                        ? "cajas"
+                        : "unidades"
+                    }
+                    onChange={(variantId, quantity) =>
+                      handleLineItemChange(variantId, quantity)
+                    }
+                  />
+                </div>
+              </article>
+            )
+          })}
+        </div>
       </div>
 
       <Button
         onClick={handleAddToCart}
         variant="primary"
-        className="w-full h-10"
+        className="h-12 w-full rounded-lg text-sm"
         isLoading={isAdding}
         disabled={totalUnits === 0}
         data-testid="add-product-button"
