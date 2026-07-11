@@ -5,6 +5,7 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
 export const dynamicParams = true
+export const dynamic = "force-dynamic"
 
 type Props = {
   params: Promise<{ category: string[]; countryCode: string }>
