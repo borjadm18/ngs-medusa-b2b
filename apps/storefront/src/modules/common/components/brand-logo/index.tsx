@@ -4,9 +4,10 @@ import { clientProfile } from "@/lib/client-profile"
 type BrandLogoProps = {
   className?: string
   imageClassName?: string
+  name?: string
 }
 
-const BrandLogo = ({ className }: BrandLogoProps) => {
+const BrandLogo = ({ className, name = clientProfile.brand.name }: BrandLogoProps) => {
   return (
     <span
       className={clx(
@@ -15,7 +16,7 @@ const BrandLogo = ({ className }: BrandLogoProps) => {
       )}
     >
       <span className="text-[32px] font-semibold leading-none tracking-normal">
-        {clientProfile.brand.name}
+        {name}
       </span>
     </span>
   )

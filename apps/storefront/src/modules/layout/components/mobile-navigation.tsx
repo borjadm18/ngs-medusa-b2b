@@ -1,6 +1,7 @@
 "use client"
 
 import { clientProfile } from "@/lib/client-profile"
+import { ClientProfile } from "@/lib/client-profile"
 import LocalizedClientLink from "@/modules/common/components/localized-client-link"
 import BrandLogo from "@/modules/common/components/brand-logo"
 import { BarsThree, ChevronDownMini, XMark } from "@medusajs/icons"
@@ -9,14 +10,16 @@ import { useState } from "react"
 
 export function MobileNavigation({
   categories,
+  profile = clientProfile,
 }: {
   categories: HttpTypes.StoreProductCategory[]
+  profile?: ClientProfile
 }) {
   const [open, setOpen] = useState(false)
   const productNavigation =
-    clientProfile.navigation.main.find((link) => link.label === "Productos") ||
-    clientProfile.navigation.main[0]
-  const staticLinks = clientProfile.navigation.main.filter(
+    profile.navigation.main.find((link) => link.label === "Productos") ||
+    profile.navigation.main[0]
+  const staticLinks = profile.navigation.main.filter(
     (link) => link.label !== productNavigation?.label
   )
 
@@ -35,7 +38,7 @@ export function MobileNavigation({
         <div className="fixed inset-0 z-[80] bg-black/30">
           <div className="ml-auto flex h-full w-full max-w-sm flex-col bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
-              <BrandLogo className="h-9 w-[140px]" />
+              <BrandLogo className="h-9 w-[140px]" name={profile.brand.name} />
               <button
                 type="button"
                 aria-label="Cerrar navegación"

@@ -16,7 +16,7 @@ El siguiente salto es cerrar el backoffice no tecnico. La home, marca, navegacio
 | Storefront | Operativo | Vercel live, home/catalogo/PDP/carrito/checkouts funcionales. |
 | Product packaging | Implementado | Modulo, API store/admin, seed NGS, validacion carrito y UI en PDP/carrito. HTTP live validado. |
 | Homepage editable | Parcial alto | Modulo backend, store API, fallback JSON y Admin page con editor estructurado existen. Falta gestion de assets y brand profile. |
-| Client profile | Parcial alto | Marca/logo/nav/footer/SEO/home/categorias/fallbacks salen de JSON. `pnpm sync:client-profile` empaqueta perfiles y valida packaging CSV. Falta editor Admin de brand/profile. |
+| Client profile | Parcial alto | Marca/logo/nav/footer/SEO/home/categorias/fallbacks salen de JSON. `pnpm sync:client-profile` empaqueta perfiles y valida packaging CSV. Admin Brand profile existe en version JSON con preview. |
 | Admin B2B | Parcial | Widget packaging con import/export y bulk basico. Falta UX avanzada y admin homepage/brand. |
 | Presupuestos | Base heredada + integrado | Flujo existe; falta enriquecer presupuesto con packaging/logistica completa. |
 | Aprobaciones | Base heredada + integrado | Existe en cuenta/carrito/checkout; falta validacion UX y casos demo claros. |
@@ -110,11 +110,14 @@ Parcial.
 - Storefront consume homepage, categorias destacadas, imagenes fallback y copy comercial desde perfil/homepage JSON.
 - Fallbacks PDP/productos relacionados usan `clientProfile.fallbacks`.
 - `product-packaging.csv` por perfil se valida y genera JSON/registry para seeds backend.
+- Backend module/API `brandProfile` permite editar el perfil de marca desde Admin y servirlo al Store API.
+- Storefront nav/footer consumen `retrieveBrandProfile()` con fallback al perfil empaquetado.
 
 Pendiente:
 
 - Perfil activo por env con multiples clientes.
-- Brand admin editable.
+- Convertir Admin Brand profile de JSON editor a formularios por seccion.
+- Gestion de assets desde Admin/storage.
 
 ### Import/export B2B
 

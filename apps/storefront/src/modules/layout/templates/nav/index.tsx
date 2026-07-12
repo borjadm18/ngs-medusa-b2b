@@ -1,7 +1,7 @@
 import { retrieveCart } from "@/lib/data/cart"
 import { listCategories } from "@/lib/data/categories"
 import { retrieveCustomer } from "@/lib/data/customer"
-import { clientProfile } from "@/lib/client-profile"
+import { retrieveBrandProfile } from "@/lib/data/brand-profile"
 import AccountButton from "@/modules/account/components/account-button"
 import CartButton from "@/modules/cart/components/cart-button"
 import BrandLogo from "@/modules/common/components/brand-logo"
@@ -20,6 +20,7 @@ export async function NavigationHeader() {
   const customer = await retrieveCustomer().catch(() => null)
   const cart = await retrieveCart()
   const categories = await listCategories({ limit: 6 }).catch(() => [])
+  const clientProfile = await retrieveBrandProfile()
   const productNavigation =
     clientProfile.navigation.main.find((link) => link.label === "Productos") ||
     clientProfile.navigation.main[0]
@@ -31,13 +32,16 @@ export async function NavigationHeader() {
     <div className="sticky inset-x-0 top-0 z-50 border-b border-neutral-200 bg-white/95 text-neutral-950 backdrop-blur">
       <header className="content-container mx-auto flex min-h-[72px] w-full items-center justify-between gap-4">
         <div className="flex items-center gap-5">
-          <MobileNavigation categories={categories} />
+          <MobileNavigation categories={categories} profile={clientProfile} />
           <div className="flex items-center gap-8">
             <LocalizedClientLink
               className="flex w-fit items-center"
               href="/"
             >
-              <BrandLogo className="h-10 w-[156px]" />
+              <BrandLogo
+                className="h-10 w-[156px]"
+                name={clientProfile.brand.name}
+              />
             </LocalizedClientLink>
 
             <nav className="hidden items-center gap-7 text-sm font-semibold medium:flex">

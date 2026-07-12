@@ -1,5 +1,5 @@
 import { listCategories } from "@/lib/data/categories"
-import { clientProfile } from "@/lib/client-profile"
+import { retrieveBrandProfile } from "@/lib/data/brand-profile"
 import BrandLogo from "@/modules/common/components/brand-logo"
 import LocalizedClientLink from "@/modules/common/components/localized-client-link"
 
@@ -8,6 +8,7 @@ export default async function Footer() {
     offset: 0,
     limit: 5,
   }).catch(() => [])
+  const clientProfile = await retrieveBrandProfile()
 
   const productLinks =
     categories.length > 0
@@ -35,7 +36,10 @@ export default async function Footer() {
               href="/"
               className="inline-flex items-center"
             >
-              <BrandLogo className="h-12 w-[188px] border border-neutral-800" />
+              <BrandLogo
+                className="h-12 w-[188px] border border-neutral-800"
+                name={clientProfile.brand.name}
+              />
             </LocalizedClientLink>
             <p className="mt-5 max-w-xs text-sm leading-6 text-neutral-400">
               {clientProfile.footer.description}

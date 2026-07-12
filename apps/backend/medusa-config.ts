@@ -3,6 +3,7 @@ import { APPROVAL_MODULE } from "./src/modules/approval";
 import { COMPANY_MODULE } from "./src/modules/company";
 import { HOMEPAGE_MODULE } from "./src/modules/homepage";
 import { PRODUCT_PACKAGING_MODULE } from "./src/modules/product-packaging";
+import { BRAND_PROFILE_MODULE } from "./src/modules/brand-profile";
 import { loadEnv, defineConfig } from "@medusajs/framework/utils";
 
 loadEnv(process.env.NODE_ENV || "development", process.cwd());
@@ -34,6 +35,9 @@ module.exports = defineConfig({
     },
     [PRODUCT_PACKAGING_MODULE]: {
       resolve: "./modules/product-packaging",
+    },
+    [BRAND_PROFILE_MODULE]: {
+      resolve: "./modules/brand-profile",
     },
   },
 });
