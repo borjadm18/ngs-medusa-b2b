@@ -1,3 +1,4 @@
+import { getClientSeoTitle } from "@/lib/client-profile"
 import { getCategoryByHandle, listCategories } from "@/lib/data/categories"
 import CategoryTemplate from "@/modules/categories/templates"
 import { SortOptions } from "@/modules/store/components/refinement-list/sort-products"
@@ -26,7 +27,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     const description = product_category.description ?? `${title} category.`
 
     return {
-      title: `${title} | NGS B2B`,
+      title: getClientSeoTitle(title),
       description,
       alternates: {
         canonical: `${params.category.join("/")}`,

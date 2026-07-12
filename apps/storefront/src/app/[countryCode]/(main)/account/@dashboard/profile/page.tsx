@@ -1,3 +1,4 @@
+import { clientProfile } from "@/lib/client-profile"
 import { retrieveCustomer } from "@/lib/data/customer"
 import { listRegions } from "@/lib/data/regions"
 import ProfileCard from "@/modules/account/components/profile-card"
@@ -8,7 +9,7 @@ import { notFound } from "next/navigation"
 
 export const metadata: Metadata = {
   title: "Profile",
-  description: "Consulta y edita tu perfil B2B NGS.",
+  description: `Consulta y edita tu perfil B2B ${clientProfile.brand.name}.`,
 }
 
 export default async function Profile() {

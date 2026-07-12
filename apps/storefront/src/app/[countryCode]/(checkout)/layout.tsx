@@ -1,3 +1,4 @@
+import { clientProfile } from "@/lib/client-profile"
 import LocalizedClientLink from "@/modules/common/components/localized-client-link"
 import BrandLogo from "@/modules/common/components/brand-logo"
 
@@ -13,7 +14,7 @@ export default function CheckoutLayout({
           <LocalizedClientLink className="hover:text-ui-fg-base" href="/">
             <span className="text-base font-medium flex items-center">
               <BrandLogo className="mr-3 h-8 w-[124px]" />
-              B2B Portal
+              {clientProfile.brand.name} B2B
             </span>
           </LocalizedClientLink>
         </nav>
@@ -22,7 +23,7 @@ export default function CheckoutLayout({
         {children}
       </div>
       <div className="flex w-full items-center justify-center py-4 text-sm text-neutral-500">
-        NGS B2B Portal. Powered by Medusa.
+        {clientProfile.brand.name} B2B Portal. Powered by Medusa.
       </div>
     </div>
   )

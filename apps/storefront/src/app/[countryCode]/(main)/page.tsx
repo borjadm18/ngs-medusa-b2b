@@ -1,3 +1,4 @@
+import { clientProfile } from "@/lib/client-profile"
 import { listCategories } from "@/lib/data/categories"
 import {
   DEFAULT_HOMEPAGE_CONTENT,
@@ -9,17 +10,15 @@ import { NgsHomepage } from "@/modules/home/templates/ngs-homepage"
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "NGS | Audio profesional B2B",
-  description:
-    "Portal B2B NGS para comprar altavoces profesionales, accesorios y soluciones de audio con precios por cuenta desde Medusa.",
+  title: clientProfile.seo.title,
+  description: clientProfile.seo.description,
   alternates: {
     canonical: `${getBaseURL()}/es`,
   },
   openGraph: {
-    title: "NGS | Audio profesional B2B",
-    description:
-      "Altavoces profesionales y soluciones de audio para empresas, retail, hosteleria, eventos e instalaciones.",
-    images: ["/images/ngs/home-hero-ngs-speakers.png"],
+    title: clientProfile.seo.title,
+    description: clientProfile.brand.tagline,
+    images: [clientProfile.brand.logo.dark],
   },
 }
 
@@ -61,7 +60,7 @@ export default async function Home(props: {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "NGS",
+    name: clientProfile.brand.name,
     url: getBaseURL(),
     sameAs: [],
   }

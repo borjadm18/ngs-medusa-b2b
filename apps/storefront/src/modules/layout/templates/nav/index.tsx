@@ -1,6 +1,7 @@
 import { retrieveCart } from "@/lib/data/cart"
 import { listCategories } from "@/lib/data/categories"
 import { retrieveCustomer } from "@/lib/data/customer"
+import { clientProfile } from "@/lib/client-profile"
 import AccountButton from "@/modules/account/components/account-button"
 import CartButton from "@/modules/cart/components/cart-button"
 import BrandLogo from "@/modules/common/components/brand-logo"
@@ -19,6 +20,12 @@ export async function NavigationHeader() {
   const customer = await retrieveCustomer().catch(() => null)
   const cart = await retrieveCart()
   const categories = await listCategories({ limit: 6 }).catch(() => [])
+  const productNavigation =
+    clientProfile.navigation.main.find((link) => link.label === "Productos") ||
+    clientProfile.navigation.main[0]
+  const secondaryNavigation = clientProfile.navigation.main.filter(
+    (link) => link.label !== productNavigation?.label
+  )
 
   return (
     <div className="sticky inset-x-0 top-0 z-50 border-b border-neutral-200 bg-white/95 text-neutral-950 backdrop-blur">
@@ -36,10 +43,10 @@ export async function NavigationHeader() {
             <nav className="hidden items-center gap-7 text-sm font-semibold medium:flex">
               <div className="group relative">
                 <LocalizedClientLink
-                  href="/store"
+                  href={productNavigation?.href || "/store"}
                   className="inline-flex items-center gap-1 py-7"
                 >
-                  Productos
+                  {productNavigation?.label || "Productos"}
                   <ChevronDownMini className="h-4 w-4" />
                 </LocalizedClientLink>
                 <div className="invisible absolute left-0 top-full z-50 w-[320px] rounded-lg border border-neutral-200 bg-white p-3 opacity-0 shadow-xl transition group-hover:visible group-hover:opacity-100">
@@ -60,10 +67,11 @@ export async function NavigationHeader() {
                   ))}
                 </div>
               </div>
-              <LocalizedClientLink href="/store">Soluciones</LocalizedClientLink>
-              <LocalizedClientLink href="/store">Sectores</LocalizedClientLink>
-              <LocalizedClientLink href="/store">Recursos</LocalizedClientLink>
-              <LocalizedClientLink href="/account">Soporte</LocalizedClientLink>
+              {secondaryNavigation.map((link) => (
+                <LocalizedClientLink key={link.label} href={link.href}>
+                  {link.label}
+                </LocalizedClientLink>
+              ))}
             </nav>
           </div>
         </div>

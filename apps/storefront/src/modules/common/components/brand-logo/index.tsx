@@ -1,4 +1,5 @@
 import { clx } from "@medusajs/ui"
+import { clientProfile } from "@/lib/client-profile"
 import Image from "next/image"
 
 type BrandLogoProps = {
@@ -15,8 +16,8 @@ const BrandLogo = ({ className, imageClassName }: BrandLogoProps) => {
       )}
     >
       <Image
-        src="/images/ngs/electronics-logo.png"
-        alt="Electronics"
+        src={clientProfile.brand.logo.dark || clientProfile.brand.logo.light}
+        alt={clientProfile.brand.legalName || clientProfile.brand.name}
         width={1060}
         height={340}
         priority

@@ -1,3 +1,4 @@
+import { clientProfile, getClientSeoTitle } from "@/lib/client-profile"
 import { listCategories } from "@/lib/data/categories"
 import { retrieveCustomer } from "@/lib/data/customer"
 import { listGlobalProductOptions } from "@/lib/data/product-options"
@@ -13,8 +14,8 @@ import { Suspense } from "react"
 export const dynamicParams = true
 
 export const metadata: Metadata = {
-  title: "Catalogo B2B NGS",
-  description: "Catalogo mayorista NGS con filtros, precios por region y disponibilidad.",
+  title: getClientSeoTitle("Catalogo"),
+  description: `Catalogo mayorista ${clientProfile.brand.name} con filtros, precios por region y disponibilidad.`,
 }
 
 type Params = {
@@ -51,7 +52,7 @@ export default async function StorePage(props: Params) {
             Catalogo profesional
           </p>
           <h1 className="mt-2 text-3xl font-semibold">
-            Productos NGS para compra B2B
+            Productos {clientProfile.brand.name} para compra B2B
           </h1>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-600">
             Filtra por categoria y atributos, revisa precio calculado por region

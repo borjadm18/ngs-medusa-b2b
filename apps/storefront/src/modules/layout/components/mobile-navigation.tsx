@@ -1,17 +1,11 @@
 "use client"
 
+import { clientProfile } from "@/lib/client-profile"
 import LocalizedClientLink from "@/modules/common/components/localized-client-link"
 import BrandLogo from "@/modules/common/components/brand-logo"
 import { BarsThree, ChevronDownMini, XMark } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
 import { useState } from "react"
-
-const staticLinks = [
-  { label: "Soluciones", href: "/store" },
-  { label: "Empresa", href: "/account" },
-  { label: "Recursos", href: "/store" },
-  { label: "Soporte", href: "/account" },
-]
 
 export function MobileNavigation({
   categories,
@@ -19,6 +13,12 @@ export function MobileNavigation({
   categories: HttpTypes.StoreProductCategory[]
 }) {
   const [open, setOpen] = useState(false)
+  const productNavigation =
+    clientProfile.navigation.main.find((link) => link.label === "Productos") ||
+    clientProfile.navigation.main[0]
+  const staticLinks = clientProfile.navigation.main.filter(
+    (link) => link.label !== productNavigation?.label
+  )
 
   return (
     <div className="medium:hidden">
@@ -48,7 +48,7 @@ export function MobileNavigation({
             <nav className="flex flex-col px-5 py-4 text-sm font-semibold text-neutral-950">
               <details className="group border-b border-neutral-200 py-3" open>
                 <summary className="flex cursor-pointer list-none items-center justify-between">
-                  Productos
+                  {productNavigation?.label || "Productos"}
                   <ChevronDownMini className="h-4 w-4 transition group-open:rotate-180" />
                 </summary>
                 <div className="mt-3 grid gap-2 text-neutral-600">

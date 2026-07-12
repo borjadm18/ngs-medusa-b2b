@@ -68,3 +68,15 @@ client-profile
 6. La demo seed crea datos consistentes en menos de 10 minutos.
 7. Hay guia de despliegue Render/Vercel y guia local.
 8. Hay tests o checks automatizados para las reglas criticas.
+
+## Perfil Activo En Storefront
+
+El storefront carga el perfil activo desde `NEXT_PUBLIC_B2B_CLIENT_PROFILE`.
+
+Valor por defecto:
+
+```env
+NEXT_PUBLIC_B2B_CLIENT_PROFILE=ngs
+```
+
+La primera implementacion lee `profiles/ngs/client-profile.json` desde `apps/storefront/src/lib/client-profile`. El siguiente paso es convertir ese loader en un registro de perfiles para poder activar nuevos clientes sin tocar componentes.

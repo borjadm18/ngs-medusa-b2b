@@ -1,49 +1,7 @@
 import { listCategories } from "@/lib/data/categories"
+import { clientProfile } from "@/lib/client-profile"
 import BrandLogo from "@/modules/common/components/brand-logo"
 import LocalizedClientLink from "@/modules/common/components/localized-client-link"
-
-const footerGroups = [
-  {
-    title: "Soluciones",
-    links: [
-      ["Instalaciones fijas", "/store"],
-      ["Eventos en vivo", "/store"],
-      ["Retail", "/store"],
-      ["Hosteleria", "/store"],
-      ["Empresas", "/store"],
-      ["Ver todas las soluciones", "/store"],
-    ],
-  },
-  {
-    title: "Recursos",
-    links: [
-      ["Documentacion", "/store"],
-      ["Especificaciones", "/store"],
-      ["Catalogos", "/store"],
-      ["Casos de exito", "/store"],
-      ["Blog", "/store"],
-    ],
-  },
-  {
-    title: "Empresa",
-    links: [
-      ["Sobre NGS", "/account"],
-      ["Calidad", "/account"],
-      ["Sostenibilidad", "/account"],
-      ["Trabaja con nosotros", "/account"],
-      ["Contacto", "/account"],
-    ],
-  },
-  {
-    title: "Soporte",
-    links: [
-      ["Centro de ayuda", "/account"],
-      ["Garantias", "/account"],
-      ["Devoluciones", "/account"],
-      ["Estado de pedidos", "/account"],
-    ],
-  },
-]
 
 export default async function Footer() {
   const categories = await listCategories({
@@ -64,6 +22,9 @@ export default async function Footer() {
           ["Columnas", "/store"],
           ["Accesorios", "/store"],
         ]
+  const footerGroups = clientProfile.footer.columns.filter(
+    (group) => group.title.toLowerCase() !== "productos"
+  )
 
   return (
     <footer className="border-t border-neutral-900 bg-neutral-950 text-white">
@@ -77,8 +38,7 @@ export default async function Footer() {
               <BrandLogo className="h-12 w-[188px] border border-neutral-800" />
             </LocalizedClientLink>
             <p className="mt-5 max-w-xs text-sm leading-6 text-neutral-400">
-              Soluciones de sonido profesional disenadas para negocios que
-              buscan la maxima calidad.
+              {clientProfile.footer.description}
             </p>
             <div className="mt-6 flex gap-3 text-xs font-semibold text-neutral-400">
               <span className="inline-flex h-8 w-8 items-center justify-center rounded border border-neutral-800">
@@ -122,13 +82,13 @@ export default async function Footer() {
               <div key={group.title}>
                 <h3 className="text-sm font-semibold">{group.title}</h3>
                 <ul className="mt-4 grid gap-2 text-sm text-neutral-400">
-                  {group.links.map(([label, href]) => (
-                    <li key={label}>
+                  {group.links.map((link) => (
+                    <li key={link.label}>
                       <LocalizedClientLink
-                        href={href}
+                        href={link.href}
                         className="transition hover:text-white"
                       >
-                        {label}
+                        {link.label}
                       </LocalizedClientLink>
                     </li>
                   ))}
@@ -140,7 +100,8 @@ export default async function Footer() {
 
         <div className="flex flex-col gap-3 border-t border-neutral-800 py-6 text-xs text-neutral-500 small:flex-row small:items-center small:justify-between">
           <p>
-            (c) {new Date().getFullYear()} NGS. Todos los derechos reservados.
+            (c) {new Date().getFullYear()} {clientProfile.brand.name}. Todos
+            los derechos reservados.
           </p>
           <div className="flex flex-wrap gap-4">
             <LocalizedClientLink href="/store">

@@ -1,3 +1,4 @@
+import { getClientSeoTitle } from "@/lib/client-profile"
 import { getCollectionByHandle } from "@/lib/data/collections"
 import CollectionTemplate from "@/modules/collections/templates"
 import { SortOptions } from "@/modules/store/components/refinement-list/sort-products"
@@ -30,7 +31,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   }
 
   const metadata = {
-    title: `${collection.title} | NGS B2B`,
+    title: getClientSeoTitle(collection.title),
     description: `${collection.title} collection`,
   } as Metadata
 

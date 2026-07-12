@@ -1,3 +1,4 @@
+import { clientProfile, getClientSeoTitle } from "@/lib/client-profile"
 import { getProductByHandle } from "@/lib/data/products"
 import { getRegion } from "@/lib/data/regions"
 import { getProductPrice } from "@/lib/util/get-product-price"
@@ -32,10 +33,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${product.title} | NGS B2B`,
+    title: getClientSeoTitle(product.title),
     description: `${product.title}`,
     openGraph: {
-      title: `${product.title} | NGS B2B`,
+      title: getClientSeoTitle(product.title),
       description: `${product.title}`,
       images: product.thumbnail ? [product.thumbnail] : [],
     },
@@ -64,7 +65,7 @@ export default async function ProductPage(props: Props) {
     sku: pricedProduct.variants?.[0]?.sku,
     brand: {
       "@type": "Brand",
-      name: "NGS",
+      name: clientProfile.brand.name,
     },
     image: pricedProduct.images?.map((image) => image.url).filter(Boolean),
     offers: cheapestPrice
