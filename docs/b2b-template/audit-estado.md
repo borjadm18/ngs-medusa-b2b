@@ -16,7 +16,7 @@ El siguiente salto es cerrar el backoffice no tecnico. La home, marca, navegacio
 | Storefront | Operativo | Vercel live, home/catalogo/PDP/carrito/checkouts funcionales. |
 | Product packaging | Implementado | Modulo, API store/admin, seed NGS, validacion carrito y UI en PDP/carrito. HTTP live validado. |
 | Homepage editable | Parcial alto | Modulo backend, store API, fallback JSON y Admin page con editor estructurado existen. Falta gestion de assets y brand profile. |
-| Client profile | Parcial alto | Marca/logo/nav/footer/SEO/home/categorias/store/checkout/PDP fallbacks salen de JSON o Brand profile runtime. `pnpm sync:client-profile` empaqueta perfiles y valida packaging CSV. Admin Brand profile existe en version JSON con preview. |
+| Client profile | Parcial alto | Marca/logo/nav/footer/SEO/home/categorias/store/checkout/PDP fallbacks salen de JSON o Brand profile runtime. `pnpm sync:client-profile` empaqueta perfiles y valida packaging CSV. Admin Brand profile existe con formularios por seccion, preview y modo JSON avanzado. |
 | Admin B2B | Parcial | Widget packaging con import/export y bulk basico. Falta UX avanzada y admin homepage/brand. |
 | Presupuestos | Base heredada + integrado | Flujo existe; falta enriquecer presupuesto con packaging/logistica completa. |
 | Aprobaciones | Base heredada + integrado | Existe en cuenta/carrito/checkout; falta validacion UX y casos demo claros. |
@@ -116,7 +116,7 @@ Parcial.
 Pendiente:
 
 - Perfil activo por env con multiples clientes.
-- Convertir Admin Brand profile de JSON editor a formularios por seccion.
+- Gestionar assets/logo/imagenes desde Admin sin escribir rutas manualmente.
 - Gestion de assets desde Admin/storage.
 
 ### Import/export B2B

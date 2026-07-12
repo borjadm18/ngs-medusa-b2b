@@ -1,9 +1,11 @@
 import { defineRouteConfig } from "@medusajs/admin-sdk";
-import { Buildings } from "@medusajs/icons";
+import { Buildings, Plus, Trash } from "@medusajs/icons";
 import {
   Button,
   Container,
   Heading,
+  IconButton,
+  Input,
   Label,
   Text,
   Textarea,
@@ -20,21 +22,26 @@ import {
   useUpdateBrandProfileContent,
 } from "../../hooks/api/brand-profile";
 
+type LinkItem = BrandProfileContent["navigation"]["main"][number];
+type FooterColumn = BrandProfileContent["footer"]["columns"][number];
+type SupportPanel = NonNullable<
+  NonNullable<BrandProfileContent["productPage"]>["supportPanels"]
+>[number];
+
+const cloneProfile = (content: BrandProfileContent): BrandProfileContent =>
+  JSON.parse(JSON.stringify(content));
+
 const toPrettyJson = (value: unknown) => JSON.stringify(value, null, 2);
 
 const BrandProfile = () => {
   const { data, isPending } = useBrandProfileContent();
+  const [form, setForm] = useState<BrandProfileContent>(
+    cloneProfile(DEFAULT_BRAND_PROFILE_CONTENT)
+  );
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [jsonValue, setJsonValue] = useState(
     toPrettyJson(DEFAULT_BRAND_PROFILE_CONTENT)
   );
-
-  const parsedProfile = useMemo(() => {
-    try {
-      return JSON.parse(jsonValue) as BrandProfileContent;
-    } catch {
-      return null;
-    }
-  }, [jsonValue]);
 
   const updateBrandProfile = useUpdateBrandProfileContent({
     onSuccess: () => toast.success("Perfil de marca actualizado"),
@@ -44,17 +51,384 @@ const BrandProfile = () => {
 
   useEffect(() => {
     if (data?.brand_profile) {
-      setJsonValue(toPrettyJson(data.brand_profile));
+      const nextProfile = cloneProfile(data.brand_profile);
+      setForm(nextProfile);
+      setJsonValue(toPrettyJson(nextProfile));
     }
   }, [data?.brand_profile]);
 
-  const handleSubmit = () => {
-    if (!parsedProfile) {
+  const previewLinks = useMemo(
+    () => form.navigation.main.map((link) => `${link.label} -> ${link.href}`),
+    [form.navigation.main]
+  );
+
+  const updateBrand = (
+    field: keyof BrandProfileContent["brand"],
+    value: string
+  ) => {
+    setForm((current) => ({
+      ...current,
+      brand: {
+        ...current.brand,
+        [field]: value,
+      },
+    }));
+  };
+
+  const updateLogo = (
+    field: keyof BrandProfileContent["brand"]["logo"],
+    value: string
+  ) => {
+    setForm((current) => ({
+      ...current,
+      brand: {
+        ...current.brand,
+        logo: {
+          ...current.brand.logo,
+          [field]: value,
+        },
+      },
+    }));
+  };
+
+  const updateColor = (
+    field: keyof BrandProfileContent["brand"]["colors"],
+    value: string
+  ) => {
+    setForm((current) => ({
+      ...current,
+      brand: {
+        ...current.brand,
+        colors: {
+          ...current.brand.colors,
+          [field]: value,
+        },
+      },
+    }));
+  };
+
+  const updateSeo = (
+    field: keyof BrandProfileContent["seo"],
+    value: string
+  ) => {
+    setForm((current) => ({
+      ...current,
+      seo: {
+        ...current.seo,
+        [field]: value,
+      },
+    }));
+  };
+
+  const updateMarkets = (
+    field: keyof BrandProfileContent["markets"],
+    value: string
+  ) => {
+    setForm((current) => ({
+      ...current,
+      markets: {
+        ...current.markets,
+        [field]:
+          field === "languages"
+            ? value
+                .split(",")
+                .map((item) => item.trim())
+                .filter(Boolean)
+            : value,
+      },
+    }));
+  };
+
+  const updateNavigation = (
+    index: number,
+    field: keyof LinkItem,
+    value: string
+  ) => {
+    setForm((current) => ({
+      ...current,
+      navigation: {
+        main: current.navigation.main.map((link, linkIndex) =>
+          linkIndex === index ? { ...link, [field]: value } : link
+        ),
+      },
+    }));
+  };
+
+  const addNavigation = () => {
+    setForm((current) => ({
+      ...current,
+      navigation: {
+        main: [...current.navigation.main, { label: "Nuevo", href: "/store" }],
+      },
+    }));
+  };
+
+  const removeNavigation = (index: number) => {
+    setForm((current) => ({
+      ...current,
+      navigation: {
+        main: current.navigation.main.filter(
+          (_, linkIndex) => linkIndex !== index
+        ),
+      },
+    }));
+  };
+
+  const updateFooterDescription = (value: string) => {
+    setForm((current) => ({
+      ...current,
+      footer: {
+        ...current.footer,
+        description: value,
+      },
+    }));
+  };
+
+  const updateFooterColumn = (
+    index: number,
+    field: keyof Pick<FooterColumn, "title">,
+    value: string
+  ) => {
+    setForm((current) => ({
+      ...current,
+      footer: {
+        ...current.footer,
+        columns: current.footer.columns.map((column, columnIndex) =>
+          columnIndex === index ? { ...column, [field]: value } : column
+        ),
+      },
+    }));
+  };
+
+  const addFooterColumn = () => {
+    setForm((current) => ({
+      ...current,
+      footer: {
+        ...current.footer,
+        columns: [
+          ...current.footer.columns,
+          {
+            title: "Nueva columna",
+            links: [{ label: "Catalogo", href: "/store" }],
+          },
+        ],
+      },
+    }));
+  };
+
+  const removeFooterColumn = (index: number) => {
+    setForm((current) => ({
+      ...current,
+      footer: {
+        ...current.footer,
+        columns: current.footer.columns.filter(
+          (_, columnIndex) => columnIndex !== index
+        ),
+      },
+    }));
+  };
+
+  const updateFooterLink = (
+    columnIndex: number,
+    linkIndex: number,
+    field: keyof LinkItem,
+    value: string
+  ) => {
+    setForm((current) => ({
+      ...current,
+      footer: {
+        ...current.footer,
+        columns: current.footer.columns.map((column, currentColumnIndex) =>
+          currentColumnIndex === columnIndex
+            ? {
+                ...column,
+                links: column.links.map((link, currentLinkIndex) =>
+                  currentLinkIndex === linkIndex
+                    ? { ...link, [field]: value }
+                    : link
+                ),
+              }
+            : column
+        ),
+      },
+    }));
+  };
+
+  const addFooterLink = (columnIndex: number) => {
+    setForm((current) => ({
+      ...current,
+      footer: {
+        ...current.footer,
+        columns: current.footer.columns.map((column, currentColumnIndex) =>
+          currentColumnIndex === columnIndex
+            ? {
+                ...column,
+                links: [
+                  ...column.links,
+                  { label: "Nuevo link", href: "/store" },
+                ],
+              }
+            : column
+        ),
+      },
+    }));
+  };
+
+  const removeFooterLink = (columnIndex: number, linkIndex: number) => {
+    setForm((current) => ({
+      ...current,
+      footer: {
+        ...current.footer,
+        columns: current.footer.columns.map((column, currentColumnIndex) =>
+          currentColumnIndex === columnIndex
+            ? {
+                ...column,
+                links: column.links.filter(
+                  (_, currentLinkIndex) => currentLinkIndex !== linkIndex
+                ),
+              }
+            : column
+        ),
+      },
+    }));
+  };
+
+  const updateFallbacks = (
+    field: keyof BrandProfileContent["fallbacks"],
+    value: string
+  ) => {
+    setForm((current) => ({
+      ...current,
+      fallbacks: {
+        ...current.fallbacks,
+        [field]:
+          field === "productBrandKeywords"
+            ? value
+                .split(",")
+                .map((item) => item.trim())
+                .filter(Boolean)
+            : value,
+      },
+    }));
+  };
+
+  const updateBenefit = (index: number, value: string) => {
+    setForm((current) => ({
+      ...current,
+      productPage: {
+        ...current.productPage,
+        benefits: (current.productPage?.benefits || []).map(
+          (benefit, itemIndex) =>
+            itemIndex === index ? { ...benefit, label: value } : benefit
+        ),
+      },
+    }));
+  };
+
+  const addBenefit = () => {
+    setForm((current) => ({
+      ...current,
+      productPage: {
+        ...current.productPage,
+        benefits: [
+          ...(current.productPage?.benefits || []),
+          { label: "Nuevo beneficio" },
+        ],
+      },
+    }));
+  };
+
+  const removeBenefit = (index: number) => {
+    setForm((current) => ({
+      ...current,
+      productPage: {
+        ...current.productPage,
+        benefits: (current.productPage?.benefits || []).filter(
+          (_, itemIndex) => itemIndex !== index
+        ),
+      },
+    }));
+  };
+
+  const updateSupportPanel = (
+    index: number,
+    field: keyof SupportPanel,
+    value: string
+  ) => {
+    setForm((current) => ({
+      ...current,
+      productPage: {
+        ...current.productPage,
+        supportPanels: (current.productPage?.supportPanels || []).map(
+          (panel, itemIndex) =>
+            itemIndex === index ? { ...panel, [field]: value } : panel
+        ),
+      },
+    }));
+  };
+
+  const addSupportPanel = () => {
+    setForm((current) => ({
+      ...current,
+      productPage: {
+        ...current.productPage,
+        supportPanels: [
+          ...(current.productPage?.supportPanels || []),
+          {
+            title: "Nuevo panel",
+            body: "Descripcion del soporte.",
+            action: "Ver mas",
+            href: "/store",
+          },
+        ],
+      },
+    }));
+  };
+
+  const removeSupportPanel = (index: number) => {
+    setForm((current) => ({
+      ...current,
+      productPage: {
+        ...current.productPage,
+        supportPanels: (current.productPage?.supportPanels || []).filter(
+          (_, itemIndex) => itemIndex !== index
+        ),
+      },
+    }));
+  };
+
+  const applyJsonToForm = () => {
+    try {
+      const parsed = JSON.parse(jsonValue) as BrandProfileContent;
+      setForm(cloneProfile(parsed));
+      toast.success("JSON aplicado al formulario");
+    } catch {
       toast.error("El JSON del perfil de marca no es valido");
+    }
+  };
+
+  const syncJsonFromForm = () => {
+    setJsonValue(toPrettyJson(form));
+    toast.success("JSON actualizado desde el formulario");
+  };
+
+  const handleSubmit = () => {
+    if (!form.brand.name || !form.seo.title) {
+      toast.error("Marca y titulo SEO son obligatorios");
       return;
     }
 
-    updateBrandProfile.mutate(parsedProfile);
+    if (!form.navigation.main.length) {
+      toast.error("Anade al menos un enlace de navegacion");
+      return;
+    }
+
+    if (!form.footer.columns.length) {
+      toast.error("Anade al menos una columna de footer");
+      return;
+    }
+
+    updateBrandProfile.mutate(form);
   };
 
   return (
@@ -66,7 +440,7 @@ const BrandProfile = () => {
               Brand profile
             </Heading>
             <Text size="small" className="text-ui-fg-subtle">
-              Edita marca, SEO, navegacion, footer y fallbacks del storefront.
+              Edita identidad, SEO, navegacion, footer y fallbacks de producto.
             </Text>
           </div>
           <Button
@@ -79,19 +453,323 @@ const BrandProfile = () => {
           </Button>
         </div>
 
-        <div className="grid gap-6 p-6 small:grid-cols-[1fr_360px]">
-          <div className="grid gap-2">
-            <Label>Perfil JSON</Label>
-            <Textarea
-              rows={32}
-              value={jsonValue}
-              onChange={(event) => setJsonValue(event.target.value)}
-              className="font-mono"
-            />
-            <Text size="small" className="text-ui-fg-subtle">
-              El siguiente paso sera convertir esto en formularios por seccion,
-              pero esta version ya permite activar clientes sin redeploy.
-            </Text>
+        <div className="grid gap-6 p-6 small:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="grid gap-6">
+            <Section title="Identidad">
+              <div className="grid gap-3 small:grid-cols-2">
+                <TextField
+                  label="Nombre comercial"
+                  value={form.brand.name}
+                  onChange={(value) => updateBrand("name", value)}
+                />
+                <TextField
+                  label="Nombre legal"
+                  value={form.brand.legalName}
+                  onChange={(value) => updateBrand("legalName", value)}
+                />
+              </div>
+              <TextAreaField
+                label="Tagline"
+                value={form.brand.tagline}
+                rows={2}
+                onChange={(value) => updateBrand("tagline", value)}
+              />
+              <div className="grid gap-3 small:grid-cols-2">
+                <TextField
+                  label="Logo claro"
+                  value={form.brand.logo.light}
+                  onChange={(value) => updateLogo("light", value)}
+                />
+                <TextField
+                  label="Logo oscuro"
+                  value={form.brand.logo.dark}
+                  onChange={(value) => updateLogo("dark", value)}
+                />
+              </div>
+              <div className="grid gap-3 small:grid-cols-3">
+                {Object.entries(form.brand.colors).map(([key, value]) => (
+                  <ColorField
+                    key={key}
+                    label={key}
+                    value={value}
+                    onChange={(nextValue) =>
+                      updateColor(
+                        key as keyof BrandProfileContent["brand"]["colors"],
+                        nextValue
+                      )
+                    }
+                  />
+                ))}
+              </div>
+            </Section>
+
+            <Section title="SEO y mercado">
+              <TextField
+                label="Titulo SEO"
+                value={form.seo.title}
+                onChange={(value) => updateSeo("title", value)}
+              />
+              <TextAreaField
+                label="Descripcion SEO"
+                value={form.seo.description}
+                rows={3}
+                onChange={(value) => updateSeo("description", value)}
+              />
+              <div className="grid gap-3 small:grid-cols-3">
+                <TextField
+                  label="Pais por defecto"
+                  value={form.markets.defaultCountryCode}
+                  onChange={(value) =>
+                    updateMarkets("defaultCountryCode", value)
+                  }
+                />
+                <TextField
+                  label="Idiomas"
+                  value={form.markets.languages.join(", ")}
+                  onChange={(value) => updateMarkets("languages", value)}
+                />
+                <TextField
+                  label="Moneda"
+                  value={form.markets.currency}
+                  onChange={(value) => updateMarkets("currency", value)}
+                />
+              </div>
+            </Section>
+
+            <Section
+              title="Navegacion"
+              actionLabel="Anadir enlace"
+              onAction={addNavigation}
+            >
+              <div className="grid gap-3">
+                {form.navigation.main.map((link, index) => (
+                  <EditableRow
+                    key={`navigation-${index}`}
+                    title={`Enlace ${index + 1}`}
+                    onRemove={() => removeNavigation(index)}
+                    removeDisabled={form.navigation.main.length === 1}
+                  >
+                    <LinkFields
+                      link={link}
+                      onChange={(field, value) =>
+                        updateNavigation(index, field, value)
+                      }
+                    />
+                  </EditableRow>
+                ))}
+              </div>
+            </Section>
+
+            <Section
+              title="Footer"
+              actionLabel="Anadir columna"
+              onAction={addFooterColumn}
+            >
+              <TextAreaField
+                label="Descripcion"
+                value={form.footer.description}
+                rows={3}
+                onChange={updateFooterDescription}
+              />
+              <div className="grid gap-3">
+                {form.footer.columns.map((column, columnIndex) => (
+                  <EditableRow
+                    key={`footer-column-${columnIndex}`}
+                    title={`Columna ${columnIndex + 1}`}
+                    onRemove={() => removeFooterColumn(columnIndex)}
+                    removeDisabled={form.footer.columns.length === 1}
+                  >
+                    <TextField
+                      label="Titulo"
+                      value={column.title}
+                      onChange={(value) =>
+                        updateFooterColumn(columnIndex, "title", value)
+                      }
+                    />
+                    <div className="grid gap-2">
+                      {column.links.map((link, linkIndex) => (
+                        <div
+                          key={`footer-${columnIndex}-${linkIndex}`}
+                          className="grid gap-2 rounded-lg border bg-ui-bg-base p-3"
+                        >
+                          <div className="flex items-center justify-between">
+                            <Text size="small" weight="plus">
+                              Link {linkIndex + 1}
+                            </Text>
+                            <IconButton
+                              size="small"
+                              variant="transparent"
+                              disabled={column.links.length === 1}
+                              onClick={() =>
+                                removeFooterLink(columnIndex, linkIndex)
+                              }
+                            >
+                              <Trash />
+                            </IconButton>
+                          </div>
+                          <LinkFields
+                            link={link}
+                            onChange={(field, value) =>
+                              updateFooterLink(
+                                columnIndex,
+                                linkIndex,
+                                field,
+                                value
+                              )
+                            }
+                          />
+                        </div>
+                      ))}
+                      <Button
+                        size="small"
+                        variant="secondary"
+                        onClick={() => addFooterLink(columnIndex)}
+                      >
+                        <Plus />
+                        Anadir link
+                      </Button>
+                    </div>
+                  </EditableRow>
+                ))}
+              </div>
+            </Section>
+
+            <Section title="Fallbacks de producto">
+              <div className="grid gap-3 small:grid-cols-2">
+                <TextField
+                  label="Etiqueta categoria fallback"
+                  value={form.fallbacks.productCategoryLabel}
+                  onChange={(value) =>
+                    updateFallbacks("productCategoryLabel", value)
+                  }
+                />
+                <TextField
+                  label="Keywords de producto"
+                  value={form.fallbacks.productBrandKeywords.join(", ")}
+                  onChange={(value) =>
+                    updateFallbacks("productBrandKeywords", value)
+                  }
+                />
+              </div>
+              <TextAreaField
+                label="Descripcion tecnica fallback"
+                value={form.fallbacks.productTechnicalDescription}
+                rows={3}
+                onChange={(value) =>
+                  updateFallbacks("productTechnicalDescription", value)
+                }
+              />
+            </Section>
+
+            <Section
+              title="Beneficios PDP"
+              actionLabel="Anadir beneficio"
+              onAction={addBenefit}
+            >
+              <div className="grid gap-3">
+                {(form.productPage?.benefits || []).map((benefit, index) => (
+                  <EditableRow
+                    key={`benefit-${index}`}
+                    title={`Beneficio ${index + 1}`}
+                    onRemove={() => removeBenefit(index)}
+                    removeDisabled={
+                      (form.productPage?.benefits || []).length === 1
+                    }
+                  >
+                    <TextField
+                      label="Texto"
+                      value={benefit.label}
+                      onChange={(value) => updateBenefit(index, value)}
+                    />
+                  </EditableRow>
+                ))}
+              </div>
+            </Section>
+
+            <Section
+              title="Paneles soporte PDP"
+              actionLabel="Anadir panel"
+              onAction={addSupportPanel}
+            >
+              <div className="grid gap-3">
+                {(form.productPage?.supportPanels || []).map((panel, index) => (
+                  <EditableRow
+                    key={`support-panel-${index}`}
+                    title={`Panel ${index + 1}`}
+                    onRemove={() => removeSupportPanel(index)}
+                    removeDisabled={
+                      (form.productPage?.supportPanels || []).length === 1
+                    }
+                  >
+                    <div className="grid gap-3 small:grid-cols-2">
+                      <TextField
+                        label="Titulo"
+                        value={panel.title}
+                        onChange={(value) =>
+                          updateSupportPanel(index, "title", value)
+                        }
+                      />
+                      <TextField
+                        label="CTA"
+                        value={panel.action}
+                        onChange={(value) =>
+                          updateSupportPanel(index, "action", value)
+                        }
+                      />
+                      <TextField
+                        label="Link"
+                        value={panel.href || ""}
+                        onChange={(value) =>
+                          updateSupportPanel(index, "href", value)
+                        }
+                      />
+                    </div>
+                    <TextAreaField
+                      label="Texto"
+                      value={panel.body}
+                      rows={3}
+                      onChange={(value) =>
+                        updateSupportPanel(index, "body", value)
+                      }
+                    />
+                  </EditableRow>
+                ))}
+              </div>
+            </Section>
+
+            <Section title="Avanzado">
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="small"
+                  variant="secondary"
+                  onClick={() => setShowAdvanced((current) => !current)}
+                >
+                  {showAdvanced ? "Ocultar JSON" : "Mostrar JSON"}
+                </Button>
+                <Button
+                  size="small"
+                  variant="secondary"
+                  onClick={syncJsonFromForm}
+                >
+                  Actualizar JSON desde formulario
+                </Button>
+                <Button
+                  size="small"
+                  variant="secondary"
+                  onClick={applyJsonToForm}
+                >
+                  Aplicar JSON al formulario
+                </Button>
+              </div>
+              {showAdvanced ? (
+                <Textarea
+                  rows={20}
+                  value={jsonValue}
+                  onChange={(event) => setJsonValue(event.target.value)}
+                  className="font-mono"
+                />
+              ) : null}
+            </Section>
           </div>
 
           <div className="h-fit rounded-lg border bg-ui-bg-base overflow-hidden">
@@ -100,50 +778,41 @@ const BrandProfile = () => {
                 Vista rapida
               </Text>
               <Text size="small" className="text-ui-fg-subtle">
-                Preview de identidad y navegacion.
+                Preview de identidad, navegacion y SEO.
               </Text>
             </div>
             <div className="grid gap-4 p-4">
-              {parsedProfile ? (
-                <>
-                  <div
-                    className="rounded-lg border p-4"
-                    style={{
-                      background: parsedProfile.brand.colors.background,
-                      color: parsedProfile.brand.colors.foreground,
-                      borderColor: parsedProfile.brand.colors.border,
-                    }}
-                  >
-                    <Text weight="plus">{parsedProfile.brand.name}</Text>
-                    <Text size="small" className="mt-1">
-                      {parsedProfile.brand.tagline}
-                    </Text>
-                  </div>
-                  <PreviewList
-                    title="Navegacion"
-                    items={parsedProfile.navigation.main.map(
-                      (link) => `${link.label} -> ${link.href}`
-                    )}
-                  />
-                  <PreviewList
-                    title="Footer"
-                    items={parsedProfile.footer.columns.map(
-                      (column) => `${column.title} (${column.links.length})`
-                    )}
-                  />
-                  <PreviewList
-                    title="SEO"
-                    items={[
-                      parsedProfile.seo.title,
-                      parsedProfile.seo.description,
-                    ]}
-                  />
-                </>
-              ) : (
-                <Text size="small" className="text-ui-fg-error">
-                  JSON invalido
+              <div
+                className="rounded-lg border p-4"
+                style={{
+                  background: form.brand.colors.background,
+                  color: form.brand.colors.foreground,
+                  borderColor: form.brand.colors.border,
+                }}
+              >
+                <Text weight="plus">{form.brand.name}</Text>
+                <Text size="small" className="mt-1">
+                  {form.brand.tagline}
                 </Text>
-              )}
+              </div>
+              <PreviewList title="Navegacion" items={previewLinks} />
+              <PreviewList
+                title="Footer"
+                items={form.footer.columns.map(
+                  (column) => `${column.title} (${column.links.length})`
+                )}
+              />
+              <PreviewList
+                title="SEO"
+                items={[form.seo.title, form.seo.description]}
+              />
+              <PreviewList
+                title="PDP"
+                items={[
+                  `${form.productPage?.benefits?.length || 0} beneficios`,
+                  `${form.productPage?.supportPanels?.length || 0} paneles`,
+                ]}
+              />
             </div>
           </div>
         </div>
@@ -152,6 +821,141 @@ const BrandProfile = () => {
     </>
   );
 };
+
+const Section = ({
+  title,
+  children,
+  actionLabel,
+  onAction,
+}: {
+  title: string;
+  children: React.ReactNode;
+  actionLabel?: string;
+  onAction?: () => void;
+}) => (
+  <div className="grid gap-4 rounded-lg border p-4">
+    <div className="flex items-center justify-between gap-3">
+      <Text size="small" leading="compact" weight="plus">
+        {title}
+      </Text>
+      {onAction ? (
+        <Button size="small" variant="secondary" onClick={onAction}>
+          <Plus />
+          {actionLabel}
+        </Button>
+      ) : null}
+    </div>
+    <div className="grid gap-3">{children}</div>
+  </div>
+);
+
+const EditableRow = ({
+  title,
+  children,
+  removeDisabled,
+  onRemove,
+}: {
+  title: string;
+  children: React.ReactNode;
+  removeDisabled?: boolean;
+  onRemove: () => void;
+}) => (
+  <div className="grid gap-3 rounded-lg border bg-ui-bg-subtle p-3">
+    <div className="flex items-center justify-between gap-3">
+      <Text size="small" leading="compact" weight="plus">
+        {title}
+      </Text>
+      <IconButton
+        size="small"
+        variant="transparent"
+        disabled={removeDisabled}
+        onClick={onRemove}
+      >
+        <Trash />
+      </IconButton>
+    </div>
+    {children}
+  </div>
+);
+
+const LinkFields = ({
+  link,
+  onChange,
+}: {
+  link: LinkItem;
+  onChange: (field: keyof LinkItem, value: string) => void;
+}) => (
+  <div className="grid gap-3 small:grid-cols-2">
+    <TextField
+      label="Etiqueta"
+      value={link.label}
+      onChange={(value) => onChange("label", value)}
+    />
+    <TextField
+      label="URL"
+      value={link.href}
+      onChange={(value) => onChange("href", value)}
+    />
+  </div>
+);
+
+const TextField = ({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) => (
+  <div className="grid gap-2">
+    <Label>{label}</Label>
+    <Input value={value} onChange={(event) => onChange(event.target.value)} />
+  </div>
+);
+
+const ColorField = ({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) => (
+  <div className="grid gap-2">
+    <Label>{label}</Label>
+    <div className="grid grid-cols-[44px_1fr] gap-2">
+      <Input
+        type="color"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      />
+      <Input value={value} onChange={(event) => onChange(event.target.value)} />
+    </div>
+  </div>
+);
+
+const TextAreaField = ({
+  label,
+  value,
+  rows = 4,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  rows?: number;
+  onChange: (value: string) => void;
+}) => (
+  <div className="grid gap-2">
+    <Label>{label}</Label>
+    <Textarea
+      rows={rows}
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+    />
+  </div>
+);
 
 const PreviewList = ({ title, items }: { title: string; items: string[] }) => (
   <div>

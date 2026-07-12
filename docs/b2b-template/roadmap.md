@@ -39,9 +39,9 @@ Estado 2026-07-12:
 
 - Admin page de homepage implementada.
 - Editor estructurado para hero, CTAs, metricas, bloques visuales y operativa B2B.
-- Admin page de Brand profile implementada como JSON editor con preview.
+- Admin page de Brand profile implementada con formularios por seccion, preview lateral y modo JSON avanzado.
 - Storefront nav/footer, home metadata, store, checkout y PDP leen Brand profile desde Store API con fallback empaquetado.
-- Pendiente: formularios por seccion, assets, import/export y plantillas por cliente.
+- Pendiente: gestion de assets, import/export dedicado y plantillas por cliente.
 
 ## Fase 3. Validacion B2B Robusta
 
