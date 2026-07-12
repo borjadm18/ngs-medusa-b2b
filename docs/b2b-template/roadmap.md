@@ -16,7 +16,7 @@ Resultado esperado:
 
 - El mismo codigo puede renderizar NGS o un cliente nuevo cambiando configuracion empaquetada.
 
-Estado 2026-07-12: avanzado. `pnpm sync:client-profile` sincroniza perfiles fuente con el storefront, valida `product-packaging.csv` y genera registry backend para seeds. Falta extenderlo a productos/categorias completos.
+Estado 2026-07-12: avanzado. `pnpm sync:client-profile` sincroniza perfiles fuente con el storefront, valida `product-packaging.csv` y genera registry backend para seeds. Home, SEO, store, checkout y PDP consumen perfil runtime o fallback empaquetado. Falta extenderlo a productos/categorias completos y eliminar la pagina demo especifica `/ngs-poc` del core.
 
 ## Fase 2. Backoffice Operativo
 
@@ -40,7 +40,7 @@ Estado 2026-07-12:
 - Admin page de homepage implementada.
 - Editor estructurado para hero, CTAs, metricas, bloques visuales y operativa B2B.
 - Admin page de Brand profile implementada como JSON editor con preview.
-- Storefront nav/footer leen Brand profile desde Store API con fallback empaquetado.
+- Storefront nav/footer, home metadata, store, checkout y PDP leen Brand profile desde Store API con fallback empaquetado.
 - Pendiente: formularios por seccion, assets, import/export y plantillas por cliente.
 
 ## Fase 3. Validacion B2B Robusta

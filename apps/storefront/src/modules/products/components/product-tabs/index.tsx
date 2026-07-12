@@ -4,6 +4,7 @@ import {
   getProductDocuments,
   getProductSpecGroups,
 } from "@/lib/util/product-technical-profile"
+import { ClientProfile } from "@/lib/client-profile"
 import { DocumentText, ChevronRightMini } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
 import { clx } from "@medusajs/ui"
@@ -12,6 +13,7 @@ import { useState } from "react"
 
 type ProductTabsProps = {
   product: HttpTypes.StoreProduct
+  profile?: ClientProfile
 }
 
 const tabLabels = [
@@ -21,9 +23,9 @@ const tabLabels = [
   "Entrega",
 ]
 
-const ProductTabs = ({ product }: ProductTabsProps) => {
+const ProductTabs = ({ product, profile }: ProductTabsProps) => {
   const [activeTab, setActiveTab] = useState(tabLabels[1])
-  const specGroups = getProductSpecGroups(product)
+  const specGroups = getProductSpecGroups(product, profile)
   const documents = getProductDocuments(product)
 
   return (

@@ -1,4 +1,4 @@
-import { clientProfile, getClientSeoTitle } from "@/lib/client-profile"
+import { retrieveBrandProfile } from "@/lib/data/brand-profile"
 import { getProductByHandle } from "@/lib/data/products"
 import { getRegion } from "@/lib/data/regions"
 import { getProductPrice } from "@/lib/util/get-product-price"
@@ -27,17 +27,24 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   }
 
   const product = await getProductByHandle(handle, region.id)
+  const profile = await retrieveBrandProfile()
 
   if (!product) {
     notFound()
   }
 
   return {
-    title: getClientSeoTitle(product.title),
-    description: `${product.title}`,
+    title: `${product.title} | ${profile.brand.name} B2B`,
+    description:
+      product.description ||
+      product.subtitle ||
+      profile.fallbacks.productTechnicalDescription,
     openGraph: {
-      title: getClientSeoTitle(product.title),
-      description: `${product.title}`,
+      title: `${product.title} | ${profile.brand.name} B2B`,
+      description:
+        product.description ||
+        product.subtitle ||
+        profile.fallbacks.productTechnicalDescription,
       images: product.thumbnail ? [product.thumbnail] : [],
     },
   }
@@ -55,6 +62,7 @@ export default async function ProductPage(props: Props) {
   if (!pricedProduct) {
     notFound()
   }
+  const profile = await retrieveBrandProfile()
   const { cheapestPrice } = getProductPrice({ product: pricedProduct })
   const category = pricedProduct.categories?.[0]
   const productJsonLd = {
@@ -65,7 +73,7 @@ export default async function ProductPage(props: Props) {
     sku: pricedProduct.variants?.[0]?.sku,
     brand: {
       "@type": "Brand",
-      name: clientProfile.brand.name,
+      name: profile.brand.name,
     },
     image: pricedProduct.images?.map((image) => image.url).filter(Boolean),
     offers: cheapestPrice
@@ -125,6 +133,7 @@ export default async function ProductPage(props: Props) {
         product={pricedProduct}
         region={region}
         countryCode={params.countryCode}
+        profile={profile}
       />
     </>
   )

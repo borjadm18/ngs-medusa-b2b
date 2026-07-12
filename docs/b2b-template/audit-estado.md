@@ -16,7 +16,7 @@ El siguiente salto es cerrar el backoffice no tecnico. La home, marca, navegacio
 | Storefront | Operativo | Vercel live, home/catalogo/PDP/carrito/checkouts funcionales. |
 | Product packaging | Implementado | Modulo, API store/admin, seed NGS, validacion carrito y UI en PDP/carrito. HTTP live validado. |
 | Homepage editable | Parcial alto | Modulo backend, store API, fallback JSON y Admin page con editor estructurado existen. Falta gestion de assets y brand profile. |
-| Client profile | Parcial alto | Marca/logo/nav/footer/SEO/home/categorias/fallbacks salen de JSON. `pnpm sync:client-profile` empaqueta perfiles y valida packaging CSV. Admin Brand profile existe en version JSON con preview. |
+| Client profile | Parcial alto | Marca/logo/nav/footer/SEO/home/categorias/store/checkout/PDP fallbacks salen de JSON o Brand profile runtime. `pnpm sync:client-profile` empaqueta perfiles y valida packaging CSV. Admin Brand profile existe en version JSON con preview. |
 | Admin B2B | Parcial | Widget packaging con import/export y bulk basico. Falta UX avanzada y admin homepage/brand. |
 | Presupuestos | Base heredada + integrado | Flujo existe; falta enriquecer presupuesto con packaging/logistica completa. |
 | Aprobaciones | Base heredada + integrado | Existe en cuenta/carrito/checkout; falta validacion UX y casos demo claros. |
@@ -106,12 +106,12 @@ Parcial.
 
 - `profiles/ngs/client-profile.json` como fuente de onboarding.
 - `apps/storefront/src/lib/client-profile/profiles/ngs.json` empaquetado para Vercel.
-- Storefront consume marca, logo textual, nav, footer y SEO desde perfil.
+- Storefront consume marca, logo textual, nav, footer, SEO, store, checkout y PDP desde perfil.
 - Storefront consume homepage, categorias destacadas, imagenes fallback y copy comercial desde perfil/homepage JSON.
-- Fallbacks PDP/productos relacionados usan `clientProfile.fallbacks`.
+- Fallbacks PDP/productos relacionados y bloques de soporte/beneficios usan `clientProfile.fallbacks` y `clientProfile.productPage`.
 - `product-packaging.csv` por perfil se valida y genera JSON/registry para seeds backend.
 - Backend module/API `brandProfile` permite editar el perfil de marca desde Admin y servirlo al Store API.
-- Storefront nav/footer consumen `retrieveBrandProfile()` con fallback al perfil empaquetado.
+- Storefront nav/footer, home metadata, store, checkout y PDP consumen `retrieveBrandProfile()` con fallback al perfil empaquetado.
 
 Pendiente:
 

@@ -1,6 +1,7 @@
 import { HandTruck, ReceiptPercent, ShieldCheck, Wrench } from "@medusajs/icons"
+import { ClientProfile } from "@/lib/client-profile"
 
-const benefits = [
+const defaultBenefits = [
   {
     label: "Precios B2B y descuentos por volumen",
     icon: ReceiptPercent,
@@ -19,7 +20,15 @@ const benefits = [
   },
 ]
 
-export function ProductBenefitsBar() {
+const benefitIcons = [ReceiptPercent, HandTruck, Wrench, ShieldCheck]
+
+export function ProductBenefitsBar({ profile }: { profile?: ClientProfile }) {
+  const benefits =
+    profile?.productPage?.benefits?.slice(0, 4).map((benefit, index) => ({
+      label: benefit.label,
+      icon: benefitIcons[index] || ReceiptPercent,
+    })) || defaultBenefits
+
   return (
     <div className="border-b border-neutral-200 bg-neutral-50">
       <div className="content-container grid gap-3 py-3 text-xs text-neutral-700 small:grid-cols-4">

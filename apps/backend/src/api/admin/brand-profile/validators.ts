@@ -10,6 +10,28 @@ const FooterColumn = z.object({
   links: z.array(BrandProfileLink).min(1),
 });
 
+const ProductPageContent = z
+  .object({
+    benefits: z
+      .array(
+        z.object({
+          label: z.string().min(1),
+        })
+      )
+      .optional(),
+    supportPanels: z
+      .array(
+        z.object({
+          title: z.string().min(1),
+          body: z.string().min(1),
+          action: z.string().min(1),
+          href: z.string().min(1).optional(),
+        })
+      )
+      .optional(),
+  })
+  .optional();
+
 export const AdminUpdateBrandProfile = z.object({
   id: z.string().min(1),
   brand: z.object({
@@ -50,6 +72,7 @@ export const AdminUpdateBrandProfile = z.object({
     productTechnicalDescription: z.string().min(1),
     productBrandKeywords: z.array(z.string().min(1)).min(1),
   }),
+  productPage: ProductPageContent,
 });
 
 export type AdminUpdateBrandProfileType = z.infer<

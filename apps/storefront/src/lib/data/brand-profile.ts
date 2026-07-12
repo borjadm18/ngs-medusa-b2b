@@ -46,6 +46,10 @@ export const retrieveBrandProfile = async (): Promise<ClientProfile> => {
         ...clientProfile.fallbacks,
         ...brand_profile.fallbacks,
       },
+      productPage: {
+        ...clientProfile.productPage,
+        ...brand_profile.productPage,
+      },
     }))
     .catch(() => clientProfile)
 }

@@ -1,4 +1,4 @@
-import { clientProfile } from "@/lib/client-profile"
+import { retrieveBrandProfile } from "@/lib/data/brand-profile"
 import { listCategories } from "@/lib/data/categories"
 import {
   DEFAULT_HOMEPAGE_CONTENT,
@@ -9,17 +9,21 @@ import { getBaseURL } from "@/lib/util/env"
 import { NgsHomepage } from "@/modules/home/templates/ngs-homepage"
 import { Metadata } from "next"
 
-export const metadata: Metadata = {
-  title: clientProfile.seo.title,
-  description: clientProfile.seo.description,
-  alternates: {
-    canonical: `${getBaseURL()}/es`,
-  },
-  openGraph: {
-    title: clientProfile.seo.title,
-    description: clientProfile.brand.tagline,
-    images: [clientProfile.brand.logo.dark],
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const profile = await retrieveBrandProfile()
+
+  return {
+    title: profile.seo.title,
+    description: profile.seo.description,
+    alternates: {
+      canonical: `${getBaseURL()}/${profile.markets.defaultCountryCode}`,
+    },
+    openGraph: {
+      title: profile.seo.title,
+      description: profile.brand.tagline,
+      images: [profile.brand.logo.dark],
+    },
+  }
 }
 
 const withTimeout = async <T,>(
@@ -42,8 +46,11 @@ export default async function Home(props: {
 }) {
   const { countryCode } = await props.params
 
-  const [categories, productsResult, homepage] = await Promise.all([
-    withTimeout(listCategories({ limit: 12 }).catch(() => []), []),
+  const [categories, productsResult, homepage, profile] = await Promise.all([
+    withTimeout(
+      listCategories({ limit: 12 }).catch(() => []),
+      []
+    ),
     withTimeout(
       listProducts({
         countryCode,
@@ -54,13 +61,14 @@ export default async function Home(props: {
       null
     ),
     withTimeout(getHomepageContent(), DEFAULT_HOMEPAGE_CONTENT),
+    retrieveBrandProfile(),
   ])
 
   const products = productsResult?.response.products || []
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: clientProfile.brand.name,
+    name: profile.brand.name,
     url: getBaseURL(),
     sameAs: [],
   }

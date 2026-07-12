@@ -30,7 +30,7 @@ Crear una base repetible para clientes B2B que necesitan:
 | Admin widgets | Implementado parcial | Edicion de packaging y acciones masivas basicas. |
 | Storefront B2B | Implementado NGS | Home, PDP, catalogo, carrito y presupuesto con patron industrial. |
 | Import/export ops | Implementado parcial | CSV packaging por SKU y CSV de carrito. |
-| Client adapter | Implementado parcial | Perfiles JSON sincronizables para marca, home, nav, footer, fallbacks y assets. |
+| Client adapter | Implementado parcial | Perfiles JSON sincronizables para marca, home, nav, footer, SEO, store, checkout, PDP fallbacks y assets. |
 | Template CLI/onboarding | Pendiente | Crear nuevo ecommerce desde prompts/configuracion. |
 
 ## Principio De Arquitectura

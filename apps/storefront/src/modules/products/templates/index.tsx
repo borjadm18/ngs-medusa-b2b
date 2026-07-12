@@ -11,17 +11,20 @@ import ProductActionsWrapper from "./product-actions-wrapper"
 import { ProductBenefitsBar } from "../components/product-benefits-bar"
 import { ProductBreadcrumbs } from "../components/product-breadcrumbs"
 import { ProductSupportPanels } from "../components/product-support-panels"
+import { ClientProfile } from "@/lib/client-profile"
 
 type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
   countryCode: string
+  profile?: ClientProfile
 }
 
 const ProductTemplate: React.FC<ProductTemplateProps> = ({
   product,
   region,
   countryCode,
+  profile,
 }) => {
   if (!product || !product.id) {
     return notFound()
@@ -29,7 +32,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
 
   return (
     <div className="flex flex-col bg-white">
-      <ProductBenefitsBar />
+      <ProductBenefitsBar profile={profile} />
       <ProductBreadcrumbs product={product} />
       <div
         className="content-container grid grid-cols-1 gap-8 pb-10 medium:grid-cols-[minmax(0,1.05fr)_minmax(420px,0.95fr)]"
@@ -37,7 +40,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
       >
         <ImageGallery product={product} />
         <div className="flex h-fit w-full flex-col items-start gap-7 rounded-lg bg-neutral-50 p-6 small:p-10 medium:sticky medium:top-24">
-          <ProductInfo product={product} />
+          <ProductInfo product={product} profile={profile} />
           <Suspense
             fallback={<ProductActions product={product} region={region} />}
           >
@@ -46,17 +49,21 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
         </div>
       </div>
       <div className="content-container">
-        <ProductTabs product={product} />
+        <ProductTabs product={product} profile={profile} />
       </div>
       <div
         className="content-container"
         data-testid="related-products-container"
       >
         <Suspense fallback={<SkeletonRelatedProducts />}>
-          <RelatedProducts product={product} countryCode={countryCode} />
+          <RelatedProducts
+            product={product}
+            countryCode={countryCode}
+            profile={profile}
+          />
         </Suspense>
       </div>
-      <ProductSupportPanels />
+      <ProductSupportPanels profile={profile} />
     </div>
   )
 }

@@ -92,6 +92,45 @@
   "fallbacks": {
     "productCategoryLabel": "Producto industrial",
     "productTechnicalDescription": "Producto profesional para compras B2B industriales.",
-    "productBrandKeywords": ["industrial", "repuesto", "consumible", "herramienta"]
+    "productBrandKeywords": [
+      "industrial",
+      "repuesto",
+      "consumible",
+      "herramienta"
+    ]
+  },
+  "productPage": {
+    "benefits": [
+      { "label": "Tarifas por cuenta y volumen" },
+      { "label": "Stock y embalaje por variante" },
+      { "label": "Soporte tecnico para compras" },
+      { "label": "Control de presupuesto y aprobaciones" }
+    ],
+    "supportPanels": [
+      {
+        "title": "Reposicion recurrente",
+        "body": "Pedidos por caja, minimos y multiplos pensados para compras industriales.",
+        "action": "Ver catalogo",
+        "href": "/store"
+      },
+      {
+        "title": "Logistica por pallet",
+        "body": "Packaging, peso y dimensiones preparados para planificar recepcion y transporte.",
+        "action": "Mas info",
+        "href": "/store"
+      },
+      {
+        "title": "Compras con control",
+        "body": "Presupuestos, aprobaciones y roles de empresa para equipos de compra.",
+        "action": "Ver empresa",
+        "href": "/account/company"
+      },
+      {
+        "title": "Soporte comercial",
+        "body": "Asistencia para equivalencias, cantidades y condiciones por cuenta.",
+        "action": "Contactar",
+        "href": "/account"
+      }
+    ]
   }
 }

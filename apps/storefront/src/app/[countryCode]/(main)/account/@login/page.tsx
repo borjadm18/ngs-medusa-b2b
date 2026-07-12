@@ -1,11 +1,15 @@
-import { clientProfile } from "@/lib/client-profile"
+import { retrieveBrandProfile } from "@/lib/data/brand-profile"
 import { listRegions } from "@/lib/data/regions"
 import LoginTemplate from "@/modules/account/templates/login-template"
 import { Metadata } from "next"
 
-export const metadata: Metadata = {
-  title: "Log in",
-  description: `Accede a tu cuenta B2B ${clientProfile.brand.name}.`,
+export async function generateMetadata(): Promise<Metadata> {
+  const profile = await retrieveBrandProfile()
+
+  return {
+    title: "Log in",
+    description: `Accede a tu cuenta B2B ${profile.brand.name}.`,
+  }
 }
 
 export default async function Login() {

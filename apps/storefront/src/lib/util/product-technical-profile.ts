@@ -1,5 +1,5 @@
 import { HttpTypes } from "@medusajs/types"
-import { clientProfile } from "@/lib/client-profile"
+import { ClientProfile, clientProfile } from "@/lib/client-profile"
 
 export type ProductHighlight = {
   label: string
@@ -40,8 +40,13 @@ const readMetadata = (
   }
 }
 
-const isDemoAudioProduct = (product: HttpTypes.StoreProduct) =>
-  clientProfile.fallbacks.productBrandKeywords.some((keyword) => {
+const profileOrDefault = (profile?: ClientProfile) => profile || clientProfile
+
+const isProfileFallbackProduct = (
+  product: HttpTypes.StoreProduct,
+  profile?: ClientProfile
+) =>
+  profileOrDefault(profile).fallbacks.productBrandKeywords.some((keyword) => {
     const normalizedKeyword = keyword.toLowerCase()
     const titleMatches = product.title
       ?.toLowerCase()
@@ -61,17 +66,21 @@ export const getProductSeries = (product: HttpTypes.StoreProduct) => {
   )
 }
 
-export const getProductSubtitle = (product: HttpTypes.StoreProduct) => {
+export const getProductSubtitle = (
+  product: HttpTypes.StoreProduct,
+  profile?: ClientProfile
+) => {
   return (
     product.subtitle ||
     readMetadata(product, ["short_description", "type", "tipo"]) ||
     product.description ||
-    clientProfile.fallbacks.productTechnicalDescription
+    profileOrDefault(profile).fallbacks.productTechnicalDescription
   )
 }
 
 export const getProductHighlights = (
-  product: HttpTypes.StoreProduct
+  product: HttpTypes.StoreProduct,
+  profile?: ClientProfile
 ): ProductHighlight[] => {
   const metadataHighlights = [
     ["power_rms", "potencia_rms", "Potencia RMS"],
@@ -89,7 +98,7 @@ export const getProductHighlights = (
     return metadataHighlights
   }
 
-  if (isDemoAudioProduct(product)) {
+  if (isProfileFallbackProduct(product, profile)) {
     return [
       { label: "Potencia RMS", value: "1200 W" },
       { label: "Woofer", value: '12"' },
@@ -102,7 +111,8 @@ export const getProductHighlights = (
 }
 
 export const getProductSpecGroups = (
-  product: HttpTypes.StoreProduct
+  product: HttpTypes.StoreProduct,
+  profile?: ClientProfile
 ): ProductSpecGroup[] => {
   const dimensions =
     product.height || product.width || product.length
@@ -117,7 +127,8 @@ export const getProductSpecGroups = (
       rows: [
         {
           label: "Potencia RMS",
-          value: readMetadata(product, ["power_rms", "potencia_rms"]) || "1200 W",
+          value:
+            readMetadata(product, ["power_rms", "potencia_rms"]) || "1200 W",
         },
         {
           label: "SPL maximo",
@@ -167,7 +178,7 @@ export const getProductSpecGroups = (
     },
   ]
 
-  if (!isDemoAudioProduct(product) && !product.metadata) {
+  if (!isProfileFallbackProduct(product, profile) && !product.metadata) {
     return baseGroups.map((group) => ({
       ...group,
       rows: group.rows.filter((row) => row.value !== "Dato no publicado"),
@@ -201,9 +212,7 @@ export const getProductDocuments = (
           title,
           type: typeof item.type === "string" ? item.type : "Documento",
           detail:
-            typeof item.detail === "string"
-              ? item.detail
-              : "Documento tecnico",
+            typeof item.detail === "string" ? item.detail : "Documento tecnico",
           url: typeof url === "string" ? url : undefined,
         }
       })

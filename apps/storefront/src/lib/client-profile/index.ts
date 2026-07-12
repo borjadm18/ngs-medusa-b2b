@@ -48,6 +48,17 @@ export type ClientProfile = {
     productTechnicalDescription: string
     productBrandKeywords: string[]
   }
+  productPage?: {
+    benefits?: Array<{
+      label: string
+    }>
+    supportPanels?: Array<{
+      title: string
+      body: string
+      action: string
+      href?: string
+    }>
+  }
 }
 
 type ClientProfileBundle = {

@@ -4,17 +4,19 @@ import {
   getProductSeries,
   getProductSubtitle,
 } from "@/lib/util/product-technical-profile"
+import { ClientProfile } from "@/lib/client-profile"
 import { CheckCircleSolid } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
 
 type ProductInfoProps = {
   product: HttpTypes.StoreProduct
+  profile?: ClientProfile
 }
 
-const ProductInfo = ({ product }: ProductInfoProps) => {
+const ProductInfo = ({ product, profile }: ProductInfoProps) => {
   const firstVariant = product.variants?.[0]
   const inventory = getInventorySummary(product)
-  const highlights = getProductHighlights(product)
+  const highlights = getProductHighlights(product, profile)
   const category = product.categories?.[0]?.name
 
   return (
@@ -75,7 +77,7 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
         className="mt-5 max-w-2xl text-sm leading-6 text-neutral-700"
         data-testid="product-description"
       >
-        {getProductSubtitle(product)}
+        {getProductSubtitle(product, profile)}
       </p>
 
       {highlights.length > 0 && (

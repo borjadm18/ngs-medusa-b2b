@@ -1,4 +1,4 @@
-import { clientProfile } from "@/lib/client-profile"
+import { retrieveBrandProfile } from "@/lib/data/brand-profile"
 import { retrieveCustomer } from "@/lib/data/customer"
 import { listRegions } from "@/lib/data/regions"
 import ProfileCard from "@/modules/account/components/profile-card"
@@ -7,9 +7,13 @@ import { Heading } from "@medusajs/ui"
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
-export const metadata: Metadata = {
-  title: "Profile",
-  description: `Consulta y edita tu perfil B2B ${clientProfile.brand.name}.`,
+export async function generateMetadata(): Promise<Metadata> {
+  const profile = await retrieveBrandProfile()
+
+  return {
+    title: "Profile",
+    description: `Consulta y edita tu perfil B2B ${profile.brand.name}.`,
+  }
 }
 
 export default async function Profile() {
