@@ -15,7 +15,7 @@ El siguiente salto es cerrar el backoffice no tecnico. La home, marca, navegacio
 | Backend Medusa | Operativo | Render live, health OK, migraciones activas. |
 | Storefront | Operativo | Vercel live, home/catalogo/PDP/carrito/checkouts funcionales. |
 | Product packaging | Implementado | Modulo, API store/admin, seed NGS, validacion carrito y UI en PDP/carrito. HTTP live validado. |
-| Homepage editable | Parcial | Modulo backend, store API y fallback JSON existen; falta Admin potente para editar contenido. |
+| Homepage editable | Parcial alto | Modulo backend, store API, fallback JSON y Admin page con editor estructurado existen. Falta gestion de assets y brand profile. |
 | Client profile | Parcial alto | Marca/logo/nav/footer/SEO/home/categorias/fallbacks salen de JSON. `pnpm sync:client-profile` empaqueta perfiles. Falta editor Admin. |
 | Admin B2B | Parcial | Widget packaging con import/export y bulk basico. Falta UX avanzada y admin homepage/brand. |
 | Presupuestos | Base heredada + integrado | Flujo existe; falta enriquecer presupuesto con packaging/logistica completa. |
@@ -91,10 +91,10 @@ Parcial.
 - Store API `/store/homepage`.
 - Storefront consume contenido con fallback desde `client-profile` empaquetado.
 - JSON completo disponible en `profiles/ngs/homepage-content.json` y `templates/homepage-content.example.json`.
+- Admin page permite editar hero, CTAs, metricas, bandas, bloques comerciales, bloques visuales y operativa B2B sin tocar JSON crudo.
 
 Pendiente:
 
-- Admin page/widget para editar home.
 - Import/export JSON.
 - Gestion de assets desde admin o storage.
 

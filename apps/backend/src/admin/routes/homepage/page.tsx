@@ -1,9 +1,10 @@
 import { defineRouteConfig } from "@medusajs/admin-sdk";
-import { Photo } from "@medusajs/icons";
+import { Photo, Plus, Trash } from "@medusajs/icons";
 import {
   Button,
   Container,
   Heading,
+  IconButton,
   Input,
   Label,
   Text,
@@ -21,59 +22,16 @@ import {
   useUpdateHomepageContent,
 } from "../../hooks/api/homepage";
 
-type HomepageFormState = Omit<
-  HomepageContent,
-  "metrics" | "trustBlocks" | "capabilityBlocks" | "detailBlocks" | "operations"
-> & {
-  metricsJson: string;
-  trustBlocksJson: string;
-  capabilityBlocksJson: string;
-  detailBlocksJson: string;
-  operationsJson: string;
-};
-
-const toPrettyJson = (value: unknown) => JSON.stringify(value, null, 2);
+type HomepageFormState = HomepageContent;
 
 const toFormState = (content: HomepageContent): HomepageFormState => ({
-  heroBadgePrimary: content.heroBadgePrimary,
-  heroBadgeSecondary: content.heroBadgeSecondary,
-  heroTitle: content.heroTitle,
-  heroBody: content.heroBody,
-  primaryCtaLabel: content.primaryCtaLabel,
-  primaryCtaHref: content.primaryCtaHref,
-  secondaryCtaLabel: content.secondaryCtaLabel,
-  secondaryCtaHref: content.secondaryCtaHref,
-  heroImage: content.heroImage,
-  heroImageAlt: content.heroImageAlt,
-  heroImageEyebrow: content.heroImageEyebrow,
-  heroImageTitle: content.heroImageTitle,
-  capabilityEyebrow: content.capabilityEyebrow,
-  capabilityTitle: content.capabilityTitle,
-  categoryEyebrow: content.categoryEyebrow,
-  categoryTitle: content.categoryTitle,
-  detailEyebrow: content.detailEyebrow,
-  detailTitle: content.detailTitle,
-  detailBody: content.detailBody,
-  detailCtaLabel: content.detailCtaLabel,
-  detailCtaHref: content.detailCtaHref,
-  catalogEyebrow: content.catalogEyebrow,
-  catalogTitle: content.catalogTitle,
-  operationsEyebrow: content.operationsEyebrow,
-  operationsTitle: content.operationsTitle,
-  metricsJson: toPrettyJson(content.metrics),
-  trustBlocksJson: toPrettyJson(content.trustBlocks),
-  capabilityBlocksJson: toPrettyJson(content.capabilityBlocks),
-  detailBlocksJson: toPrettyJson(content.detailBlocks),
-  operationsJson: toPrettyJson(content.operations),
+  ...content,
+  metrics: content.metrics.map((item) => ({ ...item })),
+  trustBlocks: content.trustBlocks.map((item) => ({ ...item })),
+  capabilityBlocks: content.capabilityBlocks.map((item) => ({ ...item })),
+  detailBlocks: content.detailBlocks.map((item) => ({ ...item })),
+  operations: [...content.operations],
 });
-
-const parseJsonField = <T,>(value: string, label: string): T => {
-  try {
-    return JSON.parse(value) as T;
-  } catch {
-    throw new Error(`${label} contiene JSON invalido`);
-  }
-};
 
 const Homepage = () => {
   const { data, isPending } = useHomepageContent();
@@ -109,30 +67,108 @@ const Homepage = () => {
     }));
   };
 
+  const updateMetric = (
+    index: number,
+    field: keyof HomepageContent["metrics"][number],
+    value: string
+  ) => {
+    setForm((current) => ({
+      ...current,
+      metrics: current.metrics.map((item, itemIndex) =>
+        itemIndex === index ? { ...item, [field]: value } : item
+      ),
+    }));
+  };
+
+  const addMetric = () => {
+    setForm((current) => ({
+      ...current,
+      metrics: [...current.metrics, { value: "Nuevo", label: "Texto" }],
+    }));
+  };
+
+  const removeMetric = (index: number) => {
+    setForm((current) => ({
+      ...current,
+      metrics: current.metrics.filter((_, itemIndex) => itemIndex !== index),
+    }));
+  };
+
+  const updateImageBlock = (
+    collection: "trustBlocks" | "capabilityBlocks" | "detailBlocks",
+    index: number,
+    field: keyof HomepageContent["trustBlocks"][number],
+    value: string
+  ) => {
+    setForm((current) => ({
+      ...current,
+      [collection]: current[collection].map((item, itemIndex) =>
+        itemIndex === index ? { ...item, [field]: value } : item
+      ),
+    }));
+  };
+
+  const addImageBlock = (
+    collection: "trustBlocks" | "capabilityBlocks" | "detailBlocks"
+  ) => {
+    setForm((current) => ({
+      ...current,
+      [collection]: [
+        ...current[collection],
+        { title: "Nuevo bloque", body: "Descripcion", image: "" },
+      ],
+    }));
+  };
+
+  const removeImageBlock = (
+    collection: "trustBlocks" | "capabilityBlocks" | "detailBlocks",
+    index: number
+  ) => {
+    setForm((current) => ({
+      ...current,
+      [collection]: current[collection].filter(
+        (_, itemIndex) => itemIndex !== index
+      ),
+    }));
+  };
+
+  const updateOperation = (index: number, value: string) => {
+    setForm((current) => ({
+      ...current,
+      operations: current.operations.map((item, itemIndex) =>
+        itemIndex === index ? value : item
+      ),
+    }));
+  };
+
+  const addOperation = () => {
+    setForm((current) => ({
+      ...current,
+      operations: [...current.operations, "Nueva capacidad operativa"],
+    }));
+  };
+
+  const removeOperation = (index: number) => {
+    setForm((current) => ({
+      ...current,
+      operations: current.operations.filter(
+        (_, itemIndex) => itemIndex !== index
+      ),
+    }));
+  };
+
   const handleSubmit = () => {
-    try {
-      const content: HomepageContent = {
-        ...form,
-        metrics: parseJsonField(form.metricsJson, "Metricas"),
-        trustBlocks: parseJsonField(form.trustBlocksJson, "Banda superior"),
-        capabilityBlocks: parseJsonField(
-          form.capabilityBlocksJson,
-          "Bloques comerciales"
-        ),
-        detailBlocks: parseJsonField(form.detailBlocksJson, "Bloques visuales"),
-        operations: parseJsonField(form.operationsJson, "Operativa B2B"),
-      };
-
-      delete (content as any).metricsJson;
-      delete (content as any).trustBlocksJson;
-      delete (content as any).capabilityBlocksJson;
-      delete (content as any).detailBlocksJson;
-      delete (content as any).operationsJson;
-
-      updateHomepage.mutate(content);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "JSON invalido");
+    if (!form.metrics.length) {
+      toast.error("Anade al menos una metrica");
+      return;
     }
+
+    if (!form.trustBlocks.length || !form.capabilityBlocks.length) {
+      toast.error("Anade al menos un bloque comercial");
+      return;
+    }
+
+    updateHomepage.mutate(form);
   };
 
   return (
@@ -267,37 +303,88 @@ const Homepage = () => {
               />
             </Section>
 
-            <Section title="Listas y bloques JSON">
-              <TextAreaField
-                label="Metricas"
-                value={form.metricsJson}
-                rows={7}
-                onChange={(value) => updateField("metricsJson", value)}
-              />
-              <TextAreaField
-                label="Banda superior"
-                value={form.trustBlocksJson}
-                rows={10}
-                onChange={(value) => updateField("trustBlocksJson", value)}
-              />
-              <TextAreaField
-                label="Bloques comerciales"
-                value={form.capabilityBlocksJson}
-                rows={14}
-                onChange={(value) => updateField("capabilityBlocksJson", value)}
-              />
-              <TextAreaField
-                label="Bloques visuales"
-                value={form.detailBlocksJson}
-                rows={16}
-                onChange={(value) => updateField("detailBlocksJson", value)}
-              />
-              <TextAreaField
-                label="Operativa B2B"
-                value={form.operationsJson}
-                rows={8}
-                onChange={(value) => updateField("operationsJson", value)}
-              />
+            <Section
+              title="Metricas"
+              actionLabel="Anadir metrica"
+              onAction={addMetric}
+            >
+              <div className="grid gap-3">
+                {form.metrics.map((metric, index) => (
+                  <EditableRow
+                    key={`metric-${index}`}
+                    title={`Metrica ${index + 1}`}
+                    onRemove={() => removeMetric(index)}
+                    removeDisabled={form.metrics.length === 1}
+                  >
+                    <div className="grid gap-3 small:grid-cols-[160px_1fr]">
+                      <TextField
+                        label="Valor"
+                        value={metric.value}
+                        onChange={(value) => updateMetric(index, "value", value)}
+                      />
+                      <TextField
+                        label="Texto"
+                        value={metric.label}
+                        onChange={(value) => updateMetric(index, "label", value)}
+                      />
+                    </div>
+                  </EditableRow>
+                ))}
+              </div>
+            </Section>
+
+            <ImageBlockSection
+              title="Banda superior"
+              items={form.trustBlocks}
+              onAdd={() => addImageBlock("trustBlocks")}
+              onRemove={(index) => removeImageBlock("trustBlocks", index)}
+              onChange={(index, field, value) =>
+                updateImageBlock("trustBlocks", index, field, value)
+              }
+            />
+
+            <ImageBlockSection
+              title="Bloques comerciales"
+              items={form.capabilityBlocks}
+              onAdd={() => addImageBlock("capabilityBlocks")}
+              onRemove={(index) => removeImageBlock("capabilityBlocks", index)}
+              onChange={(index, field, value) =>
+                updateImageBlock("capabilityBlocks", index, field, value)
+              }
+            />
+
+            <ImageBlockSection
+              title="Bloques visuales"
+              items={form.detailBlocks}
+              onAdd={() => addImageBlock("detailBlocks")}
+              onRemove={(index) => removeImageBlock("detailBlocks", index)}
+              onChange={(index, field, value) =>
+                updateImageBlock("detailBlocks", index, field, value)
+              }
+            />
+
+            <Section
+              title="Operativa B2B"
+              actionLabel="Anadir punto"
+              onAction={addOperation}
+            >
+              <div className="grid gap-3">
+                {form.operations.map((operation, index) => (
+                  <EditableRow
+                    key={`operation-${index}`}
+                    title={`Punto ${index + 1}`}
+                    onRemove={() => removeOperation(index)}
+                    removeDisabled={form.operations.length === 1}
+                  >
+                    <TextAreaField
+                      label="Texto"
+                      value={operation}
+                      rows={2}
+                      onChange={(value) => updateOperation(index, value)}
+                    />
+                  </EditableRow>
+                ))}
+              </div>
             </Section>
           </div>
 
@@ -339,16 +426,109 @@ const Homepage = () => {
 const Section = ({
   title,
   children,
+  actionLabel,
+  onAction,
 }: {
   title: string;
   children: React.ReactNode;
+  actionLabel?: string;
+  onAction?: () => void;
 }) => (
   <div className="grid gap-4 rounded-lg border p-4">
-    <Text size="small" leading="compact" weight="plus">
-      {title}
-    </Text>
+    <div className="flex items-center justify-between gap-3">
+      <Text size="small" leading="compact" weight="plus">
+        {title}
+      </Text>
+      {onAction ? (
+        <Button size="small" variant="secondary" onClick={onAction}>
+          <Plus />
+          {actionLabel}
+        </Button>
+      ) : null}
+    </div>
     <div className="grid gap-3">{children}</div>
   </div>
+);
+
+const EditableRow = ({
+  title,
+  children,
+  removeDisabled,
+  onRemove,
+}: {
+  title: string;
+  children: React.ReactNode;
+  removeDisabled?: boolean;
+  onRemove: () => void;
+}) => (
+  <div className="grid gap-3 rounded-lg border bg-ui-bg-subtle p-3">
+    <div className="flex items-center justify-between gap-3">
+      <Text size="small" leading="compact" weight="plus">
+        {title}
+      </Text>
+      <IconButton
+        size="small"
+        variant="transparent"
+        disabled={removeDisabled}
+        onClick={onRemove}
+      >
+        <Trash />
+      </IconButton>
+    </div>
+    {children}
+  </div>
+);
+
+const ImageBlockSection = ({
+  title,
+  items,
+  onAdd,
+  onRemove,
+  onChange,
+}: {
+  title: string;
+  items: HomepageContent["trustBlocks"];
+  onAdd: () => void;
+  onRemove: (index: number) => void;
+  onChange: (
+    index: number,
+    field: keyof HomepageContent["trustBlocks"][number],
+    value: string
+  ) => void;
+}) => (
+  <Section title={title} actionLabel="Anadir bloque" onAction={onAdd}>
+    <div className="grid gap-3">
+      {items.map((item, index) => (
+        <EditableRow
+          key={`${title}-${index}`}
+          title={`Bloque ${index + 1}`}
+          onRemove={() => onRemove(index)}
+          removeDisabled={items.length === 1}
+        >
+          <div className="grid gap-3">
+            <div className="grid gap-3 small:grid-cols-2">
+              <TextField
+                label="Titulo"
+                value={item.title}
+                onChange={(value) => onChange(index, "title", value)}
+              />
+              <TextField
+                label="Imagen"
+                value={item.image}
+                onChange={(value) => onChange(index, "image", value)}
+              />
+            </div>
+            <TextAreaField
+              label="Texto"
+              value={item.body}
+              rows={3}
+              onChange={(value) => onChange(index, "body", value)}
+            />
+          </div>
+        </EditableRow>
+      ))}
+    </div>
+  </Section>
 );
 
 const TextField = ({

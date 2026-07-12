@@ -35,6 +35,12 @@ Resultado esperado:
 
 - Un usuario no tecnico cambia home, logo, menu y packaging.
 
+Estado 2026-07-12:
+
+- Admin page de homepage implementada.
+- Editor estructurado para hero, CTAs, metricas, bloques visuales y operativa B2B.
+- Pendiente: brand profile, assets, import/export y plantillas por cliente.
+
 ## Fase 3. Validacion B2B Robusta
 
 Prioridad: alta.
