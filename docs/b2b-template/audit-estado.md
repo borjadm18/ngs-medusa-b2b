@@ -74,9 +74,11 @@ Implementado parcialmente.
 - Aplicar a todas las variantes.
 - Importar CSV.
 - Exportar CSV.
+- Smoke test reproducible `pnpm smoke:admin-packaging` valida login admin, escritura `/admin/product-packaging` y lectura `/store/product-packaging`.
 
 Pendiente:
 
+- QA visual del widget en navegador real.
 - Preview antes de importar.
 - Validacion de errores por fila.
 - Copiar desde otra variante.
@@ -211,11 +213,12 @@ Siguiente accion:
   - Consola navegador: 0 errores tras reiniciar dev server.
 - Suite Jest unit packaging: OK, 9 tests cubren minimo B2B, multiplos, compra por caja, cantidad cero en updates y fallback por metadata.
 - Suite Jest HTTP: `pg-god` instalado y `.medusa` excluido del runner; el arranque queda bloqueado por conexion Postgres local de test (`client password must be a string`) antes de llegar a rutas Medusa.
+- Smoke remoto Admin packaging: OK con `pnpm smoke:admin-packaging` contra Render. Valida credenciales admin, API key publicable, upsert admin y lectura store para `NGS-WILD-BASH-COMPACT-BLK`.
 
 ## Recomendacion De Siguiente Sprint
 
 1. Crear `.env.test`/Postgres local o CI con credenciales explicitas y convertir los checks live de packaging en Jest HTTP.
-2. Crear Admin homepage editor.
-3. Validar Admin packaging en navegador con credenciales reales.
+2. Validar Admin packaging visualmente en navegador con credenciales reales.
+3. Crear Admin brand/profile editor.
 4. Extender `sync:client-profile` para importar packaging/seed backend.
 5. Empezar presupuesto enriquecido con packaging/logistica y export.

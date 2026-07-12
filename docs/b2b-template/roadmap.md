@@ -64,6 +64,7 @@ Actualizacion 2026-07-12:
 
 - `pg-god` instalado.
 - Unit tests de packaging anadidos y pasando.
+- Smoke remoto `pnpm smoke:admin-packaging` anadido para validar Admin -> Store packaging contra un backend desplegado.
 - Build backend pasando.
 - HTTP Jest pendiente por entorno Postgres de test: falta `.env.test`/CI con password explicita.
 
