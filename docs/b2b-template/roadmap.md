@@ -52,7 +52,14 @@ Resultado esperado:
 
 - El template no permite pedidos B2B invalidos.
 
-Estado 2026-07-12: validado contra backend live. Pendiente convertir a Jest porque el runner local esta bloqueado por `pg-god`.
+Estado 2026-07-12: validado contra backend live. Unit tests de packaging disponibles. Pendiente convertir checks live a Jest HTTP cuando exista un Postgres de test local/CI con credenciales explicitas.
+
+Actualizacion 2026-07-12:
+
+- `pg-god` instalado.
+- Unit tests de packaging anadidos y pasando.
+- Build backend pasando.
+- HTTP Jest pendiente por entorno Postgres de test: falta `.env.test`/CI con password explicita.
 
 ## Fase 4. Import/Export Profesional
 

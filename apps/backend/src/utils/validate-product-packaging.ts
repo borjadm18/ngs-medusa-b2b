@@ -5,14 +5,14 @@ import {
 import { PRODUCT_PACKAGING_MODULE } from "../modules/product-packaging";
 import { buildNgsPackagingFallback } from "./ngs-packaging-rules";
 
-type PackagingRule = {
+export type PackagingRule = {
   variant_id: string;
   minimum_order_quantity: number;
   quantity_increment: number;
   units_per_box: number;
 };
 
-type LineItemInput = {
+export type LineItemInput = {
   variant_id?: string | null;
   quantity?: number | null;
   metadata?: Record<string, unknown> | null;
@@ -47,6 +47,65 @@ const normalizeRule = (
       toPositiveInteger(metadata?.units_per_box) ??
       1,
   };
+};
+
+export const validateProductPackagingLineQuantities = (
+  lineItems: LineItemInput[],
+  rulesByVariantId: Map<string, PackagingRule>,
+  options: {
+    allowZeroQuantity?: boolean;
+  } = {}
+) => {
+  for (const lineItem of lineItems) {
+    if (!lineItem.variant_id) {
+      continue;
+    }
+
+    const quantity = toPositiveInteger(lineItem.quantity);
+
+    if (!quantity) {
+      if (options.allowZeroQuantity && Number(lineItem.quantity) === 0) {
+        continue;
+      }
+
+      throw invalidPackagingQuantity("Quantity must be a positive integer.");
+    }
+
+    const rule = normalizeRule(
+      rulesByVariantId.get(lineItem.variant_id),
+      lineItem.metadata
+    );
+    const purchaseUnit = lineItem.metadata?.purchase_unit;
+    const packageQuantity = toPositiveInteger(
+      lineItem.metadata?.package_quantity
+    );
+
+    if (quantity < rule.minimumOrderQuantity) {
+      throw invalidPackagingQuantity(
+        `Minimum order quantity for this variant is ${rule.minimumOrderQuantity} units.`
+      );
+    }
+
+    if (quantity % rule.quantityIncrement !== 0) {
+      throw invalidPackagingQuantity(
+        `Quantity for this variant must be a multiple of ${rule.quantityIncrement}.`
+      );
+    }
+
+    if (purchaseUnit === "box") {
+      if (!packageQuantity) {
+        throw invalidPackagingQuantity(
+          "Box purchases must include package quantity."
+        );
+      }
+
+      if (quantity !== packageQuantity * rule.unitsPerBox) {
+        throw invalidPackagingQuantity(
+          `Box quantity must equal packages multiplied by ${rule.unitsPerBox} units per box.`
+        );
+      }
+    }
+  }
 };
 
 export const validateProductPackagingLines = async (
@@ -103,54 +162,5 @@ export const validateProductPackagingLines = async (
     packagingRules.map((rule) => [rule.variant_id, rule])
   );
 
-  for (const lineItem of lineItems) {
-    if (!lineItem.variant_id) {
-      continue;
-    }
-
-    const quantity = toPositiveInteger(lineItem.quantity);
-
-    if (!quantity) {
-      if (options.allowZeroQuantity && Number(lineItem.quantity) === 0) {
-        continue;
-      }
-
-      throw invalidPackagingQuantity("Quantity must be a positive integer.");
-    }
-
-    const rule = normalizeRule(
-      rulesByVariantId.get(lineItem.variant_id),
-      lineItem.metadata
-    );
-    const purchaseUnit = lineItem.metadata?.purchase_unit;
-    const packageQuantity = toPositiveInteger(
-      lineItem.metadata?.package_quantity
-    );
-
-    if (quantity < rule.minimumOrderQuantity) {
-      throw invalidPackagingQuantity(
-        `Minimum order quantity for this variant is ${rule.minimumOrderQuantity} units.`
-      );
-    }
-
-    if (quantity % rule.quantityIncrement !== 0) {
-      throw invalidPackagingQuantity(
-        `Quantity for this variant must be a multiple of ${rule.quantityIncrement}.`
-      );
-    }
-
-    if (purchaseUnit === "box") {
-      if (!packageQuantity) {
-        throw invalidPackagingQuantity(
-          "Box purchases must include package quantity."
-        );
-      }
-
-      if (quantity !== packageQuantity * rule.unitsPerBox) {
-        throw invalidPackagingQuantity(
-          `Box quantity must equal packages multiplied by ${rule.unitsPerBox} units per box.`
-        );
-      }
-    }
-  }
+  validateProductPackagingLineQuantities(lineItems, rulesByVariantId, options);
 };

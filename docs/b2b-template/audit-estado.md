@@ -209,11 +209,12 @@ Siguiente accion:
   - Home mobile: `output/playwright/home-mobile.png`.
   - Store desktop: `output/playwright/store-desktop.png`.
   - Consola navegador: 0 errores tras reiniciar dev server.
-- Suite Jest HTTP: bloqueada por dependencia de test faltante `pg-god` en `@medusajs/test-utils`.
+- Suite Jest unit packaging: OK, 9 tests cubren minimo B2B, multiplos, compra por caja, cantidad cero en updates y fallback por metadata.
+- Suite Jest HTTP: `pg-god` instalado y `.medusa` excluido del runner; el arranque queda bloqueado por conexion Postgres local de test (`client password must be a string`) antes de llegar a rutas Medusa.
 
 ## Recomendacion De Siguiente Sprint
 
-1. Anadir `pg-god`/ajustar setup de tests HTTP y convertir los checks live de packaging en Jest.
+1. Crear `.env.test`/Postgres local o CI con credenciales explicitas y convertir los checks live de packaging en Jest HTTP.
 2. Crear Admin homepage editor.
 3. Validar Admin packaging en navegador con credenciales reales.
 4. Extender `sync:client-profile` para importar packaging/seed backend.
