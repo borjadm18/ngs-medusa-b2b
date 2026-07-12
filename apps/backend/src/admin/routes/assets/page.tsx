@@ -21,6 +21,7 @@ import {
   useDeleteAsset,
   useUpsertAsset,
 } from "../../hooks/api/assets";
+import { resolveAdminAssetPreviewUrl } from "../../lib/assets";
 
 const assetTypes: Array<AssetType | "all"> = [
   "all",
@@ -189,7 +190,7 @@ const AssetsPage = () => {
                       <div className="aspect-video bg-ui-bg-subtle">
                         {asset.url ? (
                           <img
-                            src={asset.url}
+                            src={resolveAdminAssetPreviewUrl(asset.url)}
                             alt={asset.alt || asset.label}
                             className="h-full w-full object-cover"
                           />
@@ -202,7 +203,7 @@ const AssetsPage = () => {
                               {asset.label}
                             </Text>
                             <Text size="small" className="text-ui-fg-subtle">
-                              {asset.type} · {asset.client_profile_id}
+                              {asset.type} - {asset.client_profile_id}
                             </Text>
                           </div>
                           <IconButton
@@ -316,7 +317,7 @@ const AssetsPage = () => {
               {form.url ? (
                 <div className="aspect-video overflow-hidden rounded-lg border bg-ui-bg-subtle">
                   <img
-                    src={form.url}
+                    src={resolveAdminAssetPreviewUrl(form.url)}
                     alt=""
                     className="h-full w-full object-cover"
                   />

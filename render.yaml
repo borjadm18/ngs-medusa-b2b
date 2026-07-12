@@ -34,6 +34,8 @@ services:
         value: https://ngs-medusa-backend.onrender.com,https://dashboard.render.com
       - key: MEDUSA_BACKEND_URL
         value: https://ngs-medusa-backend.onrender.com
+      - key: VITE_STOREFRONT_URL
+        value: https://storefront-virid-three-41.vercel.app
       - key: DATABASE_URL
         fromDatabase:
           name: ngs-medusa-postgres

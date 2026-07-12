@@ -22,6 +22,7 @@ import {
   useUpdateHomepageContent,
 } from "../../hooks/api/homepage";
 import { AssetPickerField } from "../../components/assets/asset-picker-field";
+import { resolveAdminAssetPreviewUrl } from "../../lib/assets";
 
 type HomepageFormState = HomepageContent;
 
@@ -407,7 +408,7 @@ const Homepage = () => {
               <div className="aspect-video overflow-hidden rounded-lg border bg-ui-bg-subtle">
                 {heroPreview.image ? (
                   <img
-                    src={heroPreview.image}
+                    src={resolveAdminAssetPreviewUrl(heroPreview.image)}
                     alt=""
                     className="h-full w-full object-cover"
                   />

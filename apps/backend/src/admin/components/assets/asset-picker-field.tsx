@@ -1,6 +1,7 @@
 import { Button, Input, Label, Text } from "@medusajs/ui";
 import { useMemo, useState } from "react";
 import { AdminAsset, AssetType, useAssets } from "../../hooks/api/assets";
+import { resolveAdminAssetPreviewUrl } from "../../lib/assets";
 
 type AssetPickerFieldProps = {
   label: string;
@@ -66,7 +67,7 @@ export const AssetPickerField = ({
                 >
                   <div className="aspect-video overflow-hidden rounded-lg border bg-ui-bg-subtle">
                     <img
-                      src={asset.url}
+                      src={resolveAdminAssetPreviewUrl(asset.url)}
                       alt={asset.alt || ""}
                       className="h-full w-full object-cover"
                     />
