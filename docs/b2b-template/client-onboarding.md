@@ -51,6 +51,7 @@ Entregable:
 
 - CSV compatible con `templates/product-packaging.example.csv`.
 - Validacion en PDP, carrito y checkout.
+- `pnpm sync:client-profile` valida `profiles/<cliente>/product-packaging.csv` y genera artefactos backend para seed/import.
 
 ## 4. Pricing Y Condiciones Comerciales
 
@@ -140,3 +141,12 @@ pnpm --filter @b2b-starter/storefront build
 ```
 
 El objetivo es que una demo nueva no requiera editar componentes React para cambiar marca, home, menu, footer o fallbacks de producto.
+
+Si el perfil incluye `product-packaging.csv`, el sync tambien genera:
+
+```txt
+apps/backend/src/migration-scripts/generated-client-profiles/<cliente>-product-packaging.json
+apps/backend/src/migration-scripts/generated-client-profiles/product-packaging-registry.ts
+```
+
+El seed `seed-product-packaging.ts` usa `B2B_CLIENT_PROFILE` o `NEXT_PUBLIC_B2B_CLIENT_PROFILE` para escoger las reglas activas.

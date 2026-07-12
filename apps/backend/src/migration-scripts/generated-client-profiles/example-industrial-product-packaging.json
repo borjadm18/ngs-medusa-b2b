@@ -1,0 +1,35 @@
+[
+  {
+    "sku": "IND-VALVE-DN25-BRASS",
+    "variant_id": null,
+    "sales_unit": "box",
+    "minimum_order_quantity": 10,
+    "quantity_increment": 10,
+    "units_per_box": 10,
+    "boxes_per_pallet": 60,
+    "package_weight": 6.4,
+    "package_dimensions": "400 x 300 x 220 mm"
+  },
+  {
+    "sku": "IND-CABLE-3G25-100M",
+    "variant_id": null,
+    "sales_unit": "unit",
+    "minimum_order_quantity": 1,
+    "quantity_increment": 1,
+    "units_per_box": 1,
+    "boxes_per_pallet": 20,
+    "package_weight": 18.5,
+    "package_dimensions": "420 x 420 x 280 mm"
+  },
+  {
+    "sku": "IND-FILTER-M5-20PK",
+    "variant_id": null,
+    "sales_unit": "box",
+    "minimum_order_quantity": 20,
+    "quantity_increment": 20,
+    "units_per_box": 20,
+    "boxes_per_pallet": 40,
+    "package_weight": 5.2,
+    "package_dimensions": "500 x 320 x 260 mm"
+  }
+]

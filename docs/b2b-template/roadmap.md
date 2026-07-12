@@ -16,7 +16,7 @@ Resultado esperado:
 
 - El mismo codigo puede renderizar NGS o un cliente nuevo cambiando configuracion empaquetada.
 
-Estado 2026-07-12: avanzado. `pnpm sync:client-profile` sincroniza perfiles fuente con el storefront. Falta usarlo tambien para seeds/backend y packaging.
+Estado 2026-07-12: avanzado. `pnpm sync:client-profile` sincroniza perfiles fuente con el storefront, valida `product-packaging.csv` y genera registry backend para seeds. Falta extenderlo a productos/categorias completos.
 
 ## Fase 2. Backoffice Operativo
 

@@ -1,0 +1,4 @@
+sku,variant_id,sales_unit,minimum_order_quantity,quantity_increment,units_per_box,boxes_per_pallet,package_weight,package_dimensions
+IND-VALVE-DN25-BRASS,,box,10,10,10,60,6.4,400 x 300 x 220 mm
+IND-CABLE-3G25-100M,,unit,1,1,1,20,18.5,420 x 420 x 280 mm
+IND-FILTER-M5-20PK,,box,20,20,20,40,5.2,500 x 320 x 260 mm
