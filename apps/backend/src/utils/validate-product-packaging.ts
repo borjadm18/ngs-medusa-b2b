@@ -1,4 +1,6 @@
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
 import { PRODUCT_PACKAGING_MODULE } from "../modules/product-packaging";
+import { buildNgsPackagingFallback } from "./ngs-packaging-rules";
 
 type PackagingRule = {
   variant_id: string;
@@ -66,6 +68,31 @@ export const validateProductPackagingLines = async (
   const packagingRules = await productPackagingModule.listProductPackagings({
     variant_id: variantIds,
   });
+
+  const packagedVariantIds = new Set(
+    packagingRules.map((rule) => rule.variant_id as string)
+  );
+  const missingVariantIds = variantIds.filter(
+    (variantId) => !packagedVariantIds.has(variantId)
+  );
+
+  if (missingVariantIds.length) {
+    const query = container.resolve(ContainerRegistrationKeys.QUERY);
+    const { data: variants } = await query.graph({
+      entity: "variant",
+      fields: ["id", "sku"],
+      filters: {
+        id: missingVariantIds,
+      },
+    });
+
+    packagingRules.push(
+      ...variants
+        .map(buildNgsPackagingFallback)
+        .filter((item): item is NonNullable<typeof item> => !!item)
+    );
+  }
+
   const rulesByVariantId = new Map<string, PackagingRule>(
     packagingRules.map((rule) => [rule.variant_id, rule])
   );

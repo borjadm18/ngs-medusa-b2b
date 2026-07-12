@@ -34,6 +34,9 @@ const ItemFull = ({
   const maxQuantity = item.variant?.inventory_quantity ?? 100
   const packaging = getCartLinePackaging(item.metadata, item.quantity)
   const currentPackageQuantity = packaging?.packageQuantity
+  const maxDisplayQuantity = packaging
+    ? Math.max(Math.floor(maxQuantity / packaging.unitsPerBox), 1)
+    : maxQuantity
   const displayedQuantity = quantity
   const quantityLabel = packaging ? "cajas" : "uds"
 
@@ -85,16 +88,18 @@ const ItemFull = ({
       return
     }
 
-    if (value > maxQuantity) {
+    if (value > maxDisplayQuantity) {
       packaging
-        ? changePackageQuantity(Math.floor(maxQuantity / packaging.unitsPerBox))
-        : changeQuantity(maxQuantity)
+        ? changePackageQuantity(maxDisplayQuantity)
+        : changeQuantity(maxDisplayQuantity)
+      return
     }
 
     if (value < 1) {
       setUpdating(true)
       handleDeleteItem(item.id)
       setUpdating(false)
+      return
     }
 
     packaging ? changePackageQuantity(value) : changeQuantity(value)
@@ -228,7 +233,11 @@ const ItemFull = ({
                       ? changePackageQuantity(packaging.packageQuantity + 1)
                       : changeQuantity(item.quantity + 1)
                   }
-                  disabled={item.quantity >= maxQuantity || disabled}
+                  disabled={
+                    (packaging
+                      ? packaging.packageQuantity >= maxDisplayQuantity
+                      : item.quantity >= maxQuantity) || disabled
+                  }
                 >
                   +
                 </button>
