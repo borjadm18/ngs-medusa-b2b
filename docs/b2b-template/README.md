@@ -79,4 +79,6 @@ Valor por defecto:
 NEXT_PUBLIC_B2B_CLIENT_PROFILE=ngs
 ```
 
-La primera implementacion lee `profiles/ngs/client-profile.json` desde `apps/storefront/src/lib/client-profile`. El siguiente paso es convertir ese loader en un registro de perfiles para poder activar nuevos clientes sin tocar componentes.
+La primera implementacion empaqueta el perfil activo dentro de `apps/storefront/src/lib/client-profile/profiles/ngs.json`, porque Vercel solo sube el proyecto del storefront. `profiles/ngs/client-profile.json` queda como fuente de onboarding/template en la raiz del repo.
+
+El siguiente paso es automatizar la sincronizacion entre `profiles/<cliente>/client-profile.json` y el registro empaquetable del storefront.

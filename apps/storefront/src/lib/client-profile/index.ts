@@ -1,4 +1,4 @@
-import ngsProfile from "../../../../../profiles/ngs/client-profile.json"
+import ngsProfile from "./profiles/ngs.json"
 
 export type ClientProfileLink = {
   label: string
