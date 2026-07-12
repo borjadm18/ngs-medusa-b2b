@@ -16,7 +16,8 @@ Datos necesarios:
 Entregable:
 
 - `templates/client-profile.example.json` adaptado al cliente.
-- Assets en `apps/storefront/public/images/client/...`.
+- Assets en `profiles/<cliente>/assets`.
+- `pnpm sync:client-profile` para empaquetar el perfil en el storefront.
 
 ## 2. Catalogo
 
@@ -98,6 +99,7 @@ Entregable:
 
 - JSON compatible con `templates/homepage-content.example.json`.
 - Edicion desde admin cuando el modulo este completo.
+- Fallback empaquetado con `pnpm sync:client-profile`.
 
 ## 7. Validacion De Demo
 
@@ -111,3 +113,30 @@ Checklist minimo:
 - Admin edita packaging y se refleja en PDP.
 - Import/export CSV funciona con datos reales.
 - Deploy estable en Vercel + Render.
+
+## 8. Activacion Tecnica Del Perfil
+
+Pasos:
+
+1. Crear carpeta `profiles/<cliente>`.
+2. Anadir `client-profile.json`, `homepage-content.json` y, si aplica, `product-packaging.csv`.
+3. Anadir assets en `profiles/<cliente>/assets`.
+4. Ejecutar:
+
+```bash
+pnpm sync:client-profile
+```
+
+5. Activar en el storefront:
+
+```env
+NEXT_PUBLIC_B2B_CLIENT_PROFILE=<cliente>
+```
+
+6. Validar:
+
+```bash
+pnpm --filter @b2b-starter/storefront build
+```
+
+El objetivo es que una demo nueva no requiera editar componentes React para cambiar marca, home, menu, footer o fallbacks de producto.

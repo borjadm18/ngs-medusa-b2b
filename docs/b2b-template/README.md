@@ -30,7 +30,7 @@ Crear una base repetible para clientes B2B que necesitan:
 | Admin widgets | Implementado parcial | Edicion de packaging y acciones masivas basicas. |
 | Storefront B2B | Implementado NGS | Home, PDP, catalogo, carrito y presupuesto con patron industrial. |
 | Import/export ops | Implementado parcial | CSV packaging por SKU y CSV de carrito. |
-| Client adapter | Pendiente | Separar marca, textos, imagenes, reglas demo y seeds por cliente. |
+| Client adapter | Implementado parcial | Perfiles JSON sincronizables para marca, home, nav, footer, fallbacks y assets. |
 | Template CLI/onboarding | Pendiente | Crear nuevo ecommerce desde prompts/configuracion. |
 
 ## Principio De Arquitectura
@@ -86,6 +86,39 @@ Valor por defecto:
 NEXT_PUBLIC_B2B_CLIENT_PROFILE=ngs
 ```
 
-La primera implementacion empaqueta el perfil activo dentro de `apps/storefront/src/lib/client-profile/profiles/ngs.json`, porque Vercel solo sube el proyecto del storefront. `profiles/ngs/client-profile.json` queda como fuente de onboarding/template en la raiz del repo.
+Los perfiles fuente viven en:
 
-El siguiente paso es automatizar la sincronizacion entre `profiles/<cliente>/client-profile.json` y el registro empaquetable del storefront.
+```text
+profiles/<cliente>/client-profile.json
+profiles/<cliente>/homepage-content.json
+profiles/<cliente>/product-packaging.csv
+profiles/<cliente>/assets
+```
+
+Vercel solo despliega `apps/storefront`, asi que antes de construir se empaquetan los perfiles con:
+
+```bash
+pnpm sync:client-profile
+```
+
+El comando:
+
+- Valida que cada perfil tenga los campos minimos.
+- Copia `client-profile.json` y `homepage-content.json` a `apps/storefront/src/lib/client-profile/profiles`.
+- Copia assets de `profiles/<cliente>/assets` a `apps/storefront/public/images/<cliente>`.
+- Regenera `apps/storefront/src/lib/client-profile/generated-profiles.ts`.
+
+Perfiles actuales:
+
+- `ngs`: demo real.
+- `example-industrial`: perfil generico para validar que el template no depende de NGS.
+
+## Nuevo Cliente En 10 Minutos
+
+1. Copia `profiles/example-industrial` a `profiles/<cliente>`.
+2. Cambia `id`, marca, SEO, navegacion y footer en `client-profile.json`.
+3. Cambia hero, categorias, bloques comerciales e imagenes en `homepage-content.json`.
+4. Deja assets en `profiles/<cliente>/assets` y referencia rutas `/images/<cliente>/...`.
+5. Ejecuta `pnpm sync:client-profile`.
+6. Define `NEXT_PUBLIC_B2B_CLIENT_PROFILE=<cliente>`.
+7. Ejecuta `pnpm --filter @b2b-starter/storefront build`.

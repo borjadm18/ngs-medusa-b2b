@@ -1,0 +1,104 @@
+{
+  "heroBadgePrimary": "Suministro industrial",
+  "heroBadgeSecondary": "Portal B2B",
+  "heroTitle": "Compra industrial con reglas reales de empresa.",
+  "heroBody": "Catalogo, packaging, stock, presupuestos y aprobaciones para equipos de compras profesionales.",
+  "primaryCtaLabel": "Explorar catalogo",
+  "primaryCtaHref": "/store",
+  "secondaryCtaLabel": "Solicitar asesoramiento",
+  "secondaryCtaHref": "/account",
+  "heroImage": "/images/ngs/home-texture-metal.jpg",
+  "heroImageAlt": "Textura tecnica para suministro industrial",
+  "heroImageEyebrow": "Operativa profesional",
+  "heroImageTitle": "Una base Medusa preparada para compras recurrentes y control B2B.",
+  "metrics": [
+    { "value": "24/48h", "label": "entrega agil segun stock" },
+    { "value": "B2B", "label": "precios por cuenta" },
+    { "value": "CSV", "label": "import/export operativo" }
+  ],
+  "trustBlocks": [
+    { "title": "Compra por caja", "body": "Minimos, multiplos y pallets", "image": "" },
+    { "title": "Disponibilidad", "body": "Stock visible por region", "image": "" },
+    { "title": "Precios B2B", "body": "Tarifas por cuenta y volumen", "image": "" },
+    { "title": "Control", "body": "Presupuestos y aprobaciones", "image": "" }
+  ],
+  "capabilityEyebrow": "Soluciones por operativa",
+  "capabilityTitle": "Una experiencia preparada para distribucion, mantenimiento y compras corporativas.",
+  "capabilityBlocks": [
+    {
+      "title": "Mantenimiento",
+      "body": "Compra recurrente de repuestos, consumibles y herramientas criticas.",
+      "image": "/images/ngs/home-texture-metal.jpg"
+    },
+    {
+      "title": "Distribucion",
+      "body": "Packaging por caja, pallet y multiples para pedidos de volumen.",
+      "image": "/images/ngs/home-detail-cable.jpg"
+    },
+    {
+      "title": "Compras corporativas",
+      "body": "Usuarios, empresas, limites y aprobaciones antes de confirmar pedido.",
+      "image": "/images/ngs/home-panel-acoustic.jpg"
+    }
+  ],
+  "categoryEyebrow": "Categorias",
+  "categoryTitle": "Categorias destacadas",
+  "featuredCategories": [
+    { "title": "Consumibles", "handle": "consumibles", "image": "/images/ngs/home-texture-metal.jpg" },
+    { "title": "Repuestos", "handle": "repuestos", "image": "/images/ngs/home-detail-cable.jpg" },
+    { "title": "Herramientas", "handle": "herramientas", "image": "/images/ngs/home-texture-fabric.jpg" },
+    { "title": "Proteccion", "handle": "proteccion", "image": "/images/ngs/home-panel-acoustic.jpg" },
+    { "title": "Accesorios", "handle": "accesorios", "image": "/images/ngs/home-detail-brand.jpg" }
+  ],
+  "detailEyebrow": "Backoffice operativo",
+  "detailTitle": "Menos friccion para compradores y comerciales.",
+  "detailBody": "El comprador ve disponibilidad, embalaje y total; el comercial conserva presupuesto, aprobacion y reglas de cuenta.",
+  "detailCtaLabel": "Ver operativa B2B",
+  "detailCtaHref": "/store",
+  "detailImage": "/images/ngs/home-texture-metal.jpg",
+  "detailImageAlt": "Detalle tecnico industrial",
+  "detailBlocks": [
+    {
+      "title": "Packaging",
+      "body": "Reglas por SKU para unidad, caja, minimo, multiplo, pallet y peso.",
+      "image": "/images/ngs/home-texture-metal.jpg"
+    },
+    {
+      "title": "Presupuesto",
+      "body": "Carritos convertibles en propuesta comercial para negociar.",
+      "image": "/images/ngs/home-detail-cable.jpg"
+    },
+    {
+      "title": "Aprobaciones",
+      "body": "Control por empresa y limite antes de finalizar pedidos.",
+      "image": "/images/ngs/home-panel-acoustic.jpg"
+    },
+    {
+      "title": "Integracion",
+      "body": "Preparado para ERP, PIM, tarifas y stock externo.",
+      "image": "/images/ngs/home-detail-brand.jpg"
+    }
+  ],
+  "catalogEyebrow": "Catalogo conectado",
+  "catalogTitle": "Productos destacados",
+  "productFallbackImages": [
+    "/images/ngs/home-texture-metal.jpg",
+    "/images/ngs/home-detail-cable.jpg",
+    "/images/ngs/home-texture-fabric.jpg",
+    "/images/ngs/home-panel-acoustic.jpg",
+    "/images/ngs/home-detail-brand.jpg"
+  ],
+  "emptyCatalogMessage": "Cuando Medusa devuelva productos para esta region, apareceran con imagen, precio calculado y enlace a PDP.",
+  "commercialCtaTitle": "Necesitas una configuracion a medida?",
+  "commercialCtaBody": "Preparamos el portal con tus categorias, packaging, tarifas y flujo comercial.",
+  "commercialCtaLabel": "Contactar",
+  "commercialCtaHref": "/account",
+  "operationsEyebrow": "Operativa B2B",
+  "operationsTitle": "Lo que este template aporta al cliente",
+  "operations": [
+    "Empresas, empleados y permisos de compra desde Admin.",
+    "Presupuestos negociables que nacen desde el carrito.",
+    "Aprobaciones por importe antes de confirmar pedidos.",
+    "Packaging industrial validado en PDP, carrito y checkout."
+  ]
+}

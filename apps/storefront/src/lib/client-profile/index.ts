@@ -1,5 +1,4 @@
-import ngsProfile from "./profiles/ngs.json"
-import ngsHomepage from "./profiles/ngs-homepage.json"
+import { generatedProfileBundles } from "./generated-profiles"
 
 export type ClientProfileLink = {
   label: string
@@ -51,18 +50,15 @@ export type ClientProfile = {
   }
 }
 
-const profileBundles: Record<
-  string,
-  {
-    profile: ClientProfile
-    homepage: Record<string, unknown>
-  }
-> = {
-  ngs: {
-    profile: ngsProfile as ClientProfile,
-    homepage: ngsHomepage as Record<string, unknown>,
-  },
+type ClientProfileBundle = {
+  profile: ClientProfile
+  homepage: Record<string, unknown>
 }
+
+const profileBundles = generatedProfileBundles as Record<
+  string,
+  ClientProfileBundle
+>
 
 export const getClientProfileBundle = () => {
   const activeProfile = process.env.NEXT_PUBLIC_B2B_CLIENT_PROFILE || "ngs"

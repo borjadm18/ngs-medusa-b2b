@@ -16,7 +16,7 @@ Resultado esperado:
 
 - El mismo codigo puede renderizar NGS o un cliente nuevo cambiando configuracion empaquetada.
 
-Estado 2026-07-12: avanzado. Falta script de sincronizacion para no duplicar perfiles.
+Estado 2026-07-12: avanzado. `pnpm sync:client-profile` sincroniza perfiles fuente con el storefront. Falta usarlo tambien para seeds/backend y packaging.
 
 ## Fase 2. Backoffice Operativo
 
@@ -90,6 +90,14 @@ Debe:
 Resultado esperado:
 
 - Crear una demo nueva en horas, no dias.
+
+Primer bloque implementado:
+
+```bash
+pnpm sync:client-profile
+```
+
+Siguiente paso: convertirlo en launcher interactivo que cree la carpeta de perfil, copie assets, valide packaging y prepare envs.
 
 ## Fase 6. Vertical Packs
 

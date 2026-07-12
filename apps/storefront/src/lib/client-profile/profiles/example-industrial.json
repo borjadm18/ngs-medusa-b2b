@@ -1,25 +1,25 @@
 {
-  "id": "ngs",
+  "id": "example-industrial",
   "brand": {
-    "name": "NGS",
-    "legalName": "NGS Electronics",
-    "tagline": "Sonido profesional. Negocios que suenan mas alto.",
+    "name": "Industrex",
+    "legalName": "Industrex Supply S.L.",
+    "tagline": "Suministro industrial para equipos que no paran.",
     "logo": {
-      "light": "/images/ngs/electronics-logo.png",
-      "dark": "/images/ngs/electronics-logo.png"
+      "light": "/images/example-industrial/logo-light.png",
+      "dark": "/images/example-industrial/logo-dark.png"
     },
     "colors": {
       "background": "#ffffff",
       "foreground": "#111111",
       "primary": "#111111",
-      "accent": "#e30613",
-      "muted": "#f5f5f5",
-      "border": "#d9d9d9"
+      "accent": "#d71920",
+      "muted": "#f4f5f6",
+      "border": "#d8dde3"
     }
   },
   "seo": {
-    "title": "NGS | Audio profesional B2B",
-    "description": "Portal B2B NGS para comprar altavoces profesionales, accesorios y soluciones de audio con precios por cuenta desde Medusa."
+    "title": "Industrex | Portal B2B industrial",
+    "description": "Portal B2B para compra industrial con precios por cuenta, packaging por caja, presupuestos y aprobaciones."
   },
   "markets": {
     "defaultCountryCode": "es",
@@ -53,7 +53,7 @@
     ]
   },
   "footer": {
-    "description": "Soluciones de sonido profesional para empresas e instalaciones que exigen calidad, disponibilidad y fiabilidad.",
+    "description": "Suministros industriales para empresas que necesitan comprar con precision, control y disponibilidad.",
     "columns": [
       {
         "title": "Productos",
@@ -63,11 +63,11 @@
             "href": "/store"
           },
           {
-            "label": "Altavoces activos",
+            "label": "Consumibles",
             "href": "/store"
           },
           {
-            "label": "Accesorios",
+            "label": "Repuestos",
             "href": "/store"
           }
         ]
@@ -92,13 +92,13 @@
     ]
   },
   "fallbacks": {
-    "productCategoryLabel": "Producto profesional",
-    "productTechnicalDescription": "Producto profesional para canal B2B.",
+    "productCategoryLabel": "Producto industrial",
+    "productTechnicalDescription": "Producto profesional para compras B2B industriales.",
     "productBrandKeywords": [
-      "ngs",
-      "audio",
-      "altavoz",
-      "speaker"
+      "industrial",
+      "repuesto",
+      "consumible",
+      "herramienta"
     ]
   }
 }

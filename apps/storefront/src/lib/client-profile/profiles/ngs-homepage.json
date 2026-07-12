@@ -12,15 +12,40 @@
   "heroImageEyebrow": "Gama profesional",
   "heroImageTitle": "Soluciones de sonido para espacios comerciales y proyectos B2B.",
   "metrics": [
-    { "value": "24/48h", "label": "entrega agil segun stock" },
-    { "value": "B2B", "label": "precios por cuenta" },
-    { "value": "Medusa", "label": "catalogo conectado" }
+    {
+      "value": "24/48h",
+      "label": "entrega agil segun stock"
+    },
+    {
+      "value": "B2B",
+      "label": "precios por cuenta"
+    },
+    {
+      "value": "Medusa",
+      "label": "catalogo conectado"
+    }
   ],
   "trustBlocks": [
-    { "title": "Calidad profesional", "body": "Rendimiento probado", "image": "" },
-    { "title": "Stock y disponibilidad", "body": "Entregas agiles y fiables", "image": "" },
-    { "title": "Precios B2B", "body": "Descuentos por volumen", "image": "" },
-    { "title": "Soporte dedicado", "body": "Asesoramiento experto", "image": "" }
+    {
+      "title": "Calidad profesional",
+      "body": "Rendimiento probado",
+      "image": ""
+    },
+    {
+      "title": "Stock y disponibilidad",
+      "body": "Entregas agiles y fiables",
+      "image": ""
+    },
+    {
+      "title": "Precios B2B",
+      "body": "Descuentos por volumen",
+      "image": ""
+    },
+    {
+      "title": "Soporte dedicado",
+      "body": "Asesoramiento experto",
+      "image": ""
+    }
   ],
   "capabilityEyebrow": "Soluciones para cada negocio",
   "capabilityTitle": "Sonido profesional para instalaciones, retail y espacios comerciales.",
@@ -44,11 +69,31 @@
   "categoryEyebrow": "Categorias",
   "categoryTitle": "Categorias destacadas",
   "featuredCategories": [
-    { "title": "Altavoces pasivos", "handle": "altavoces-pasivos", "image": "/images/ngs/home-detail-brand.jpg" },
-    { "title": "Altavoces activos", "handle": "altavoces-activos", "image": "/images/ngs/home-range-speakers.jpg" },
-    { "title": "Subwoofers", "handle": "subwoofers", "image": "/images/ngs/home-detail-tweeter.jpg" },
-    { "title": "Columnas", "handle": "columnas", "image": "/images/ngs/home-panel-acoustic.jpg" },
-    { "title": "Accesorios", "handle": "accesorios", "image": "/images/ngs/home-detail-cable.jpg" }
+    {
+      "title": "Altavoces pasivos",
+      "handle": "altavoces-pasivos",
+      "image": "/images/ngs/home-detail-brand.jpg"
+    },
+    {
+      "title": "Altavoces activos",
+      "handle": "altavoces-activos",
+      "image": "/images/ngs/home-range-speakers.jpg"
+    },
+    {
+      "title": "Subwoofers",
+      "handle": "subwoofers",
+      "image": "/images/ngs/home-detail-tweeter.jpg"
+    },
+    {
+      "title": "Columnas",
+      "handle": "columnas",
+      "image": "/images/ngs/home-panel-acoustic.jpg"
+    },
+    {
+      "title": "Accesorios",
+      "handle": "accesorios",
+      "image": "/images/ngs/home-detail-cable.jpg"
+    }
   ],
   "detailEyebrow": "Soluciones para cada negocio",
   "detailTitle": "Soluciones de audio para cada necesidad.",

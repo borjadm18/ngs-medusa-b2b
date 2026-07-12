@@ -16,7 +16,7 @@ El siguiente salto es cerrar el backoffice no tecnico. La home, marca, navegacio
 | Storefront | Operativo | Vercel live, home/catalogo/PDP/carrito/checkouts funcionales. |
 | Product packaging | Implementado | Modulo, API store/admin, seed NGS, validacion carrito y UI en PDP/carrito. HTTP live validado. |
 | Homepage editable | Parcial | Modulo backend, store API y fallback JSON existen; falta Admin potente para editar contenido. |
-| Client profile | Parcial alto | Marca/logo/nav/footer/SEO/home/categorias/fallbacks salen de JSON. Falta sincronizacion y editor Admin. |
+| Client profile | Parcial alto | Marca/logo/nav/footer/SEO/home/categorias/fallbacks salen de JSON. `pnpm sync:client-profile` empaqueta perfiles. Falta editor Admin. |
 | Admin B2B | Parcial | Widget packaging con import/export y bulk basico. Falta UX avanzada y admin homepage/brand. |
 | Presupuestos | Base heredada + integrado | Flujo existe; falta enriquecer presupuesto con packaging/logistica completa. |
 | Aprobaciones | Base heredada + integrado | Existe en cuenta/carrito/checkout; falta validacion UX y casos demo claros. |
@@ -110,8 +110,7 @@ Parcial.
 
 Pendiente:
 
-- Evitar duplicacion entre `profiles/ngs` y perfil empaquetado.
-- Script de sincronizacion.
+- Extender sincronizacion a seeds/backend y packaging.
 - Perfil activo por env con multiples clientes.
 - Brand admin editable.
 
@@ -214,8 +213,8 @@ Siguiente accion:
 
 ## Recomendacion De Siguiente Sprint
 
-1. Crear script de sincronizacion de perfiles.
-2. Anadir `pg-god`/ajustar setup de tests HTTP y convertir los checks live de packaging en Jest.
-3. Crear Admin homepage editor.
-4. Validar Admin packaging en navegador con credenciales reales.
+1. Anadir `pg-god`/ajustar setup de tests HTTP y convertir los checks live de packaging en Jest.
+2. Crear Admin homepage editor.
+3. Validar Admin packaging en navegador con credenciales reales.
+4. Extender `sync:client-profile` para importar packaging/seed backend.
 5. Empezar presupuesto enriquecido con packaging/logistica y export.
