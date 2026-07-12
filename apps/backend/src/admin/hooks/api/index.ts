@@ -8,3 +8,4 @@ export * from "./variants";
 export * from "./customers";
 export * from "./homepage";
 export * from "./product-packaging";
+export * from "./assets";
