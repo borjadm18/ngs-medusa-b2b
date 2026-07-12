@@ -13,6 +13,13 @@ Crear una base repetible para clientes B2B que necesitan:
 - Storefront industrial sobrio, rapido y responsive.
 - Import/export para equipos comerciales y operaciones.
 
+## Documentos Clave
+
+- Auditoria de estado: `docs/b2b-template/audit-estado.md`
+- Onboarding de cliente: `docs/b2b-template/client-onboarding.md`
+- Catalogo de modulos: `docs/b2b-template/module-catalog.md`
+- Roadmap: `docs/b2b-template/roadmap.md`
+
 ## Capas Del Template
 
 | Capa | Estado | Proposito |

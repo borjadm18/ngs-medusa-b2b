@@ -56,6 +56,7 @@ This fork is evolving into a reusable Medusa B2B commerce template for industria
 - Template docs: `docs/b2b-template/README.md`
 - Client onboarding: `docs/b2b-template/client-onboarding.md`
 - Module catalog: `docs/b2b-template/module-catalog.md`
+- Project audit: `docs/b2b-template/audit-estado.md`
 - Roadmap: `docs/b2b-template/roadmap.md`
 - Example client profile: `templates/client-profile.example.json`
 - Packaging CSV example: `templates/product-packaging.example.csv`
