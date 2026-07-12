@@ -21,6 +21,7 @@ import {
   useBrandProfileContent,
   useUpdateBrandProfileContent,
 } from "../../hooks/api/brand-profile";
+import { AssetPickerField } from "../../components/assets/asset-picker-field";
 
 type LinkItem = BrandProfileContent["navigation"]["main"][number];
 type FooterColumn = BrandProfileContent["footer"]["columns"][number];
@@ -475,14 +476,18 @@ const BrandProfile = () => {
                 onChange={(value) => updateBrand("tagline", value)}
               />
               <div className="grid gap-3 small:grid-cols-2">
-                <TextField
+                <AssetPickerField
                   label="Logo claro"
                   value={form.brand.logo.light}
+                  profileId={form.id || "ngs"}
+                  preferredType="logo"
                   onChange={(value) => updateLogo("light", value)}
                 />
-                <TextField
+                <AssetPickerField
                   label="Logo oscuro"
                   value={form.brand.logo.dark}
+                  profileId={form.id || "ngs"}
+                  preferredType="logo"
                   onChange={(value) => updateLogo("dark", value)}
                 />
               </div>

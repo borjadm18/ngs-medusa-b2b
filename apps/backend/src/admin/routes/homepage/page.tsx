@@ -21,6 +21,7 @@ import {
   useHomepageContent,
   useUpdateHomepageContent,
 } from "../../hooks/api/homepage";
+import { AssetPickerField } from "../../components/assets/asset-picker-field";
 
 type HomepageFormState = HomepageContent;
 
@@ -238,9 +239,10 @@ const Homepage = () => {
                   onChange={(value) => updateField("secondaryCtaHref", value)}
                 />
               </div>
-              <TextField
+              <AssetPickerField
                 label="Imagen hero"
                 value={form.heroImage}
+                preferredType="hero"
                 onChange={(value) => updateField("heroImage", value)}
               />
               <TextField
@@ -336,6 +338,7 @@ const Homepage = () => {
             <ImageBlockSection
               title="Banda superior"
               items={form.trustBlocks}
+              profileId="ngs"
               onAdd={() => addImageBlock("trustBlocks")}
               onRemove={(index) => removeImageBlock("trustBlocks", index)}
               onChange={(index, field, value) =>
@@ -346,6 +349,7 @@ const Homepage = () => {
             <ImageBlockSection
               title="Bloques comerciales"
               items={form.capabilityBlocks}
+              profileId="ngs"
               onAdd={() => addImageBlock("capabilityBlocks")}
               onRemove={(index) => removeImageBlock("capabilityBlocks", index)}
               onChange={(index, field, value) =>
@@ -356,6 +360,7 @@ const Homepage = () => {
             <ImageBlockSection
               title="Bloques visuales"
               items={form.detailBlocks}
+              profileId="ngs"
               onAdd={() => addImageBlock("detailBlocks")}
               onRemove={(index) => removeImageBlock("detailBlocks", index)}
               onChange={(index, field, value) =>
@@ -485,9 +490,11 @@ const ImageBlockSection = ({
   onAdd,
   onRemove,
   onChange,
+  profileId = "ngs",
 }: {
   title: string;
   items: HomepageContent["trustBlocks"];
+  profileId?: string;
   onAdd: () => void;
   onRemove: (index: number) => void;
   onChange: (
@@ -512,9 +519,11 @@ const ImageBlockSection = ({
                 value={item.title}
                 onChange={(value) => onChange(index, "title", value)}
               />
-              <TextField
+              <AssetPickerField
                 label="Imagen"
                 value={item.image}
+                profileId={profileId}
+                preferredType="homepage"
                 onChange={(value) => onChange(index, "image", value)}
               />
             </div>

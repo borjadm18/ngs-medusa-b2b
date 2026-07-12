@@ -15,9 +15,9 @@ El siguiente salto es cerrar el backoffice no tecnico. La home, marca, navegacio
 | Backend Medusa         | Operativo                 | Render live, health OK, migraciones activas.                                                                                                                                                                                                                              |
 | Storefront             | Operativo                 | Vercel live, home/catalogo/PDP/carrito/checkouts funcionales.                                                                                                                                                                                                             |
 | Product packaging      | Implementado              | Modulo, API store/admin, seed NGS, validacion carrito y UI en PDP/carrito. HTTP live validado.                                                                                                                                                                            |
-| Homepage editable      | Parcial alto              | Modulo backend, store API, fallback JSON y Admin page con editor estructurado existen. Assets page permite registrar/copiar rutas visuales; falta upload binario real.                                                                                                    |
+| Homepage editable      | Parcial alto              | Modulo backend, store API, fallback JSON y Admin page con editor estructurado existen. Assets page permite registrar rutas visuales y el editor de Home permite seleccionarlas; falta upload binario real.                                                                 |
 | Client profile         | Parcial alto              | Marca/logo/nav/footer/SEO/home/categorias/store/checkout/PDP fallbacks salen de JSON o Brand profile runtime. `pnpm sync:client-profile` empaqueta perfiles y valida packaging CSV. Admin Brand profile existe con formularios por seccion, preview y modo JSON avanzado. |
-| Admin B2B              | Parcial                   | Widget packaging con import/export y bulk basico. Falta UX avanzada y admin homepage/brand.                                                                                                                                                                               |
+| Admin B2B              | Parcial alto              | Widget packaging con import/export y bulk basico. Admin Home, Brand profile y Assets existen. Falta UX avanzada de packaging, upload real de assets y editores por perfil activo.                                                                                         |
 | Presupuestos           | Base heredada + integrado | Flujo existe; falta enriquecer presupuesto con packaging/logistica completa.                                                                                                                                                                                              |
 | Aprobaciones           | Base heredada + integrado | Existe en cuenta/carrito/checkout; falta validacion UX y casos demo claros.                                                                                                                                                                                               |
 | Import/export          | Parcial                   | Packaging CSV y cart CSV. Falta import/export homepage, brand profile y presupuesto.                                                                                                                                                                                      |
@@ -98,7 +98,8 @@ Parcial.
 Pendiente:
 
 - Import/export JSON.
-- Gestion de assets desde admin o storage.
+- Upload binario real de assets a storage/CDN.
+- Import/export JSON desde Admin.
 
 ### Client profile / template
 
@@ -116,7 +117,7 @@ Parcial.
 Pendiente:
 
 - Perfil activo por env con multiples clientes.
-- Subida binaria real de assets a storage/CDN y selector embebido dentro de Home/Brand Profile.
+- Subida binaria real de assets a storage/CDN.
 - Gestion de assets desde Admin/storage.
 
 ### Import/export B2B
@@ -158,18 +159,18 @@ Siguiente accion:
 
 ### P1 - Convertir En Template Real
 
-1. Extraer homepage completa a `client-profile` o `homepage-content`.
-2. Extraer copy PDP/catalogo/footer restante.
-3. Script `sync-client-profile` para empaquetar perfiles en storefront.
+1. Eliminar restos NGS hardcodeados en `/ngs-poc` o moverlos a un pack demo aislado.
+2. Extraer productos/categorias demo completos a perfiles o seeds parametrizables.
+3. Ampliar `sync-client-profile` para preparar assets, packaging y seeds de backend.
 4. Crear `profiles/example-industrial`.
 5. Crear guia "nuevo cliente en 60 minutos".
 
 ### P2 - Backoffice No Tecnico
 
-1. Admin page para editar homepage.
-2. Admin page para editar brand profile.
-3. Admin packaging con preview CSV, errores por fila y plantillas.
-4. Gestion de imagenes: local al principio, storage despues.
+1. Admin packaging con preview CSV, errores por fila y plantillas.
+2. Upload de imagenes: local/storage al principio, CDN despues.
+3. Selector de perfil activo para editar varios clientes desde el mismo Admin.
+4. Import/export JSON para homepage y brand profile.
 
 ### P3 - Operacion B2B Avanzada
 
@@ -222,6 +223,6 @@ Siguiente accion:
 
 1. Crear `.env.test`/Postgres local o CI con credenciales explicitas y convertir los checks live de packaging en Jest HTTP.
 2. Validar Admin packaging visualmente en navegador con credenciales reales.
-3. Crear Admin brand/profile editor.
-4. Extender `sync:client-profile` para importar packaging/seed backend.
-5. Empezar presupuesto enriquecido con packaging/logistica y export.
+3. Extender `sync:client-profile` para importar packaging/seed backend.
+4. Empezar presupuesto enriquecido con packaging/logistica y export.
+5. Crear upload/storage real para Assets.

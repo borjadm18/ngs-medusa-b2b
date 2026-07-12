@@ -42,6 +42,7 @@ Estado 2026-07-12:
 - Admin page de Brand profile implementada con formularios por seccion, preview lateral y modo JSON avanzado.
 - Storefront nav/footer, home metadata, store, checkout y PDP leen Brand profile desde Store API con fallback empaquetado.
 - Assets page implementada como libreria operativa de URLs/rutas con preview, filtros, copia de ruta y CRUD Admin.
+- Selector de assets embebido en los editores de Homepage y Brand profile para elegir hero, bloques visuales y logos sin copiar rutas a mano.
 - Pendiente: subida binaria real a storage/CDN, import/export dedicado y plantillas por cliente.
 
 ## Fase 3. Validacion B2B Robusta
