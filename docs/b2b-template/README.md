@@ -1,0 +1,70 @@
+# Medusa B2B Commerce Template
+
+Este repositorio debe evolucionar de POC NGS a un template reusable para ecommerce B2B industrial sobre Medusa. La idea no es crear otra demo estatica, sino un acelerador con opinion de producto: backend real, storefront real, admin real y datos operativos importables.
+
+## Objetivo
+
+Crear una base repetible para clientes B2B que necesitan:
+
+- Catalogo con precios por cuenta, region, canal o volumen.
+- Compra por unidad, caja, multiplo, minimo y pallet.
+- Presupuesto, aprobaciones, companias y roles.
+- Admin operativo para contenido, packaging y datos B2B.
+- Storefront industrial sobrio, rapido y responsive.
+- Import/export para equipos comerciales y operaciones.
+
+## Capas Del Template
+
+| Capa | Estado | Proposito |
+| --- | --- | --- |
+| Medusa backend B2B | Base existente | Companias, empleados, aprobaciones, presupuestos, carrito y checkout. |
+| Product packaging module | Implementado | Reglas por variante: unidad/caja, minimo, multiplo, pallet, peso, dimensiones. |
+| Homepage content module | Implementado | Contenido editable de home desde backend. |
+| Admin widgets | Implementado parcial | Edicion de packaging y acciones masivas basicas. |
+| Storefront B2B | Implementado NGS | Home, PDP, catalogo, carrito y presupuesto con patron industrial. |
+| Import/export ops | Implementado parcial | CSV packaging por SKU y CSV de carrito. |
+| Client adapter | Pendiente | Separar marca, textos, imagenes, reglas demo y seeds por cliente. |
+| Template CLI/onboarding | Pendiente | Crear nuevo ecommerce desde prompts/configuracion. |
+
+## Principio De Arquitectura
+
+Todo lo reusable debe vivir como core B2B. Todo lo especifico de cliente debe vivir como configuracion, seed o assets.
+
+```text
+b2b-core
+  backend modules
+  workflows
+  API routes
+  admin widgets
+  storefront primitives
+
+client-profile
+  brand tokens
+  homepage content
+  category taxonomy
+  product packaging CSV
+  sample data seed
+  images/assets
+```
+
+## Que No Debe Quedar Hardcodeado
+
+- Nombre de marca: NGS, Electronics, Blake, etc.
+- Colores y logo.
+- Textos de home/PDP/footer.
+- Categorias principales y mega menu.
+- Reglas de packaging por SKU.
+- Mensajes comerciales como "audio profesional".
+- URLs de deploy.
+- Publishable keys o secretos.
+
+## Definition Of Done Para Considerarlo Template
+
+1. Un nuevo cliente puede configurarse editando un `client-profile`.
+2. El admin permite editar contenido esencial sin tocar codigo.
+3. Packaging se puede importar/exportar por CSV.
+4. El storefront no contiene copy de NGS fuera del perfil activo.
+5. El backend valida reglas B2B en add-to-cart, edicion de carrito y checkout.
+6. La demo seed crea datos consistentes en menos de 10 minutos.
+7. Hay guia de despliegue Render/Vercel y guia local.
+8. Hay tests o checks automatizados para las reglas criticas.

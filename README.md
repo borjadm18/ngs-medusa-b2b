@@ -49,6 +49,18 @@ An official Medusa starter for B2B ecommerce, built with [Medusa](https://medusa
 - **Promotions** — Manual and automatic promotion support with free shipping progress
 - **Full ecommerce** — Products, collections, cart, checkout, and order history
 
+## B2B Template Work
+
+This fork is evolving into a reusable Medusa B2B commerce template for industrial ecommerce. The template layer documents the reusable architecture, client onboarding contract, packaging CSV format, homepage content format, and roadmap for turning the current NGS demo into a repeatable accelerator.
+
+- Template docs: `docs/b2b-template/README.md`
+- Client onboarding: `docs/b2b-template/client-onboarding.md`
+- Module catalog: `docs/b2b-template/module-catalog.md`
+- Roadmap: `docs/b2b-template/roadmap.md`
+- Example client profile: `templates/client-profile.example.json`
+- Packaging CSV example: `templates/product-packaging.example.csv`
+- First real client profile: `profiles/ngs/README.md`
+
 ## Getting Started
 
 ### Deploy with Medusa Cloud

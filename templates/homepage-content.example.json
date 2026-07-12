@@ -1,0 +1,42 @@
+{
+  "hero": {
+    "eyebrow": "Portal B2B profesional",
+    "title": "Compra industrial con reglas reales de empresa",
+    "description": "Catalogo, packaging, presupuestos y aprobaciones en una experiencia B2B preparada para operaciones.",
+    "primaryCta": {
+      "label": "Explorar catalogo",
+      "href": "/store"
+    },
+    "secondaryCta": {
+      "label": "Solicitar asesoramiento",
+      "href": "/contact"
+    },
+    "image": "/images/client/home-hero.png"
+  },
+  "trustBar": [
+    {
+      "title": "Compra por caja",
+      "description": "Minimos, multiplos y pallets"
+    },
+    {
+      "title": "Precios B2B",
+      "description": "Tarifas por cuenta y volumen"
+    },
+    {
+      "title": "Presupuestos",
+      "description": "Negociacion comercial integrada"
+    },
+    {
+      "title": "Aprobaciones",
+      "description": "Control de compras por empresa"
+    }
+  ],
+  "featuredCategories": [],
+  "featuredProducts": [],
+  "cta": {
+    "title": "Necesitas una configuracion a medida?",
+    "description": "Nuestro equipo comercial puede preparar una propuesta adaptada a tu operativa.",
+    "label": "Contactar",
+    "href": "/contact"
+  }
+}

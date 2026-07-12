@@ -1,0 +1,64 @@
+{
+  "heroBadgePrimary": "Audio profesional NGS",
+  "heroBadgeSecondary": "Portal B2B",
+  "heroTitle": "Sonido profesional. Negocios que suenan mas alto.",
+  "heroBody": "Altavoces disenados para impulsar tu marca, tus proyectos y tus espacios.",
+  "primaryCtaLabel": "Explorar catalogo",
+  "primaryCtaHref": "/store",
+  "secondaryCtaLabel": "Solicitar asesoramiento",
+  "secondaryCtaHref": "/account",
+  "heroImage": "/images/ngs/home-hero-ngs-speakers.png",
+  "heroImageAlt": "Altavoces profesionales NGS en una escena premium",
+  "heroImageEyebrow": "Gama profesional",
+  "heroImageTitle": "Soluciones de sonido para espacios comerciales y proyectos B2B.",
+  "metrics": [
+    {
+      "value": "24/48h",
+      "label": "entrega agil segun stock"
+    },
+    {
+      "value": "B2B",
+      "label": "precios por cuenta"
+    },
+    {
+      "value": "Medusa",
+      "label": "catalogo conectado"
+    }
+  ],
+  "trustBlocks": [
+    {
+      "title": "Calidad profesional",
+      "body": "Rendimiento probado",
+      "image": ""
+    },
+    {
+      "title": "Stock y disponibilidad",
+      "body": "Entregas agiles y fiables",
+      "image": ""
+    },
+    {
+      "title": "Precios B2B",
+      "body": "Descuentos por volumen",
+      "image": ""
+    },
+    {
+      "title": "Soporte dedicado",
+      "body": "Asesoramiento experto",
+      "image": ""
+    }
+  ],
+  "capabilityEyebrow": "Soluciones para cada negocio",
+  "capabilityTitle": "Sonido profesional para instalaciones, retail y espacios comerciales.",
+  "categoryEyebrow": "Categorias",
+  "categoryTitle": "Categorias destacadas",
+  "catalogEyebrow": "Catalogo conectado",
+  "catalogTitle": "Productos destacados",
+  "operationsEyebrow": "Operativa B2B",
+  "operationsTitle": "Lo que el backoffice aporta a NGS",
+  "operations": [
+    "Empresas, empleados y permisos de compra desde Admin.",
+    "Presupuestos negociables que nacen desde el carrito.",
+    "Aprobaciones por importe antes de confirmar pedidos.",
+    "Base preparada para integrar ERP, PIM, stock e invoices."
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "id": "example-industrial-client",
+  "brand": {
+    "name": "Industrial Co",
+    "legalName": "Industrial Co S.L.",
+    "tagline": "Suministro profesional para empresas",
+    "logo": {
+      "light": "/images/client/logo-light.png",
+      "dark": "/images/client/logo-dark.png"
+    },
+    "colors": {
+      "background": "#ffffff",
+      "foreground": "#0f1115",
+      "primary": "#111111",
+      "accent": "#d71920",
+      "muted": "#f4f5f6",
+      "border": "#d8dde3"
+    }
+  },
+  "seo": {
+    "title": "Industrial Co | Portal B2B",
+    "description": "Portal B2B para compra profesional con precios por cuenta, packaging industrial y presupuestos."
+  },
+  "markets": {
+    "defaultCountryCode": "es",
+    "languages": ["es"],
+    "currency": "EUR"
+  },
+  "navigation": {
+    "main": [
+      {
+        "label": "Productos",
+        "href": "/store"
+      },
+      {
+        "label": "Soluciones",
+        "href": "/solutions"
+      },
+      {
+        "label": "Empresa",
+        "href": "/company"
+      },
+      {
+        "label": "Recursos",
+        "href": "/resources"
+      },
+      {
+        "label": "Soporte",
+        "href": "/support"
+      }
+    ]
+  },
+  "footer": {
+    "description": "Soluciones profesionales para empresas que necesitan comprar con precision, control y disponibilidad.",
+    "columns": [
+      {
+        "title": "Productos",
+        "links": [
+          {
+            "label": "Catalogo completo",
+            "href": "/store"
+          }
+        ]
+      },
+      {
+        "title": "Soporte",
+        "links": [
+          {
+            "label": "Contacto",
+            "href": "/contact"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+sku,variant_id,sales_unit,minimum_order_quantity,quantity_increment,units_per_box,boxes_per_pallet,package_weight,package_dimensions
+NGS-WILD-SPACE-3-BLK,,box,2,2,1,32,8.6,460 x 330 x 610 mm
+NGS-WILD-SPACE-3-RED,,box,2,2,1,32,8.6,460 x 330 x 610 mm
+NGS-XPRESSCAM-1080-BLK,,box,24,24,24,40,4.8,420 x 280 x 260 mm
+NGS-XPRESSCAM-1080-WHT,,box,24,24,24,40,4.8,420 x 280 x 260 mm
+NGS-POWERPUMP-10W-PUR,,box,12,12,12,64,5.4,360 x 240 x 220 mm
+NGS-POWERPUMP-10W-RED,,box,12,12,12,64,5.4,360 x 240 x 220 mm
+NGS-GMX-27-WHT,,box,2,2,2,12,14.2,720 x 180 x 520 mm
+NGS-GMX-27-BLK,,box,2,2,2,12,14.2,720 x 180 x 520 mm
+NGS-GHX-600-BLK,,box,10,10,10,48,6.1,580 x 390 x 340 mm
+NGS-GHX-600-WHT,,box,10,10,10,48,6.1,580 x 390 x 340 mm
+NGS-FUNKY-KIT-BLK,,box,12,12,12,32,10.8,640 x 430 x 360 mm
+NGS-FUNKY-KIT-WHT,,box,12,12,12,32,10.8,640 x 430 x 360 mm
+NGS-EVO-MOUSE-BLK,,box,24,24,24,72,4.2,430 x 300 x 250 mm
+NGS-EVO-MOUSE-WHT,,box,24,24,24,72,4.2,430 x 300 x 250 mm
+NGS-WILD-BASH-COMPACT-BLK,,box,6,6,6,36,7.9,520 x 360 x 330 mm
+NGS-WILD-BASH-COMPACT-WHT,,box,6,6,6,36,7.9,520 x 360 x 330 mm

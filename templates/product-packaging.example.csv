@@ -1,0 +1,4 @@
+sku,variant_id,sales_unit,minimum_order_quantity,quantity_increment,units_per_box,boxes_per_pallet,package_weight,package_dimensions
+SKU-ALTAVOZ-12-BLK,,box,6,6,6,36,7.9,520 x 360 x 330 mm
+SKU-CABLE-HDMI-2M,,box,24,24,24,80,4.2,430 x 300 x 250 mm
+SKU-RACK-19-12U,,unit,1,1,1,8,18.5,640 x 430 x 360 mm
