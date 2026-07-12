@@ -153,6 +153,12 @@ export const getCartLinePackaging = (
   const purchaseUnit = metadata?.purchase_unit as PurchaseUnit | undefined
   const unitsPerBox = toNumber(metadata?.units_per_box)
   const packageQuantity = toNumber(metadata?.package_quantity)
+  const packageWeight = toNumber(metadata?.package_weight)
+  const boxesPerPallet = toNumber(metadata?.boxes_per_pallet)
+  const packageDimensions =
+    typeof metadata?.package_dimensions === "string"
+      ? metadata.package_dimensions
+      : undefined
 
   if (purchaseUnit !== "box" || !unitsPerBox || !packageQuantity) {
     return undefined
@@ -163,5 +169,10 @@ export const getCartLinePackaging = (
     unitsPerBox,
     packageQuantity,
     unitQuantity: quantity,
+    boxesPerPallet,
+    packageWeight,
+    packageDimensions,
+    totalWeight: packageWeight ? packageWeight * packageQuantity : undefined,
+    palletShare: boxesPerPallet ? packageQuantity / boxesPerPallet : undefined,
   }
 }

@@ -47,6 +47,7 @@ const ItemPreview = ({ item, showBorders = true, currencyCode }: ItemProps) => {
             {packaging && (
               <span className="text-neutral-600 text-xs">
                 {packaging.packageQuantity} cajas x {packaging.unitsPerBox} uds
+                = {packaging.unitQuantity} uds
               </span>
             )}
           </div>
@@ -72,6 +73,11 @@ const ItemPreview = ({ item, showBorders = true, currencyCode }: ItemProps) => {
         <span className="self-end text-xs text-neutral-600 italic">
           {packaging ? `${packaging.unitQuantity} uds` : `${item.quantity}x`}
         </span>
+        {packaging?.totalWeight && (
+          <span className="self-end text-[11px] text-neutral-500">
+            {packaging.totalWeight.toFixed(1)} kg
+          </span>
+        )}
       </div>
     </Container>
   )

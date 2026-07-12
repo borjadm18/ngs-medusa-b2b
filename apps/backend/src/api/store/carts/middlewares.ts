@@ -8,6 +8,7 @@ import { retrieveCartTransformQueryConfig } from "./query-config";
 import {
   GetCartLineItemsBulkParams,
   StoreAddLineItemsBulk,
+  StoreUpdateLineItemB2B,
 } from "./validators";
 
 export const storeCartsMiddlewares: MiddlewareRoute[] = [
@@ -16,6 +17,17 @@ export const storeCartsMiddlewares: MiddlewareRoute[] = [
     matcher: "/store/carts/:id/line-items/bulk",
     middlewares: [
       validateAndTransformBody(StoreAddLineItemsBulk),
+      validateAndTransformQuery(
+        GetCartLineItemsBulkParams,
+        retrieveCartTransformQueryConfig
+      ),
+    ],
+  },
+  {
+    method: ["POST"],
+    matcher: "/store/carts/:id/line-items/:line_id/b2b",
+    middlewares: [
+      validateAndTransformBody(StoreUpdateLineItemB2B),
       validateAndTransformQuery(
         GetCartLineItemsBulkParams,
         retrieveCartTransformQueryConfig

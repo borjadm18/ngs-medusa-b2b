@@ -93,3 +93,31 @@ export const useUpsertProductPackaging = (
     ...options,
   });
 };
+
+export const useBulkUpsertProductPackaging = (
+  options?: UseMutationOptions<
+    AdminProductPackagingResponse,
+    FetchError,
+    AdminUpsertProductPackaging[]
+  >
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (packaging) =>
+      sdk.client.fetch<AdminProductPackagingResponse>(
+        "/admin/product-packaging/bulk",
+        {
+          method: "POST",
+          body: { packaging },
+        }
+      ),
+    onSuccess: (data, variables, context) => {
+      queryClient.invalidateQueries({
+        queryKey: productPackagingQueryKeys.all,
+      });
+      options?.onSuccess?.(data, variables, context);
+    },
+    ...options,
+  });
+};

@@ -31,6 +31,11 @@ const ItemFull = ({
   const [quantity, setQuantity] = useState(item.quantity.toString())
 
   const { handleDeleteItem, handleUpdateCartQuantity } = useCart()
+  const maxQuantity = item.variant?.inventory_quantity ?? 100
+  const packaging = getCartLinePackaging(item.metadata, item.quantity)
+  const currentPackageQuantity = packaging?.packageQuantity
+  const displayedQuantity = quantity
+  const quantityLabel = packaging ? "cajas" : "uds"
 
   const changeQuantity = async (newQuantity: number) => {
     setError(null)
@@ -43,17 +48,47 @@ const ItemFull = ({
     await handleUpdateCartQuantity(item.id, Number(newQuantity))
   }
 
+  const changePackageQuantity = async (newPackageQuantity: number) => {
+    if (!packaging) {
+      return changeQuantity(newPackageQuantity)
+    }
+
+    const packageQuantity = Math.max(Math.floor(newPackageQuantity), 0)
+    const unitQuantity = packageQuantity * packaging.unitsPerBox
+    const nextMetadata = {
+      ...(item.metadata || {}),
+      package_quantity: packageQuantity,
+      unit_quantity: unitQuantity,
+    }
+
+    setError(null)
+
+    startTransition(() => {
+      setQuantity(packageQuantity.toString())
+    })
+
+    await handleUpdateCartQuantity(item.id, unitQuantity, nextMetadata)
+  }
+
   useEffect(() => {
-    setQuantity(item.quantity.toString())
-  }, [item.quantity])
+    setQuantity(
+      currentPackageQuantity
+        ? currentPackageQuantity.toString()
+        : item.quantity.toString()
+    )
+  }, [item.quantity, currentPackageQuantity])
 
   const handleBlur = (value: number) => {
-    if (value === item.quantity) {
+    const compareValue = packaging ? packaging.packageQuantity : item.quantity
+
+    if (value === compareValue) {
       return
     }
 
     if (value > maxQuantity) {
-      changeQuantity(maxQuantity)
+      packaging
+        ? changePackageQuantity(Math.floor(maxQuantity / packaging.unitsPerBox))
+        : changeQuantity(maxQuantity)
     }
 
     if (value < 1) {
@@ -62,7 +97,7 @@ const ItemFull = ({
       setUpdating(false)
     }
 
-    changeQuantity(value)
+    packaging ? changePackageQuantity(value) : changeQuantity(value)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -71,22 +106,21 @@ const ItemFull = ({
     }
 
     if (e.key === "Enter") {
-      changeQuantity(Number(quantity))
+      packaging
+        ? changePackageQuantity(Number(quantity))
+        : changeQuantity(Number(quantity))
     }
 
     if (e.key === "ArrowUp" && e.shiftKey) {
       e.preventDefault()
-      setQuantity((Number(quantity) + 10).toString())
+      setQuantity((Number(quantity) + (packaging ? 1 : 10)).toString())
     }
 
     if (e.key === "ArrowDown" && e.shiftKey) {
       e.preventDefault()
-      setQuantity((Number(quantity) - 10).toString())
+      setQuantity((Number(quantity) - (packaging ? 1 : 10)).toString())
     }
   }
-
-  const maxQuantity = item.variant?.inventory_quantity ?? 100
-  const packaging = getCartLinePackaging(item.metadata, item.quantity)
 
   return (
     <Container
@@ -114,10 +148,25 @@ const ItemFull = ({
               {item.variant?.title}
             </span>
             {packaging && (
-              <span className="mt-1 text-xs text-neutral-600">
-                {packaging.packageQuantity} cajas x {packaging.unitsPerBox} uds
-                /caja = {packaging.unitQuantity} uds
-              </span>
+              <div className="mt-1 grid gap-0.5 text-xs text-neutral-600">
+                <span>
+                  {packaging.packageQuantity} cajas x {packaging.unitsPerBox}{" "}
+                  uds/caja = {packaging.unitQuantity} uds
+                </span>
+                <span>
+                  {[
+                    packaging.totalWeight
+                      ? `${packaging.totalWeight.toFixed(1)} kg estimados`
+                      : null,
+                    packaging.packageDimensions,
+                    packaging.boxesPerPallet
+                      ? `${packaging.boxesPerPallet} cajas/pallet`
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </span>
+              </div>
             )}
           </div>
           <div className="flex small:flex-row flex-col gap-2">
@@ -133,8 +182,15 @@ const ItemFull = ({
                     "w-4 h-4 flex items-center justify-center text-neutral-600 hover:bg-neutral-100 rounded-full text-md",
                     disabled ? "opacity-50 pointer-events-none" : "opacity-100"
                   )}
-                  onClick={() => changeQuantity(item.quantity - 1)}
-                  disabled={item.quantity <= 1 || disabled}
+                  onClick={() =>
+                    packaging
+                      ? changePackageQuantity(packaging.packageQuantity - 1)
+                      : changeQuantity(item.quantity - 1)
+                  }
+                  disabled={
+                    (packaging ? packaging.packageQuantity <= 1 : item.quantity <= 1) ||
+                    disabled
+                  }
                 >
                   -
                 </button>
@@ -150,7 +206,7 @@ const ItemFull = ({
                           : "opacity-100"
                       )}
                       type="number"
-                      value={quantity}
+                      value={displayedQuantity}
                       onChange={(e) => {
                         setQuantity(e.target.value)
                       }}
@@ -167,7 +223,11 @@ const ItemFull = ({
                     "w-4 h-4 flex items-center justify-center text-neutral-600 hover:bg-neutral-100 rounded-full text-md",
                     disabled ? "opacity-50 pointer-events-none" : "opacity-100"
                   )}
-                  onClick={() => changeQuantity(item.quantity + 1)}
+                  onClick={() =>
+                    packaging
+                      ? changePackageQuantity(packaging.packageQuantity + 1)
+                      : changeQuantity(item.quantity + 1)
+                  }
                   disabled={item.quantity >= maxQuantity || disabled}
                 >
                   +
@@ -176,6 +236,7 @@ const ItemFull = ({
 
               <DeleteButton id={item.id} disabled={disabled} />
             </div>
+            <span className="text-[11px] text-neutral-500">{quantityLabel}</span>
             <AddNoteButton
               item={item as HttpTypes.StoreCartLineItem}
               disabled={disabled}

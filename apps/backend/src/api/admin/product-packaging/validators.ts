@@ -14,3 +14,11 @@ export const AdminUpsertProductPackaging = z.object({
 export type AdminUpsertProductPackagingType = z.infer<
   typeof AdminUpsertProductPackaging
 >;
+
+export const AdminBulkUpsertProductPackaging = z.object({
+  packaging: z.array(AdminUpsertProductPackaging).min(1),
+});
+
+export type AdminBulkUpsertProductPackagingType = z.infer<
+  typeof AdminBulkUpsertProductPackaging
+>;

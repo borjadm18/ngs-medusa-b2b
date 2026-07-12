@@ -180,14 +180,12 @@ export async function addToCartBulk({
       process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
   }
 
-  await fetch(
-    `${process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL}/store/carts/${cart.id}/line-items/bulk`,
-    {
+  await sdk.client
+    .fetch(`/store/carts/${cart.id}/line-items/bulk`, {
       method: "POST",
       headers,
-      body: JSON.stringify({ line_items: lineItems }),
-    }
-  )
+      body: { line_items: lineItems },
+    })
     .then(async () => {
       const fullfillmentCacheTag = await getCacheTag("fulfillment")
       revalidateTag(fullfillmentCacheTag)
@@ -218,8 +216,12 @@ export async function updateLineItem({
     ...(await getAuthHeaders()),
   }
 
-  await sdk.store.cart
-    .updateLineItem(cartId, lineId, data, {}, headers)
+  await sdk.client
+    .fetch(`/store/carts/${cartId}/line-items/${lineId}/b2b`, {
+      method: "POST",
+      headers,
+      body: data,
+    })
     .then(async () => {
       const fullfillmentCacheTag = await getCacheTag("fulfillment")
       revalidateTag(fullfillmentCacheTag)

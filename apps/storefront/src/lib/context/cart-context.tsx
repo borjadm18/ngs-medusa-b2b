@@ -46,7 +46,8 @@ const CartContext = createContext<
       handleDeleteItem: (lineItem: string) => Promise<void>
       handleUpdateCartQuantity: (
         lineItem: string,
-        newQuantity: number
+        newQuantity: number,
+        metadata?: Record<string, unknown>
       ) => Promise<void>
       handleEmptyCart: () => Promise<void>
       isUpdatingCart: boolean
@@ -230,7 +231,8 @@ export function CartProvider({
 
   const handleUpdateCartQuantity = async (
     lineItem: string,
-    quantity: number
+    quantity: number,
+    metadata?: Record<string, unknown>
   ) => {
     const item = optimisticCart?.items?.find(({ id }) => id === lineItem)
 
@@ -282,7 +284,7 @@ export function CartProvider({
       setIsUpdatingCart(true)
       await updateLineItem({
         lineId: lineItem,
-        data: { quantity },
+        data: { quantity, metadata },
       }).catch((e) => {
         toast.error("Failed to update cart quantity")
         setOptimisticCart(prevCart)

@@ -32,6 +32,9 @@ const ProductVariantsTable = ({
         unitsPerBox: number
         minimumOrderQuantity: number
         quantityIncrement: number
+        boxesPerPallet?: number
+        packageWeight?: number
+        packageDimensions?: string
       }
     >
   >(new Map())
@@ -109,6 +112,9 @@ const ProductVariantsTable = ({
         unitsPerBox: packaging.unitsPerBox,
         minimumOrderQuantity: packaging.minimumOrderQuantity,
         quantityIncrement: packaging.quantityIncrement,
+        boxesPerPallet: packaging.palletUnits,
+        packageWeight: packaging.packageWeight,
+        packageDimensions: packaging.packageDimensions,
         quantity,
       })
 
@@ -129,6 +135,9 @@ const ProductVariantsTable = ({
           unitsPerBox,
           minimumOrderQuantity,
           quantityIncrement,
+          boxesPerPallet,
+          packageWeight,
+          packageDimensions,
           ...variant
         }) => ({
           productVariant: {
@@ -142,6 +151,9 @@ const ProductVariantsTable = ({
             unit_quantity: quantity,
             minimum_order_quantity: minimumOrderQuantity,
             quantity_increment: quantityIncrement,
+            boxes_per_pallet: boxesPerPallet,
+            package_weight: packageWeight,
+            package_dimensions: packageDimensions,
           },
         })
       )

@@ -1,5 +1,6 @@
 import { B2BCart } from "@/types/global"
 import { HttpTypes } from "@medusajs/types"
+import { getCartLinePackaging } from "./b2b-packaging"
 
 // Function to convert the cart items into CSV format
 export function cartToCsv(cart: B2BCart) {
@@ -11,6 +12,7 @@ export function cartToCsv(cart: B2BCart) {
       const taxRate = item.tax_lines?.[0]?.rate || 0
       const totalPrice = item.quantity * item.unit_price
       const totalTax = totalPrice * taxRate
+      const packaging = getCartLinePackaging(item.metadata, item.quantity)
 
       return {
         id: item.id,
@@ -24,6 +26,13 @@ export function cartToCsv(cart: B2BCart) {
         tax_rate: taxRate,
         total_price: totalPrice,
         total_tax: totalTax,
+        purchase_unit: packaging ? "box" : "unit",
+        packages: packaging?.packageQuantity ?? "",
+        units_per_box: packaging?.unitsPerBox ?? "",
+        total_units: packaging?.unitQuantity ?? item.quantity,
+        estimated_weight: packaging?.totalWeight ?? "",
+        package_dimensions: packaging?.packageDimensions ?? "",
+        boxes_per_pallet: packaging?.boxesPerPallet ?? "",
       }
     }) || []
 
@@ -40,6 +49,13 @@ export function cartToCsv(cart: B2BCart) {
     "Tax Rate",
     "Total Price",
     "Total Tax",
+    "Purchase Unit",
+    "Packages",
+    "Units Per Box",
+    "Total Units",
+    "Estimated Weight",
+    "Package Dimensions",
+    "Boxes Per Pallet",
   ].join(",")
 
   // Create CSV rows
@@ -56,6 +72,15 @@ export function cartToCsv(cart: B2BCart) {
       item.tax_rate?.toFixed(2),
       item.total_price.toFixed(2),
       item.total_tax.toFixed(2),
+      item.purchase_unit,
+      item.packages,
+      item.units_per_box,
+      item.total_units,
+      typeof item.estimated_weight === "number"
+        ? item.estimated_weight.toFixed(1)
+        : item.estimated_weight,
+      `"${item.package_dimensions}"`,
+      item.boxes_per_pallet,
     ].join(",")
   )
 

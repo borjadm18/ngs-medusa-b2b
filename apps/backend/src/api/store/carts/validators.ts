@@ -18,3 +18,13 @@ export const StoreAddLineItemsBulk = z
     ),
   })
   .strict();
+
+export type StoreUpdateLineItemB2BType = z.infer<
+  typeof StoreUpdateLineItemB2B
+>;
+export const StoreUpdateLineItemB2B = z
+  .object({
+    quantity: z.number().int().min(0),
+    metadata: z.record(z.string(), z.unknown()).optional(),
+  })
+  .strict();

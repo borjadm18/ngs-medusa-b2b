@@ -43,7 +43,10 @@ const normalizeRule = (
 
 export const validateProductPackagingLines = async (
   container: any,
-  lineItems: LineItemInput[]
+  lineItems: LineItemInput[],
+  options: {
+    allowZeroQuantity?: boolean;
+  } = {}
 ) => {
   const variantIds = Array.from(
     new Set(
@@ -75,6 +78,10 @@ export const validateProductPackagingLines = async (
     const quantity = toPositiveInteger(lineItem.quantity);
 
     if (!quantity) {
+      if (options.allowZeroQuantity && Number(lineItem.quantity) === 0) {
+        continue;
+      }
+
       throw new Error("Quantity must be a positive integer.");
     }
 

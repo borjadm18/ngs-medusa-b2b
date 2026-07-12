@@ -13,11 +13,12 @@ import {
   toast,
 } from "@medusajs/ui";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import { sdk } from "../lib/client";
 import {
   AdminProductPackaging,
   AdminUpsertProductPackaging,
+  useBulkUpsertProductPackaging,
   useProductPackaging,
   useUpsertProductPackaging,
 } from "../hooks/api/product-packaging";
@@ -54,6 +55,7 @@ const ProductPackagingWidget = ({
   const [selectedVariant, setSelectedVariant] =
     useState<ProductVariant | null>(null);
   const [form, setForm] = useState<AdminUpsertProductPackaging>(DEFAULT_FORM);
+  const importInputRef = useRef<HTMLInputElement | null>(null);
 
   const { data: productData, isLoading: isProductLoading } = useQuery({
     queryKey: ["admin-product-packaging-product", data.id],
@@ -95,6 +97,15 @@ const ProductPackagingWidget = ({
       toast.error(error.message || "No se pudo guardar el packaging");
     },
   });
+  const bulkUpsertPackaging = useBulkUpsertProductPackaging({
+    onSuccess: () => {
+      toast.success("Reglas de packaging actualizadas");
+      setSelectedVariant(null);
+    },
+    onError: (error) => {
+      toast.error(error.message || "No se pudo actualizar el packaging");
+    },
+  });
 
   useEffect(() => {
     if (!selectedVariant) {
@@ -132,6 +143,121 @@ const ProductPackagingWidget = ({
     });
   };
 
+  const normalizedForm = (variantId: string): AdminUpsertProductPackaging => ({
+    ...form,
+    variant_id: variantId,
+    minimum_order_quantity: Math.max(
+      Math.floor(Number(form.minimum_order_quantity)),
+      1
+    ),
+    quantity_increment: Math.max(Math.floor(Number(form.quantity_increment)), 1),
+    units_per_box: Math.max(Math.floor(Number(form.units_per_box)), 1),
+    boxes_per_pallet: form.boxes_per_pallet
+      ? Math.max(Math.floor(Number(form.boxes_per_pallet)), 1)
+      : null,
+    package_weight: form.package_weight ? Number(form.package_weight) : null,
+    package_dimensions: form.package_dimensions || null,
+  });
+
+  const handleSaveForAllVariants = () => {
+    if (!variants.length) {
+      return;
+    }
+
+    bulkUpsertPackaging.mutate(
+      variants.map((variant) => normalizedForm(variant.id))
+    );
+  };
+
+  const handleExportCsv = () => {
+    const rows = variants.map((variant) => {
+      const packaging = packagingByVariantId[variant.id] || {
+        ...DEFAULT_FORM,
+        variant_id: variant.id,
+      };
+
+      return [
+        variant.sku || "",
+        variant.id,
+        packaging.sales_unit,
+        packaging.minimum_order_quantity,
+        packaging.quantity_increment,
+        packaging.units_per_box,
+        packaging.boxes_per_pallet ?? "",
+        packaging.package_weight ?? "",
+        packaging.package_dimensions ?? "",
+      ];
+    });
+    const csv = [
+      [
+        "sku",
+        "variant_id",
+        "sales_unit",
+        "minimum_order_quantity",
+        "quantity_increment",
+        "units_per_box",
+        "boxes_per_pallet",
+        "package_weight",
+        "package_dimensions",
+      ],
+      ...rows,
+    ]
+      .map((row) =>
+        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")
+      )
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `product-packaging-${data.id}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportCsv = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const text = await file.text();
+    const [headerLine, ...lines] = text.trim().split(/\r?\n/);
+    const headers = parseCsvRow(headerLine);
+    const records = lines
+      .map(parseCsvRow)
+      .map((values) =>
+        headers.reduce<Record<string, string>>((acc, header, index) => {
+          acc[header] = values[index] || "";
+          return acc;
+        }, {})
+      )
+      .filter((record) => record.variant_id);
+
+    bulkUpsertPackaging.mutate(
+      records.map((record) => ({
+        variant_id: record.variant_id,
+        sales_unit: record.sales_unit === "box" ? "box" : "unit",
+        minimum_order_quantity:
+          Number(record.minimum_order_quantity || record.minimo) || 1,
+        quantity_increment:
+          Number(record.quantity_increment || record.multiplo) || 1,
+        units_per_box: Number(record.units_per_box || record.uds_caja) || 1,
+        boxes_per_pallet: record.boxes_per_pallet
+          ? Number(record.boxes_per_pallet)
+          : null,
+        package_weight: record.package_weight
+          ? Number(record.package_weight)
+          : null,
+        package_dimensions: record.package_dimensions || null,
+      }))
+    );
+
+    event.target.value = "";
+  };
+
   const isLoading = isProductLoading || isPackagingLoading;
 
   return (
@@ -144,6 +270,31 @@ const ProductPackagingWidget = ({
           <Text size="small" leading="compact" className="text-ui-fg-subtle">
             Reglas de venta por unidad, caja, minimos y multiplos por variante.
           </Text>
+        </div>
+        <div className="flex items-center gap-x-2">
+          <input
+            ref={importInputRef}
+            className="hidden"
+            type="file"
+            accept=".csv,text/csv"
+            onChange={handleImportCsv}
+          />
+          <Button
+            size="small"
+            variant="secondary"
+            disabled={!variants.length || bulkUpsertPackaging.isPending}
+            onClick={() => importInputRef.current?.click()}
+          >
+            Importar CSV
+          </Button>
+          <Button
+            size="small"
+            variant="secondary"
+            disabled={!variants.length}
+            onClick={handleExportCsv}
+          >
+            Exportar CSV
+          </Button>
         </div>
       </div>
 
@@ -318,12 +469,53 @@ const ProductPackagingWidget = ({
               >
                 Guardar
               </Button>
+              <Button
+                size="small"
+                variant="secondary"
+                onClick={handleSaveForAllVariants}
+                isLoading={bulkUpsertPackaging.isPending}
+              >
+                Aplicar a todas
+              </Button>
             </div>
           </Drawer.Footer>
         </Drawer.Content>
       </Drawer>
     </Container>
   );
+};
+
+const parseCsvRow = (row: string) => {
+  const result: string[] = [];
+  let current = "";
+  let quoted = false;
+
+  for (let index = 0; index < row.length; index += 1) {
+    const character = row[index];
+    const next = row[index + 1];
+
+    if (character === '"' && quoted && next === '"') {
+      current += '"';
+      index += 1;
+      continue;
+    }
+
+    if (character === '"') {
+      quoted = !quoted;
+      continue;
+    }
+
+    if (character === "," && !quoted) {
+      result.push(current);
+      current = "";
+      continue;
+    }
+
+    current += character;
+  }
+
+  result.push(current);
+  return result.map((value) => value.trim());
 };
 
 const NumberField = ({
