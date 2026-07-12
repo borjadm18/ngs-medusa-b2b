@@ -1,5 +1,8 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework";
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
+import {
+  ContainerRegistrationKeys,
+  MedusaError,
+} from "@medusajs/framework/utils";
 import { updateLineItemInCartWorkflow } from "@medusajs/medusa/core-flows";
 import { StoreUpdateLineItemB2BType } from "../../../../validators";
 import { validateProductPackagingLines } from "../../../../../../../utils/validate-product-packaging";
@@ -26,7 +29,7 @@ export async function POST(
   const lineItem = cart.items?.find((item) => item?.id === line_id);
 
   if (!lineItem) {
-    throw new Error("Line item not found.");
+    throw new MedusaError(MedusaError.Types.NOT_FOUND, "Line item not found.");
   }
 
   const nextMetadata = {

@@ -11,8 +11,8 @@ export function BusinessSolutions({ content }: { content: HomepageContent }) {
         <div className="grid overflow-hidden rounded-lg border border-neutral-200 bg-neutral-50 small:grid-cols-[0.52fr_0.48fr]">
           <div className="relative min-h-[320px] bg-neutral-100">
             <Image
-              src="/images/ngs/home-panel-acoustic.jpg"
-              alt="Solución profesional NGS en espacio comercial"
+              src={content.detailImage}
+              alt={content.detailImageAlt}
               fill
               sizes="(min-width: 1024px) 50vw, 100vw"
               className="object-cover"

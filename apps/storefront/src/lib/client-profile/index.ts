@@ -1,4 +1,5 @@
 import ngsProfile from "./profiles/ngs.json"
+import ngsHomepage from "./profiles/ngs-homepage.json"
 
 export type ClientProfileLink = {
   label: string
@@ -43,19 +44,34 @@ export type ClientProfile = {
       links: ClientProfileLink[]
     }>
   }
+  fallbacks: {
+    productCategoryLabel: string
+    productTechnicalDescription: string
+    productBrandKeywords: string[]
+  }
 }
 
-const profiles: Record<string, ClientProfile> = {
-  ngs: ngsProfile as ClientProfile,
+const profileBundles: Record<
+  string,
+  {
+    profile: ClientProfile
+    homepage: Record<string, unknown>
+  }
+> = {
+  ngs: {
+    profile: ngsProfile as ClientProfile,
+    homepage: ngsHomepage as Record<string, unknown>,
+  },
 }
 
-export const getClientProfile = () => {
+export const getClientProfileBundle = () => {
   const activeProfile = process.env.NEXT_PUBLIC_B2B_CLIENT_PROFILE || "ngs"
 
-  return profiles[activeProfile] || profiles.ngs
+  return profileBundles[activeProfile] || profileBundles.ngs
 }
 
-export const clientProfile = getClientProfile()
+export const clientProfile = getClientProfileBundle().profile
+export const clientHomepageContent = getClientProfileBundle().homepage
 
 export const getClientSeoTitle = (title?: string) => {
   if (!title) {

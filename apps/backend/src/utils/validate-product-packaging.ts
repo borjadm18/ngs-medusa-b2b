@@ -1,4 +1,7 @@
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils";
+import {
+  ContainerRegistrationKeys,
+  MedusaError,
+} from "@medusajs/framework/utils";
 import { PRODUCT_PACKAGING_MODULE } from "../modules/product-packaging";
 import { buildNgsPackagingFallback } from "./ngs-packaging-rules";
 
@@ -14,6 +17,9 @@ type LineItemInput = {
   quantity?: number | null;
   metadata?: Record<string, unknown> | null;
 };
+
+const invalidPackagingQuantity = (message: string) =>
+  new MedusaError(MedusaError.Types.INVALID_DATA, message);
 
 const toPositiveInteger = (value: unknown) => {
   const numberValue = Number(value);
@@ -109,7 +115,7 @@ export const validateProductPackagingLines = async (
         continue;
       }
 
-      throw new Error("Quantity must be a positive integer.");
+      throw invalidPackagingQuantity("Quantity must be a positive integer.");
     }
 
     const rule = normalizeRule(
@@ -122,24 +128,26 @@ export const validateProductPackagingLines = async (
     );
 
     if (quantity < rule.minimumOrderQuantity) {
-      throw new Error(
+      throw invalidPackagingQuantity(
         `Minimum order quantity for this variant is ${rule.minimumOrderQuantity} units.`
       );
     }
 
     if (quantity % rule.quantityIncrement !== 0) {
-      throw new Error(
+      throw invalidPackagingQuantity(
         `Quantity for this variant must be a multiple of ${rule.quantityIncrement}.`
       );
     }
 
     if (purchaseUnit === "box") {
       if (!packageQuantity) {
-        throw new Error("Box purchases must include package quantity.");
+        throw invalidPackagingQuantity(
+          "Box purchases must include package quantity."
+        );
       }
 
       if (quantity !== packageQuantity * rule.unitsPerBox) {
-        throw new Error(
+        throw invalidPackagingQuantity(
           `Box quantity must equal packages multiplied by ${rule.unitsPerBox} units per box.`
         );
       }

@@ -6,7 +6,7 @@ Fecha: 2026-07-12
 
 El proyecto ya no es solo una demo estatica: tiene backend Medusa real, storefront Next.js, Admin extendido y despliegue en Render/Vercel. La capa B2B principal funciona para companias, presupuestos, aprobaciones, packaging por variante, compra por caja/unidad, validacion de carrito y contenido de homepage desde backend.
 
-El siguiente salto es convertir lo especifico de NGS en configuracion de cliente. Ya existe el primer `client-profile`, pero todavia quedan piezas hardcodeadas en homepage, PDP, catalogo y seeds.
+El siguiente salto es cerrar el backoffice no tecnico. La home, marca, navegacion, footer, SEO y fallbacks principales ya salen de JSON empaquetado; queda evitar duplicacion entre `profiles/*` y `apps/storefront/src/lib/client-profile/profiles/*`, y crear editores Admin para que no haya que tocar codigo.
 
 ## Estado Por Area
 
@@ -14,9 +14,9 @@ El siguiente salto es convertir lo especifico de NGS en configuracion de cliente
 | --- | --- | --- |
 | Backend Medusa | Operativo | Render live, health OK, migraciones activas. |
 | Storefront | Operativo | Vercel live, home/catalogo/PDP/carrito/checkouts funcionales. |
-| Product packaging | Implementado | Modulo, API store/admin, seed NGS, validacion carrito y UI en PDP/carrito. |
-| Homepage editable | Parcial | Modulo backend y store API existen; falta Admin potente para editar contenido. |
-| Client profile | Parcial | Marca/logo/nav/footer/SEO empiezan a salir de JSON. Falta home, PDP copy, categorias y assets. |
+| Product packaging | Implementado | Modulo, API store/admin, seed NGS, validacion carrito y UI en PDP/carrito. HTTP live validado. |
+| Homepage editable | Parcial | Modulo backend, store API y fallback JSON existen; falta Admin potente para editar contenido. |
+| Client profile | Parcial alto | Marca/logo/nav/footer/SEO/home/categorias/fallbacks salen de JSON. Falta sincronizacion y editor Admin. |
 | Admin B2B | Parcial | Widget packaging con import/export y bulk basico. Falta UX avanzada y admin homepage/brand. |
 | Presupuestos | Base heredada + integrado | Flujo existe; falta enriquecer presupuesto con packaging/logistica completa. |
 | Aprobaciones | Base heredada + integrado | Existe en cuenta/carrito/checkout; falta validacion UX y casos demo claros. |
@@ -45,8 +45,8 @@ Implementado parcialmente y desplegado.
 
 Pendiente:
 
-- QA visual completo en mobile/desktop.
-- Terminar de extraer contenido NGS a perfiles.
+- Admin packaging validado en navegador con sesion real.
+- QA visual adicional de PDP/carrito tras cada deploy.
 
 ### Packaging por unidad/caja
 
@@ -61,8 +61,8 @@ Implementado.
 
 Pendiente:
 
-- Tests HTTP automatizados.
-- Mensajes de error localizados y mas accionables.
+- Tests HTTP automatizados en Jest.
+- Mensajes de error localizados.
 - Plantillas por categoria.
 
 ### Admin packaging
@@ -89,13 +89,13 @@ Parcial.
 
 - Backend module `homepage`.
 - Store API `/store/homepage`.
-- Storefront consume contenido con fallback.
+- Storefront consume contenido con fallback desde `client-profile` empaquetado.
+- JSON completo disponible en `profiles/ngs/homepage-content.json` y `templates/homepage-content.example.json`.
 
 Pendiente:
 
 - Admin page/widget para editar home.
 - Import/export JSON.
-- Vincular al `client-profile`.
 - Gestion de assets desde admin o storage.
 
 ### Client profile / template
@@ -105,6 +105,8 @@ Parcial.
 - `profiles/ngs/client-profile.json` como fuente de onboarding.
 - `apps/storefront/src/lib/client-profile/profiles/ngs.json` empaquetado para Vercel.
 - Storefront consume marca, logo textual, nav, footer y SEO desde perfil.
+- Storefront consume homepage, categorias destacadas, imagenes fallback y copy comercial desde perfil/homepage JSON.
+- Fallbacks PDP/productos relacionados usan `clientProfile.fallbacks`.
 
 Pendiente:
 
@@ -185,14 +187,35 @@ Siguiente accion:
 
 - Render free tiene cold starts largos y redeploys lentos.
 - Algunas rutas Admin dependen de sesion real para QA.
-- El storefront aun contiene NGS en componentes de home y pagina `/ngs-poc`.
+- El storefront mantiene NGS intencionadamente en `profiles/ngs` y en la pagina especifica `/ngs-poc`.
 - El perfil NGS esta duplicado en raiz y storefront hasta crear sincronizacion.
 - OpenWiki no puede ejecutarse sin credencial OpenAI disponible.
+- La validacion navegador de Admin packaging queda pendiente porque Render rechazo las credenciales dev documentadas.
+
+## Validacion 2026-07-12
+
+- `corepack pnpm --filter @b2b-starter/storefront build`: OK con Node 24 local forzando `engine-strict=false`; Vercel usa Node 22 por `engines`.
+- `corepack pnpm --filter @b2b-starter/backend build`: OK.
+- HTTP live backend: `/health` OK.
+- HTTP live storefront: `/es` y `/es/store` OK.
+- HTTP live packaging/carrito:
+  - Variante `NGS-WILD-BASH-COMPACT-BLK`.
+  - Regla: 6 uds/caja, minimo 6, multiplo 6.
+  - Add-to-cart invalido bloqueado.
+  - Add-to-cart valido OK.
+  - Edicion posterior invalida bloqueada.
+  - Edicion posterior valida OK.
+- QA visual Playwright local:
+  - Home desktop: `output/playwright/home-desktop.png`.
+  - Home mobile: `output/playwright/home-mobile.png`.
+  - Store desktop: `output/playwright/store-desktop.png`.
+  - Consola navegador: 0 errores tras reiniciar dev server.
+- Suite Jest HTTP: bloqueada por dependencia de test faltante `pg-god` en `@medusajs/test-utils`.
 
 ## Recomendacion De Siguiente Sprint
 
 1. Crear script de sincronizacion de perfiles.
-2. Extraer homepage NGS completa a perfil/homepage JSON.
+2. Anadir `pg-god`/ajustar setup de tests HTTP y convertir los checks live de packaging en Jest.
 3. Crear Admin homepage editor.
-4. Implementar tests HTTP de packaging.
-5. QA visual con Playwright y capturas.
+4. Validar Admin packaging en navegador con credenciales reales.
+5. Empezar presupuesto enriquecido con packaging/logistica y export.

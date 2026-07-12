@@ -1,5 +1,6 @@
 import { listProducts } from "@/lib/data/products"
 import { getRegion } from "@/lib/data/regions"
+import { clientProfile } from "@/lib/client-profile"
 import LocalizedClientLink from "@/modules/common/components/localized-client-link"
 import { getProductPrice } from "@/lib/util/get-product-price"
 import { ArrowRight } from "@medusajs/icons"
@@ -94,7 +95,8 @@ export default async function RelatedProducts({
                   )}
                 </div>
                 <p className="mt-4 text-[11px] font-semibold uppercase text-neutral-500">
-                  {relatedProduct.categories?.[0]?.name || "Producto NGS"}
+                  {relatedProduct.categories?.[0]?.name ||
+                    clientProfile.fallbacks.productCategoryLabel}
                 </p>
                 <h3 className="mt-1 line-clamp-2 min-h-10 text-sm font-semibold text-neutral-950">
                   {relatedProduct.title}

@@ -72,5 +72,10 @@
         ]
       }
     ]
+  },
+  "fallbacks": {
+    "productCategoryLabel": "Producto profesional",
+    "productTechnicalDescription": "Producto profesional para canal B2B.",
+    "productBrandKeywords": ["industrial", "professional"]
   }
 }

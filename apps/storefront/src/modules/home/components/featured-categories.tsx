@@ -1,3 +1,4 @@
+import { HomepageContent } from "@/lib/data/homepage"
 import LocalizedClientLink from "@/modules/common/components/localized-client-link"
 import { ArrowRight } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
@@ -5,41 +6,17 @@ import Image from "next/image"
 import { Container } from "./container"
 import { SectionHeading } from "./section-heading"
 
-const FALLBACK_CATEGORIES = [
-  {
-    title: "Altavoces pasivos",
-    handle: "altavoces-pasivos",
-    image: "/images/ngs/home-detail-brand.jpg",
-  },
-  {
-    title: "Altavoces activos",
-    handle: "altavoces-activos",
-    image: "/images/ngs/home-range-speakers.jpg",
-  },
-  {
-    title: "Subwoofers",
-    handle: "subwoofers",
-    image: "/images/ngs/home-detail-tweeter.jpg",
-  },
-  {
-    title: "Columnas",
-    handle: "columnas",
-    image: "/images/ngs/home-panel-acoustic.jpg",
-  },
-  {
-    title: "Accesorios",
-    handle: "accesorios",
-    image: "/images/ngs/home-detail-cable.jpg",
-  },
-]
-
 export function FeaturedCategories({
   categories,
+  content,
 }: {
   categories: HttpTypes.StoreProductCategory[]
+  content: HomepageContent
 }) {
-  const parentCategories = categories.filter((category) => !category.parent_category)
-  const items = FALLBACK_CATEGORIES.map((fallback) => {
+  const parentCategories = categories.filter(
+    (category) => !category.parent_category
+  )
+  const items = content.featuredCategories.map((fallback) => {
     const matchingCategory = parentCategories.find((category) =>
       category.name.toLowerCase().includes(fallback.title.toLowerCase())
     )
@@ -48,6 +25,8 @@ export function FeaturedCategories({
       title: fallback.title,
       href: matchingCategory?.handle
         ? `/categories/${matchingCategory.handle}`
+        : fallback.handle
+        ? `/categories/${fallback.handle}`
         : "/store",
       image: fallback.image,
     }
@@ -57,9 +36,9 @@ export function FeaturedCategories({
     <section className="bg-white py-10 small:py-12">
       <Container>
         <SectionHeading
-          title="Categorías destacadas"
+          title={content.categoryTitle}
           href="/store"
-          action="Ver todas las categorías"
+          action="Ver todas las categorias"
         />
         <div className="grid gap-4 xsmall:grid-cols-2 medium:grid-cols-5">
           {items.map((item) => (

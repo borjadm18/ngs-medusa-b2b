@@ -1,31 +1,26 @@
+import { HomepageContent } from "@/lib/data/homepage"
 import { getProductPrice } from "@/lib/util/get-product-price"
 import LocalizedClientLink from "@/modules/common/components/localized-client-link"
-import PlaceholderImage from "@/modules/common/icons/placeholder-image"
-import { ArrowRight } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
 import Image from "next/image"
 import { Container } from "./container"
 import { SectionHeading } from "./section-heading"
 
-const fallbackProductImages = [
-  "/images/ngs/home-range-speakers.jpg",
-  "/images/ngs/home-detail-tweeter.jpg",
-  "/images/ngs/home-detail-brand.jpg",
-  "/images/ngs/home-texture-fabric.jpg",
-  "/images/ngs/home-detail-cable.jpg",
-]
-
 function ProductCard({
   product,
   image,
+  fallbackCategoryLabel,
 }: {
   product: HttpTypes.StoreProduct
   image: string
+  fallbackCategoryLabel: string
 }) {
   const { cheapestPrice } = getProductPrice({ product })
   const productImage = product.thumbnail || product.images?.[0]?.url || image
   const category =
-    product.categories?.[0]?.name || product.collection?.title || "Producto NGS"
+    product.categories?.[0]?.name ||
+    product.collection?.title ||
+    fallbackCategoryLabel
 
   return (
     <LocalizedClientLink
@@ -43,7 +38,7 @@ function ProductCard({
           />
         ) : (
           <div className="flex h-full items-center justify-center">
-            <PlaceholderImage size={32} />
+            <span className="text-sm text-neutral-400">Sin imagen</span>
           </div>
         )}
       </div>
@@ -67,14 +62,18 @@ function ProductCard({
 
 export function FeaturedProducts({
   products,
+  content,
 }: {
   products: HttpTypes.StoreProduct[]
+  content: HomepageContent
 }) {
+  const fallbackProductImages = content.productFallbackImages
+
   return (
     <section className="bg-white py-10 small:py-12">
       <Container>
         <SectionHeading
-          title="Productos destacados"
+          title={content.catalogTitle}
           href="/store"
           action="Ver todos los productos"
         />
@@ -84,15 +83,19 @@ export function FeaturedProducts({
               <div key={product.id} className="snap-start">
                 <ProductCard
                   product={product}
-                  image={fallbackProductImages[index % fallbackProductImages.length]}
+                  image={
+                    fallbackProductImages[
+                      index % Math.max(fallbackProductImages.length, 1)
+                    ] || ""
+                  }
+                  fallbackCategoryLabel={content.catalogEyebrow}
                 />
               </div>
             ))}
           </div>
         ) : (
           <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-6 text-sm text-neutral-600">
-            Cuando el backend Medusa devuelva productos para esta región, aquí
-            aparecerán con imagen, precio calculado y enlace a PDP.
+            {content.emptyCatalogMessage}
           </div>
         )}
       </Container>

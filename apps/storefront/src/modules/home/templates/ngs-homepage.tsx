@@ -18,10 +18,10 @@ export function NgsHomepage({
   return (
     <main className="bg-white text-neutral-950">
       <HeroSection content={content} />
-      <FeaturedCategories categories={categories} />
+      <FeaturedCategories categories={categories} content={content} />
       <BusinessSolutions content={content} />
-      <FeaturedProducts products={products} />
-      <CommercialCta />
+      <FeaturedProducts products={products} content={content} />
+      <CommercialCta content={content} />
     </main>
   )
 }

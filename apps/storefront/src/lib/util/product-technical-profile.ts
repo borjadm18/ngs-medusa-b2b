@@ -1,4 +1,5 @@
 import { HttpTypes } from "@medusajs/types"
+import { clientProfile } from "@/lib/client-profile"
 
 export type ProductHighlight = {
   label: string
@@ -40,10 +41,17 @@ const readMetadata = (
 }
 
 const isDemoAudioProduct = (product: HttpTypes.StoreProduct) =>
-  product.title?.toLowerCase().includes("ngs") ||
-  product.categories?.some((category) =>
-    category.name.toLowerCase().includes("audio")
-  )
+  clientProfile.fallbacks.productBrandKeywords.some((keyword) => {
+    const normalizedKeyword = keyword.toLowerCase()
+    const titleMatches = product.title
+      ?.toLowerCase()
+      .includes(normalizedKeyword)
+    const categoryMatches = product.categories?.some((category) =>
+      category.name.toLowerCase().includes(normalizedKeyword)
+    )
+
+    return titleMatches || categoryMatches
+  })
 
 export const getProductSeries = (product: HttpTypes.StoreProduct) => {
   return (
@@ -58,7 +66,7 @@ export const getProductSubtitle = (product: HttpTypes.StoreProduct) => {
     product.subtitle ||
     readMetadata(product, ["short_description", "type", "tipo"]) ||
     product.description ||
-    "Producto profesional para canal B2B."
+    clientProfile.fallbacks.productTechnicalDescription
   )
 }
 
