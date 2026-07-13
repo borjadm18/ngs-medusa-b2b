@@ -77,7 +77,7 @@ pnpm template:new -- --id acme-industrial --name "ACME Industrial" --from ngs --
 Useful options:
 
 - `--from ngs` or `--from example-industrial`: starts from an existing profile.
-- `--vertical audio|packaging|hardware|electrical|spare-parts`: applies sector-specific menu, homepage and fallback copy.
+- `--vertical audio|packaging|hardware|electrical|spare-parts`: applies sector-specific menu, homepage, fallback copy and demo packaging CSV.
 - `--tagline "..."`: sets the visible brand tagline.
 - `--country es --currency EUR`: sets default market values.
 - `--dry-run`: previews files without writing.

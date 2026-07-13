@@ -202,6 +202,7 @@ const verticalPacks = {
     ],
     capabilityTitle:
       "Un portal preparado para compras recurrentes, stock y control comercial.",
+    packagingRows: null,
   },
   audio: {
     tagline: "Audio profesional para negocios, instalaciones y eventos.",
@@ -221,6 +222,12 @@ const verticalPacks = {
     solutions: ["Instalaciones fijas", "Eventos en vivo", "Retail y hosteleria"],
     capabilityTitle:
       "Soluciones de audio para venta recurrente, proyectos e instalaciones.",
+    packagingRows: [
+      ["SKU-AUDIO-ACTIVO-12-BLK", "", "box", 6, 6, 6, 32, 8.2, "560 x 380 x 360 mm"],
+      ["SKU-AUDIO-SUB-18-BLK", "", "box", 2, 2, 2, 12, 28.5, "720 x 560 x 520 mm"],
+      ["SKU-AUDIO-COLUMN-10-BLK", "", "unit", 1, 1, 1, 18, 14.8, "1040 x 260 x 240 mm"],
+      ["SKU-AUDIO-CABLE-XLR-5M", "", "box", 24, 24, 24, 80, 4.2, "430 x 300 x 250 mm"],
+    ],
   },
   packaging: {
     tagline: "Embalaje y packaging para operaciones que no pueden parar.",
@@ -234,6 +241,13 @@ const verticalPacks = {
     solutions: ["Ecommerce", "Logistica", "Almacen", "Retail"],
     capabilityTitle:
       "Un portal para comprar embalaje con control de stock, volumen y logistica.",
+    packagingRows: [
+      ["SKU-BOX-KRAFT-300", "", "box", 100, 100, 100, 40, 12.5, "600 x 400 x 360 mm"],
+      ["SKU-MAILER-BAG-250", "", "box", 250, 250, 250, 32, 8.1, "520 x 380 x 300 mm"],
+      ["SKU-BUBBLE-ROLL-50M", "", "unit", 1, 1, 1, 24, 3.8, "500 x 500 x 1000 mm"],
+      ["SKU-LABEL-A6-1000", "", "box", 1000, 1000, 1000, 60, 6.4, "320 x 240 x 220 mm"],
+      ["SKU-TAPE-48MM-36", "", "box", 36, 36, 36, 72, 9.6, "420 x 320 x 280 mm"],
+    ],
   },
   hardware: {
     tagline: "Ferreteria industrial para compras recurrentes y mantenimiento.",
@@ -247,6 +261,12 @@ const verticalPacks = {
     solutions: ["Mantenimiento", "Obra", "Taller", "Compras corporativas"],
     capabilityTitle:
       "Compra recurrente para equipos de mantenimiento, obra y operaciones.",
+    packagingRows: [
+      ["SKU-ANCHOR-M8-100", "", "box", 100, 100, 100, 60, 5.2, "260 x 180 x 120 mm"],
+      ["SKU-GLOVE-NITRILE-L", "", "box", 10, 10, 10, 80, 4.5, "420 x 300 x 260 mm"],
+      ["SKU-DRILL-BIT-SET", "", "box", 6, 6, 6, 72, 3.6, "300 x 220 x 160 mm"],
+      ["SKU-ADHESIVE-290ML", "", "box", 12, 12, 12, 48, 7.8, "340 x 260 x 240 mm"],
+    ],
   },
   electrical: {
     tagline: "Material electrico para instaladores, distribuidores y empresas.",
@@ -260,6 +280,12 @@ const verticalPacks = {
     solutions: ["Instaladores", "Distribucion", "Mantenimiento", "Proyectos"],
     capabilityTitle:
       "Un portal preparado para instaladores, distribuidores y compras por proyecto.",
+    packagingRows: [
+      ["SKU-CABLE-3G25-100M", "", "unit", 1, 1, 1, 12, 24.0, "620 x 620 x 220 mm"],
+      ["SKU-BREAKER-C16-12", "", "box", 12, 12, 12, 80, 3.2, "280 x 180 x 160 mm"],
+      ["SKU-SWITCH-WHITE-24", "", "box", 24, 24, 24, 96, 4.8, "360 x 260 x 220 mm"],
+      ["SKU-LED-PANEL-60X60", "", "box", 4, 4, 4, 30, 10.4, "680 x 680 x 180 mm"],
+    ],
   },
   "spare-parts": {
     tagline: "Repuestos industriales para reducir paradas y acelerar compras.",
@@ -273,6 +299,12 @@ const verticalPacks = {
     solutions: ["Mantenimiento", "Reposicion", "Maquinaria", "Compras urgentes"],
     capabilityTitle:
       "Compra de repuestos con control comercial, equivalencias y logistica.",
+    packagingRows: [
+      ["SKU-BEARING-6205-20", "", "box", 20, 20, 20, 100, 3.4, "220 x 160 x 120 mm"],
+      ["SKU-FILTER-HYD-12", "", "box", 12, 12, 12, 48, 6.8, "420 x 320 x 260 mm"],
+      ["SKU-BELT-A42-10", "", "box", 10, 10, 10, 60, 4.1, "500 x 300 x 180 mm"],
+      ["SKU-SENSOR-PROX-5", "", "box", 5, 5, 5, 80, 2.2, "260 x 180 x 140 mm"],
+    ],
   },
 }
 
@@ -321,6 +353,45 @@ const makeMenuChildren = (labels) =>
     href: "/store",
     enabled: true,
   }))
+
+const packagingHeaders = [
+  "sku",
+  "variant_id",
+  "sales_unit",
+  "minimum_order_quantity",
+  "quantity_increment",
+  "units_per_box",
+  "boxes_per_pallet",
+  "package_weight",
+  "package_dimensions",
+]
+
+const escapeCsvValue = (value) => {
+  const stringValue = String(value ?? "")
+
+  if (
+    stringValue.includes(",") ||
+    stringValue.includes("\n") ||
+    stringValue.includes('"')
+  ) {
+    return `"${stringValue.replace(/"/g, '""')}"`
+  }
+
+  return stringValue
+}
+
+const buildVerticalPackagingCsv = (vertical) => {
+  const rows = verticalPacks[vertical]?.packagingRows
+
+  if (!rows?.length) {
+    return null
+  }
+
+  return [
+    packagingHeaders.join(","),
+    ...rows.map((row) => row.map(escapeCsvValue).join(",")),
+  ].join("\n") + "\n"
+}
 
 const applyVerticalPack = ({ profile, homepage, brandName, vertical }) => {
   const pack = verticalPacks[vertical]
@@ -509,12 +580,23 @@ const createProfile = ({
     force,
     dryRun
   )
-  copyFileMaybe(
-    source.packagingPath,
-    path.join(targetDir, "product-packaging.csv"),
-    force,
-    dryRun
-  )
+  const verticalPackagingCsv = buildVerticalPackagingCsv(vertical)
+
+  if (verticalPackagingCsv) {
+    writeTextMaybe(
+      path.join(targetDir, "product-packaging.csv"),
+      verticalPackagingCsv,
+      force,
+      dryRun
+    )
+  } else {
+    copyFileMaybe(
+      source.packagingPath,
+      path.join(targetDir, "product-packaging.csv"),
+      force,
+      dryRun
+    )
+  }
 
   if (source.assetsDir && fs.existsSync(source.assetsDir)) {
     if (dryRun) {

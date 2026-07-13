@@ -145,15 +145,15 @@ pnpm template:new -- --id acme-industrial --name "ACME Industrial" --dry-run
 pnpm template:new -- --id acme-industrial --name "ACME Industrial" --no-sync
 ```
 
-Cada perfil generado incluye `README.md`, `activation-checklist.md`, `.env.example`, `client-profile.json`, `homepage-content.json`, `product-packaging.csv` y carpeta `assets/`.
+Cada perfil generado incluye `README.md`, `activation-checklist.md`, `.env.example`, `client-profile.json`, `homepage-content.json`, `product-packaging.csv` y carpeta `assets/`. Si usas `--vertical`, el CSV de packaging se genera con SKUs demo y reglas acordes al sector.
 
 Vertical packs disponibles:
 
-- `audio`: altavoces, instalaciones, eventos y accesorios.
-- `packaging`: cajas, sobres, proteccion, etiquetas y precintos.
-- `hardware`: ferreteria industrial, herramientas, EPIs y mantenimiento.
-- `electrical`: material electrico, instaladores y proyectos.
-- `spare-parts`: repuestos, consumibles, maquinaria y mantenimiento.
+- `audio`: altavoces, instalaciones, eventos, accesorios y reglas por caja/equipo.
+- `packaging`: cajas, sobres, proteccion, etiquetas, precintos y reglas por pallet.
+- `hardware`: ferreteria industrial, herramientas, EPIs y consumibles.
+- `electrical`: material electrico, instaladores, proyectos y bobinas/cajas.
+- `spare-parts`: repuestos, consumibles, maquinaria y cajas pequenas.
 
 ## Assets Desde Admin
 
