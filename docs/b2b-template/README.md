@@ -140,11 +140,20 @@ Opciones utiles:
 
 ```bash
 pnpm template:new -- --id acme-industrial --name "ACME Industrial" --from ngs --accent "#d71920" --tagline "Portal profesional ACME"
+pnpm template:new -- --id embalajes-demo --name "Embalajes Demo" --vertical packaging
 pnpm template:new -- --id acme-industrial --name "ACME Industrial" --dry-run
 pnpm template:new -- --id acme-industrial --name "ACME Industrial" --no-sync
 ```
 
 Cada perfil generado incluye `README.md`, `activation-checklist.md`, `.env.example`, `client-profile.json`, `homepage-content.json`, `product-packaging.csv` y carpeta `assets/`.
+
+Vertical packs disponibles:
+
+- `audio`: altavoces, instalaciones, eventos y accesorios.
+- `packaging`: cajas, sobres, proteccion, etiquetas y precintos.
+- `hardware`: ferreteria industrial, herramientas, EPIs y mantenimiento.
+- `electrical`: material electrico, instaladores y proyectos.
+- `spare-parts`: repuestos, consumibles, maquinaria y mantenimiento.
 
 ## Assets Desde Admin
 

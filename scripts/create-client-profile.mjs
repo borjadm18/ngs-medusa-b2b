@@ -17,6 +17,7 @@ Options:
   --legal    Nombre legal opcional
   --tagline  Tagline visible opcional
   --from     Perfil base existente en ./profiles o "template". Por defecto: template
+  --vertical Vertical pack: audio, packaging, hardware, electrical, spare-parts
   --accent   Color acento hex. Ej: "#d71920"
   --country  Pais por defecto. Por defecto: es
   --currency Moneda. Por defecto: EUR
@@ -32,6 +33,7 @@ const parseArgs = () => {
     sync: true,
     dryRun: false,
     from: "template",
+    vertical: "industrial",
     country: "es",
     currency: "EUR",
   }
@@ -64,6 +66,7 @@ const parseArgs = () => {
       arg === "--legal" ||
       arg === "--tagline" ||
       arg === "--from" ||
+      arg === "--vertical" ||
       arg === "--accent" ||
       arg === "--country" ||
       arg === "--currency"
@@ -176,6 +179,111 @@ const titleCaseFromId = (profileId) =>
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ")
 
+const verticalPacks = {
+  industrial: {
+    tagline: "Suministro profesional para empresas",
+    categoryLabel: "Producto profesional",
+    keywords: ["industrial", "profesional", "b2b"],
+    heroTitle: (brandName) =>
+      `Compra profesional ${brandName} con reglas reales de empresa.`,
+    heroBody:
+      "Catalogo, packaging, presupuestos y aprobaciones en una experiencia preparada para operaciones B2B.",
+    categories: [
+      "Consumibles",
+      "Repuestos",
+      "Herramientas",
+      "Proteccion",
+      "Accesorios",
+    ],
+    solutions: [
+      "Compras recurrentes",
+      "Packaging industrial",
+      "Presupuestos y aprobaciones",
+    ],
+    capabilityTitle:
+      "Un portal preparado para compras recurrentes, stock y control comercial.",
+  },
+  audio: {
+    tagline: "Audio profesional para negocios, instalaciones y eventos.",
+    categoryLabel: "Equipo de audio profesional",
+    keywords: ["audio", "altavoz", "sonido", "instalacion"],
+    heroTitle: (brandName) =>
+      `Sonido profesional ${brandName} para negocios que suenan mas alto.`,
+    heroBody:
+      "Altavoces, accesorios y soluciones de audio con precios B2B, compra por caja y soporte comercial.",
+    categories: [
+      "Altavoces activos",
+      "Altavoces pasivos",
+      "Subwoofers",
+      "Columnas",
+      "Accesorios",
+    ],
+    solutions: ["Instalaciones fijas", "Eventos en vivo", "Retail y hosteleria"],
+    capabilityTitle:
+      "Soluciones de audio para venta recurrente, proyectos e instalaciones.",
+  },
+  packaging: {
+    tagline: "Embalaje y packaging para operaciones que no pueden parar.",
+    categoryLabel: "Producto de packaging profesional",
+    keywords: ["packaging", "embalaje", "caja", "sobre"],
+    heroTitle: (brandName) =>
+      `Packaging ${brandName} preparado para compras B2B por caja y pallet.`,
+    heroBody:
+      "Sobres, cajas, proteccion y consumibles con minimos, multiplos, pallets y presupuestos para equipos de compra.",
+    categories: ["Cajas", "Sobres", "Proteccion", "Etiquetas", "Precintos"],
+    solutions: ["Ecommerce", "Logistica", "Almacen", "Retail"],
+    capabilityTitle:
+      "Un portal para comprar embalaje con control de stock, volumen y logistica.",
+  },
+  hardware: {
+    tagline: "Ferreteria industrial para compras recurrentes y mantenimiento.",
+    categoryLabel: "Producto de ferreteria industrial",
+    keywords: ["ferreteria", "herramienta", "mantenimiento", "suministro"],
+    heroTitle: (brandName) =>
+      `Ferreteria industrial ${brandName} con control B2B real.`,
+    heroBody:
+      "Herramientas, consumibles y EPIs con tarifas por cuenta, aprobaciones y compra recurrente.",
+    categories: ["Herramientas", "Fijaciones", "EPIs", "Consumibles", "Adhesivos"],
+    solutions: ["Mantenimiento", "Obra", "Taller", "Compras corporativas"],
+    capabilityTitle:
+      "Compra recurrente para equipos de mantenimiento, obra y operaciones.",
+  },
+  electrical: {
+    tagline: "Material electrico para instaladores, distribuidores y empresas.",
+    categoryLabel: "Material electrico profesional",
+    keywords: ["material electrico", "instalacion", "cable", "cuadro"],
+    heroTitle: (brandName) =>
+      `Material electrico ${brandName} para instalaciones profesionales.`,
+    heroBody:
+      "Cableado, proteccion, mecanismos y accesorios con reglas por cuenta, region y canal.",
+    categories: ["Cableado", "Proteccion", "Mecanismos", "Iluminacion", "Canalizacion"],
+    solutions: ["Instaladores", "Distribucion", "Mantenimiento", "Proyectos"],
+    capabilityTitle:
+      "Un portal preparado para instaladores, distribuidores y compras por proyecto.",
+  },
+  "spare-parts": {
+    tagline: "Repuestos industriales para reducir paradas y acelerar compras.",
+    categoryLabel: "Repuesto industrial",
+    keywords: ["repuesto", "maquinaria", "mantenimiento", "industrial"],
+    heroTitle: (brandName) =>
+      `Repuestos ${brandName} para operaciones que necesitan continuidad.`,
+    heroBody:
+      "Piezas, consumibles y equivalencias con busqueda por SKU, presupuestos y reglas por cliente.",
+    categories: ["Repuestos", "Consumibles", "Filtros", "Rodamientos", "Accesorios"],
+    solutions: ["Mantenimiento", "Reposicion", "Maquinaria", "Compras urgentes"],
+    capabilityTitle:
+      "Compra de repuestos con control comercial, equivalencias y logistica.",
+  },
+}
+
+const assertValidVertical = (vertical) => {
+  if (!verticalPacks[vertical]) {
+    throw new Error(
+      `--vertical must be one of: ${Object.keys(verticalPacks).join(", ")}`
+    )
+  }
+}
+
 const resolveProfileSource = (from) => {
   if (!from || from === "template") {
     return {
@@ -205,6 +313,58 @@ const resolveProfileSource = (from) => {
       : path.join(templatesDir, "product-packaging.example.csv"),
     assetsDir: path.join(sourceDir, "assets"),
   }
+}
+
+const makeMenuChildren = (labels) =>
+  labels.map((label) => ({
+    label,
+    href: "/store",
+    enabled: true,
+  }))
+
+const applyVerticalPack = ({ profile, homepage, brandName, vertical }) => {
+  const pack = verticalPacks[vertical]
+
+  profile.brand.tagline = profile.brand.tagline || pack.tagline
+  profile.fallbacks.productCategoryLabel = pack.categoryLabel
+  profile.fallbacks.productTechnicalDescription = `${pack.categoryLabel} para canal B2B.`
+  profile.fallbacks.productBrandKeywords = pack.keywords
+
+  const productLink = profile.navigation.main.find(
+    (link) => link.label === "Productos"
+  )
+  const solutionsLink = profile.navigation.main.find(
+    (link) => link.label === "Soluciones"
+  )
+
+  if (productLink) {
+    productLink.enabled = true
+    productLink.children = [
+      { label: "Catalogo completo", href: "/store", enabled: true },
+      ...makeMenuChildren(pack.categories),
+    ]
+  }
+
+  if (solutionsLink) {
+    solutionsLink.enabled = true
+    solutionsLink.children = makeMenuChildren(pack.solutions)
+  }
+
+  homepage.heroTitle = pack.heroTitle(brandName)
+  homepage.heroBody = pack.heroBody
+  homepage.capabilityTitle = pack.capabilityTitle
+  homepage.featuredCategories = (homepage.featuredCategories || []).map(
+    (category, index) => ({
+      ...category,
+      title: pack.categories[index] || category.title,
+      handle: (pack.categories[index] || category.title)
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, ""),
+    })
+  )
 }
 
 const buildActivationChecklist = ({
@@ -284,6 +444,7 @@ const createProfile = ({
   legal,
   tagline,
   from,
+  vertical,
   accent,
   country,
   currency,
@@ -293,6 +454,7 @@ const createProfile = ({
 }) => {
   assertValidId(id)
   assertHexColor(accent, "--accent")
+  assertValidVertical(vertical)
 
   const brandName = name || titleCaseFromId(id)
   const legalName = legal || brandName
@@ -332,6 +494,8 @@ const createProfile = ({
   homepage.heroBadgePrimary = brandName
   homepage.heroTitle = `Compra profesional ${brandName} con reglas reales de empresa.`
   homepage.heroImageAlt = `Producto profesional ${brandName} en contexto B2B`
+  applyVerticalPack({ profile, homepage, brandName, vertical })
+  profile.brand.tagline = tagline || verticalPacks[vertical].tagline
 
   writeJsonMaybe(
     path.join(targetDir, "client-profile.json"),

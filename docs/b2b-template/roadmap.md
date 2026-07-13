@@ -177,9 +177,10 @@ pnpm template:new -- --id acme-industrial --name "ACME Industrial" --from exampl
 - `sync:client-profile` empaqueta perfiles para storefront y backend.
 - `template:new` crea `profiles/<cliente>` desde `templates` o desde un perfil existente.
 - Soporta `--from`, `--accent`, `--tagline`, `--country`, `--currency`, `--dry-run`, `--no-sync` y `--force`.
+- Soporta vertical packs con `--vertical audio|packaging|hardware|electrical|spare-parts`.
 - Copia packaging CSV, assets si existen, genera README por cliente y ejecuta sync por defecto.
 
-Siguiente paso: convertirlo en launcher interactivo con preguntas guiadas, checklist de deploy Render/Vercel y opcion para generar un vertical pack completo.
+Siguiente paso: convertirlo en launcher interactivo con preguntas guiadas y vertical packs con productos/packaging demo por sector.
 
 ## Fase 7. Vertical Packs
 
