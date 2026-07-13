@@ -75,7 +75,7 @@ export const saveUploadedAssetFileStep = createStep(
         client_profile_id: input.client_profile_id,
         tags: input.tags || null,
         sort_order: input.sort_order || 0,
-        url: `${baseUrl}/store/asset-files/${storedFilename}`,
+        url: `${baseUrl}/asset-files/${storedFilename}`,
       },
       {
         targetPath,

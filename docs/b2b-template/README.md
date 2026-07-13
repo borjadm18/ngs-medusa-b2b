@@ -125,6 +125,6 @@ Perfiles actuales:
 
 ## Assets Desde Admin
 
-Admin > Assets permite registrar rutas existentes o subir imagenes desde el equipo. En esta fase, los archivos subidos se guardan en el filesystem del backend y se sirven desde `/store/asset-files/<filename>`.
+Admin > Assets permite registrar rutas existentes o subir imagenes desde el equipo. En esta fase, los archivos subidos se guardan en el filesystem del backend y se sirven desde `/asset-files/<filename>`.
 
 Esto es suficiente para demos y POCs. Para produccion real, el siguiente paso es sustituir esa capa por storage persistente tipo S3, R2 o equivalente, manteniendo el mismo contrato de Asset Library.

@@ -31,7 +31,10 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
 
   const extension = path.extname(filename).toLowerCase();
 
-  res.setHeader("Content-Type", contentTypes[extension] || "application/octet-stream");
+  res.setHeader(
+    "Content-Type",
+    contentTypes[extension] || "application/octet-stream"
+  );
   res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
   res.send(buffer);
 };
