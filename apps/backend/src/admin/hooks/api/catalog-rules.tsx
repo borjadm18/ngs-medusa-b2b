@@ -111,6 +111,26 @@ type CatalogRuleSimulationResponse = {
   applicable_rules: AdminCatalogRule[];
 };
 
+export type CatalogRuleSimulatorOption = {
+  id: string;
+  label: string;
+  description?: string;
+};
+
+export type CatalogRuleSimulatorProductOption = CatalogRuleSimulatorOption & {
+  collection_id?: string;
+  categories?: CatalogRuleSimulatorOption[];
+  variants?: CatalogRuleSimulatorOption[];
+};
+
+export type CatalogRuleSimulatorOptions = {
+  products: CatalogRuleSimulatorProductOption[];
+  companies: CatalogRuleSimulatorOption[];
+  customer_groups: CatalogRuleSimulatorOption[];
+  regions: CatalogRuleSimulatorOption[];
+  sales_channels: CatalogRuleSimulatorOption[];
+};
+
 export const catalogRulesQueryKeys = queryKeysFactory("catalog_rules");
 
 const buildQuery = (filters?: CatalogRuleFilters) => {
@@ -126,6 +146,31 @@ const buildQuery = (filters?: CatalogRuleFilters) => {
 
   return query;
 };
+
+const safeCall = async <TData,>(call: () => Promise<TData>) => {
+  try {
+    return await call();
+  } catch (_error) {
+    return undefined;
+  }
+};
+
+const compactOptionDescription = (parts: Array<string | undefined | null>) =>
+  parts.filter(Boolean).join(" / ");
+
+const mapOption = (
+  item: any,
+  fallbackLabel = "Untitled"
+): CatalogRuleSimulatorOption => ({
+  id: item.id,
+  label: item.name || item.title || item.email || item.handle || fallbackLabel,
+  description: compactOptionDescription([
+    item.handle,
+    item.email,
+    item.code,
+    item.currency_code,
+  ]),
+});
 
 export const useCatalogRules = (
   filters?: CatalogRuleFilters,
@@ -143,6 +188,82 @@ export const useCatalogRules = (
         method: "GET",
         query: buildQuery(filters),
       }),
+    ...options,
+  });
+};
+
+export const useCatalogRuleSimulatorOptions = (
+  search: string,
+  options?: UseQueryOptions<
+    CatalogRuleSimulatorOptions,
+    FetchError,
+    CatalogRuleSimulatorOptions,
+    QueryKey
+  >
+) => {
+  const query = search.trim();
+
+  return useQuery({
+    queryKey: catalogRulesQueryKeys.detail("simulator-options", { q: query }),
+    queryFn: async () => {
+      const [
+        productsResult,
+        companiesResult,
+        customerGroupsResult,
+        regionsResult,
+        salesChannelsResult,
+      ] = await Promise.all([
+        safeCall(() =>
+          (sdk.admin as any).product.list({
+            q: query || undefined,
+            limit: 8,
+            fields:
+              "id,title,handle,collection_id,categories.id,categories.name,variants.id,variants.title,variants.sku",
+          })
+        ),
+        safeCall(() =>
+          sdk.client.fetch<any>("/admin/companies", {
+            method: "GET",
+            query: {
+              q: query || undefined,
+              limit: 8,
+            },
+          })
+        ),
+        safeCall(() => sdk.admin.customerGroup.list({ limit: 20 })),
+        safeCall(() => sdk.admin.region.list({ limit: 20 })),
+        safeCall(() => (sdk.admin as any).salesChannel.list({ limit: 20 })),
+      ]);
+
+      return {
+        products: ((productsResult as any)?.products || []).map(
+          (product: any) => ({
+            ...mapOption(product),
+            collection_id: product.collection_id,
+            categories: (product.categories || []).map((category: any) =>
+              mapOption(category)
+            ),
+            variants: (product.variants || []).map((variant: any) => ({
+              id: variant.id,
+              label: variant.title || variant.sku || variant.id,
+              description: variant.sku,
+            })),
+          })
+        ),
+        companies: ((companiesResult as any)?.companies || []).map(
+          (company: any) => mapOption(company)
+        ),
+        customer_groups: (
+          (customerGroupsResult as any)?.customer_groups || []
+        ).map((group: any) => mapOption(group)),
+        regions: ((regionsResult as any)?.regions || []).map((region: any) =>
+          mapOption(region)
+        ),
+        sales_channels: (
+          (salesChannelsResult as any)?.sales_channels || []
+        ).map((channel: any) => mapOption(channel)),
+      };
+    },
     ...options,
   });
 };

@@ -30,9 +30,12 @@ import {
   CatalogRuleEffectType,
   CatalogRuleFilters,
   CatalogRuleStatus,
+  CatalogRuleSimulatorOption,
+  CatalogRuleSimulatorProductOption,
   CatalogRuleTargetType,
   CatalogRuleType,
   useBulkUpsertCatalogRules,
+  useCatalogRuleSimulatorOptions,
   useCatalogRules,
   useDeleteCatalogRule,
   useSimulateCatalogRules,
@@ -501,9 +504,12 @@ const CatalogRulesPage = () => {
   );
   const [simulationForm, setSimulationForm] =
     useState<SimulationFormState>(EMPTY_SIMULATION);
+  const [simulatorSearch, setSimulatorSearch] = useState("");
   const importInputRef = useRef<HTMLInputElement | null>(null);
 
   const { data, isPending } = useCatalogRules(filters);
+  const { data: simulatorOptions, isPending: isLoadingSimulatorOptions } =
+    useCatalogRuleSimulatorOptions(simulatorSearch);
   const catalogRules = data?.catalog_rules || [];
   const activeRules = useMemo(
     () => catalogRules.filter((rule) => rule.status === "active").length,
@@ -650,6 +656,31 @@ const CatalogRulesPage = () => {
     setSimulationForm((current) => ({
       ...current,
       [field]: value,
+    }));
+  };
+
+  const applyProductToSimulation = (
+    product: CatalogRuleSimulatorProductOption
+  ) => {
+    setSimulationForm((current) => ({
+      ...current,
+      product_id: product.id,
+      variant_id: "",
+      category_id: product.categories?.[0]?.id || current.category_id,
+      collection_id: product.collection_id || current.collection_id,
+    }));
+  };
+
+  const applyVariantToSimulation = (
+    product: CatalogRuleSimulatorProductOption,
+    variant: CatalogRuleSimulatorOption
+  ) => {
+    setSimulationForm((current) => ({
+      ...current,
+      product_id: product.id,
+      variant_id: variant.id,
+      category_id: product.categories?.[0]?.id || current.category_id,
+      collection_id: product.collection_id || current.collection_id,
     }));
   };
 
@@ -853,6 +884,109 @@ const CatalogRulesPage = () => {
               >
                 Simulate
               </Button>
+            </div>
+
+            <div className="grid gap-3 rounded-lg border bg-ui-bg-subtle p-3">
+              <div className="grid gap-2 medium:grid-cols-[minmax(0,1fr)_auto] medium:items-end">
+                <TextField
+                  label="Search catalog or company"
+                  value={simulatorSearch}
+                  onChange={setSimulatorSearch}
+                />
+                <Button
+                  size="small"
+                  variant="secondary"
+                  onClick={() => setSimulationForm(EMPTY_SIMULATION)}
+                >
+                  Clear context
+                </Button>
+              </div>
+
+              <SimulationContextSummary simulationForm={simulationForm} />
+
+              <div className="grid gap-3 large:grid-cols-2">
+                <div className="grid gap-2">
+                  <Text size="small" leading="compact" weight="plus">
+                    Product and variant
+                  </Text>
+                  {isLoadingSimulatorOptions ? (
+                    <Text size="small" className="text-ui-fg-subtle">
+                      Loading product options...
+                    </Text>
+                  ) : simulatorOptions?.products.length ? (
+                    <div className="grid gap-2">
+                      {simulatorOptions.products.map((product) => (
+                        <div
+                          key={product.id}
+                          className="grid gap-2 rounded-md border bg-ui-bg-base p-2"
+                        >
+                          <SimulatorOptionButton
+                            option={product}
+                            selected={simulationForm.product_id === product.id}
+                            onClick={() => applyProductToSimulation(product)}
+                          />
+                          {product.variants?.length ? (
+                            <div className="flex flex-wrap gap-2 pl-2">
+                              {product.variants.map((variant) => (
+                                <SimulatorOptionButton
+                                  key={variant.id}
+                                  option={variant}
+                                  selected={
+                                    simulationForm.variant_id === variant.id
+                                  }
+                                  compact
+                                  onClick={() =>
+                                    applyVariantToSimulation(product, variant)
+                                  }
+                                />
+                              ))}
+                            </div>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <Text size="small" className="text-ui-fg-subtle">
+                      No products found. Use the manual ID fields below.
+                    </Text>
+                  )}
+                </div>
+
+                <div className="grid gap-3">
+                  <SimulatorOptionSection
+                    title="Company"
+                    options={simulatorOptions?.companies || []}
+                    selectedId={simulationForm.company_id}
+                    onSelect={(option) =>
+                      updateSimulation("company_id", option.id)
+                    }
+                  />
+                  <SimulatorOptionSection
+                    title="Customer group"
+                    options={simulatorOptions?.customer_groups || []}
+                    selectedId={simulationForm.customer_group_id}
+                    onSelect={(option) =>
+                      updateSimulation("customer_group_id", option.id)
+                    }
+                  />
+                  <SimulatorOptionSection
+                    title="Region"
+                    options={simulatorOptions?.regions || []}
+                    selectedId={simulationForm.region_id}
+                    onSelect={(option) =>
+                      updateSimulation("region_id", option.id)
+                    }
+                  />
+                  <SimulatorOptionSection
+                    title="Sales channel"
+                    options={simulatorOptions?.sales_channels || []}
+                    selectedId={simulationForm.sales_channel_id}
+                    onSelect={(option) =>
+                      updateSimulation("sales_channel_id", option.id)
+                    }
+                  />
+                </div>
+              </div>
             </div>
 
             <div className="grid gap-3 medium:grid-cols-5">
@@ -1372,6 +1506,105 @@ const CatalogRulesPage = () => {
     </>
   );
 };
+
+const SimulationContextSummary = ({
+  simulationForm,
+}: {
+  simulationForm: SimulationFormState;
+}) => {
+  const activeEntries = Object.entries(simulationForm).filter(
+    ([, value]) => value.trim() && value !== "eur"
+  );
+
+  if (!activeEntries.length) {
+    return (
+      <Text size="small" className="text-ui-fg-subtle">
+        Select a product, company, region or channel to simulate a B2B buying
+        context.
+      </Text>
+    );
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {activeEntries.map(([key, value]) => (
+        <Badge key={key} size="small">
+          {key.replace("_id", "")}: {compact(value)}
+        </Badge>
+      ))}
+    </div>
+  );
+};
+
+const SimulatorOptionButton = ({
+  option,
+  selected,
+  compact: isCompact,
+  onClick,
+}: {
+  option: CatalogRuleSimulatorOption;
+  selected: boolean;
+  compact?: boolean;
+  onClick: () => void;
+}) => (
+  <button
+    type="button"
+    className={`rounded-md border px-3 py-2 text-left transition-colors ${
+      selected
+        ? "border-ui-border-interactive bg-ui-bg-interactive text-ui-fg-on-color"
+        : "border-ui-border-base bg-ui-bg-base hover:bg-ui-bg-base-hover"
+    } ${isCompact ? "min-w-[120px]" : "w-full"}`}
+    onClick={onClick}
+  >
+    <Text size="small" leading="compact" weight="plus">
+      {option.label}
+    </Text>
+    {option.description ? (
+      <Text
+        size="xsmall"
+        leading="compact"
+        className={selected ? "text-ui-fg-on-color" : "text-ui-fg-subtle"}
+      >
+        {option.description}
+      </Text>
+    ) : null}
+  </button>
+);
+
+const SimulatorOptionSection = ({
+  title,
+  options,
+  selectedId,
+  onSelect,
+}: {
+  title: string;
+  options: CatalogRuleSimulatorOption[];
+  selectedId: string;
+  onSelect: (option: CatalogRuleSimulatorOption) => void;
+}) => (
+  <div className="grid gap-2">
+    <Text size="small" leading="compact" weight="plus">
+      {title}
+    </Text>
+    {options.length ? (
+      <div className="flex flex-wrap gap-2">
+        {options.map((option) => (
+          <SimulatorOptionButton
+            key={option.id}
+            option={option}
+            selected={selectedId === option.id}
+            compact
+            onClick={() => onSelect(option)}
+          />
+        ))}
+      </div>
+    ) : (
+      <Text size="small" className="text-ui-fg-subtle">
+        No options found.
+      </Text>
+    )}
+  </div>
+);
 
 const Metric = ({ label, value }: { label: string; value: number }) => (
   <div className="rounded-lg border bg-ui-bg-subtle p-4">
