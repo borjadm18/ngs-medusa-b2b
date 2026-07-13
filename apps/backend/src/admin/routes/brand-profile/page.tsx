@@ -28,11 +28,32 @@ type FooterColumn = BrandProfileContent["footer"]["columns"][number];
 type SupportPanel = NonNullable<
   NonNullable<BrandProfileContent["productPage"]>["supportPanels"]
 >[number];
+type LinkFieldValue = string | boolean | LinkItem[];
 
 const cloneProfile = (content: BrandProfileContent): BrandProfileContent =>
   JSON.parse(JSON.stringify(content));
 
 const toPrettyJson = (value: unknown) => JSON.stringify(value, null, 2);
+
+const createNavigationLink = (label = "Nuevo link"): LinkItem => ({
+  label,
+  href: "/store",
+  enabled: true,
+  children: [],
+});
+
+const normalizeLink = (link: LinkItem): LinkItem => ({
+  ...link,
+  enabled: link.enabled !== false,
+  children: (link.children || []).map(normalizeLink),
+});
+
+const moveItem = <T,>(items: T[], fromIndex: number, toIndex: number) => {
+  const nextItems = [...items];
+  const [item] = nextItems.splice(fromIndex, 1);
+  nextItems.splice(toIndex, 0, item);
+  return nextItems;
+};
 
 const BrandProfile = () => {
   const { data, isPending } = useBrandProfileContent();
@@ -40,6 +61,13 @@ const BrandProfile = () => {
     cloneProfile(DEFAULT_BRAND_PROFILE_CONTENT)
   );
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [draggedNavigationIndex, setDraggedNavigationIndex] = useState<
+    number | null
+  >(null);
+  const [draggedChildIndex, setDraggedChildIndex] = useState<{
+    parentIndex: number;
+    childIndex: number;
+  } | null>(null);
   const [jsonValue, setJsonValue] = useState(
     toPrettyJson(DEFAULT_BRAND_PROFILE_CONTENT)
   );
@@ -53,6 +81,9 @@ const BrandProfile = () => {
   useEffect(() => {
     if (data?.brand_profile) {
       const nextProfile = cloneProfile(data.brand_profile);
+      nextProfile.navigation.main = nextProfile.navigation.main.map(
+        normalizeLink
+      );
       setForm(nextProfile);
       setJsonValue(toPrettyJson(nextProfile));
     }
@@ -143,7 +174,7 @@ const BrandProfile = () => {
   const updateNavigation = (
     index: number,
     field: keyof LinkItem,
-    value: string
+    value: LinkFieldValue
   ) => {
     setForm((current) => ({
       ...current,
@@ -159,7 +190,20 @@ const BrandProfile = () => {
     setForm((current) => ({
       ...current,
       navigation: {
-        main: [...current.navigation.main, { label: "Nuevo", href: "/store" }],
+        main: [...current.navigation.main, createNavigationLink("Nuevo")],
+      },
+    }));
+  };
+
+  const moveNavigation = (fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) {
+      return;
+    }
+
+    setForm((current) => ({
+      ...current,
+      navigation: {
+        main: moveItem(current.navigation.main, fromIndex, toIndex),
       },
     }));
   };
@@ -170,6 +214,92 @@ const BrandProfile = () => {
       navigation: {
         main: current.navigation.main.filter(
           (_, linkIndex) => linkIndex !== index
+        ),
+      },
+    }));
+  };
+
+  const updateNavigationChild = (
+    parentIndex: number,
+    childIndex: number,
+    field: keyof LinkItem,
+    value: LinkFieldValue
+  ) => {
+    setForm((current) => ({
+      ...current,
+      navigation: {
+        main: current.navigation.main.map((link, linkIndex) =>
+          linkIndex === parentIndex
+            ? {
+                ...link,
+                children: (link.children || []).map((child, currentChildIndex) =>
+                  currentChildIndex === childIndex
+                    ? { ...child, [field]: value }
+                    : child
+                ),
+              }
+            : link
+        ),
+      },
+    }));
+  };
+
+  const addNavigationChild = (parentIndex: number) => {
+    setForm((current) => ({
+      ...current,
+      navigation: {
+        main: current.navigation.main.map((link, linkIndex) =>
+          linkIndex === parentIndex
+            ? {
+                ...link,
+                children: [
+                  ...(link.children || []),
+                  createNavigationLink("Nuevo subenlace"),
+                ],
+              }
+            : link
+        ),
+      },
+    }));
+  };
+
+  const moveNavigationChild = (
+    parentIndex: number,
+    fromIndex: number,
+    toIndex: number
+  ) => {
+    if (fromIndex === toIndex) {
+      return;
+    }
+
+    setForm((current) => ({
+      ...current,
+      navigation: {
+        main: current.navigation.main.map((link, linkIndex) =>
+          linkIndex === parentIndex
+            ? {
+                ...link,
+                children: moveItem(link.children || [], fromIndex, toIndex),
+              }
+            : link
+        ),
+      },
+    }));
+  };
+
+  const removeNavigationChild = (parentIndex: number, childIndex: number) => {
+    setForm((current) => ({
+      ...current,
+      navigation: {
+        main: current.navigation.main.map((link, linkIndex) =>
+          linkIndex === parentIndex
+            ? {
+                ...link,
+                children: (link.children || []).filter(
+                  (_, currentChildIndex) => currentChildIndex !== childIndex
+                ),
+              }
+            : link
         ),
       },
     }));
@@ -401,7 +531,11 @@ const BrandProfile = () => {
   const applyJsonToForm = () => {
     try {
       const parsed = JSON.parse(jsonValue) as BrandProfileContent;
-      setForm(cloneProfile(parsed));
+      const nextProfile = cloneProfile(parsed);
+      nextProfile.navigation.main = nextProfile.navigation.main.map(
+        normalizeLink
+      );
+      setForm(nextProfile);
       toast.success("JSON aplicado al formulario");
     } catch {
       toast.error("El JSON del perfil de marca no es valido");
@@ -421,6 +555,11 @@ const BrandProfile = () => {
 
     if (!form.navigation.main.length) {
       toast.error("Anade al menos un enlace de navegacion");
+      return;
+    }
+
+    if (!form.navigation.main.some((link) => link.enabled !== false)) {
+      toast.error("Activa al menos un enlace de navegacion");
       return;
     }
 
@@ -548,19 +687,75 @@ const BrandProfile = () => {
             >
               <div className="grid gap-3">
                 {form.navigation.main.map((link, index) => (
-                  <EditableRow
+                  <NavigationEditorRow
                     key={`navigation-${index}`}
-                    title={`Enlace ${index + 1}`}
+                    link={link}
+                    index={index}
+                    draggable
+                    isDragging={draggedNavigationIndex === index}
+                    onDragStart={() => setDraggedNavigationIndex(index)}
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={() => {
+                      if (draggedNavigationIndex !== null) {
+                        moveNavigation(draggedNavigationIndex, index);
+                      }
+                      setDraggedNavigationIndex(null);
+                    }}
+                    onToggle={() =>
+                      updateNavigation(index, "enabled", link.enabled === false)
+                    }
                     onRemove={() => removeNavigation(index)}
                     removeDisabled={form.navigation.main.length === 1}
+                    onChange={(field, value) =>
+                      updateNavigation(index, field, value)
+                    }
+                    onAddChild={() => addNavigationChild(index)}
                   >
-                    <LinkFields
-                      link={link}
-                      onChange={(field, value) =>
-                        updateNavigation(index, field, value)
-                      }
-                    />
-                  </EditableRow>
+                    {(link.children || []).map((child, childIndex) => (
+                      <NavigationEditorRow
+                        key={`navigation-${index}-child-${childIndex}`}
+                        link={child}
+                        index={childIndex}
+                        level="child"
+                        draggable
+                        isDragging={
+                          draggedChildIndex?.parentIndex === index &&
+                          draggedChildIndex.childIndex === childIndex
+                        }
+                        onDragStart={() =>
+                          setDraggedChildIndex({
+                            parentIndex: index,
+                            childIndex,
+                          })
+                        }
+                        onDragOver={(event) => event.preventDefault()}
+                        onDrop={() => {
+                          if (draggedChildIndex?.parentIndex === index) {
+                            moveNavigationChild(
+                              index,
+                              draggedChildIndex.childIndex,
+                              childIndex
+                            );
+                          }
+                          setDraggedChildIndex(null);
+                        }}
+                        onToggle={() =>
+                          updateNavigationChild(
+                            index,
+                            childIndex,
+                            "enabled",
+                            child.enabled === false
+                          )
+                        }
+                        onRemove={() =>
+                          removeNavigationChild(index, childIndex)
+                        }
+                        onChange={(field, value) =>
+                          updateNavigationChild(index, childIndex, field, value)
+                        }
+                      />
+                    ))}
+                  </NavigationEditorRow>
                 ))}
               </div>
             </Section>
@@ -883,12 +1078,109 @@ const EditableRow = ({
   </div>
 );
 
+const NavigationEditorRow = ({
+  link,
+  index,
+  level = "parent",
+  children,
+  draggable,
+  isDragging,
+  removeDisabled,
+  onChange,
+  onToggle,
+  onRemove,
+  onAddChild,
+  onDragStart,
+  onDragOver,
+  onDrop,
+}: {
+  link: LinkItem;
+  index: number;
+  level?: "parent" | "child";
+  children?: React.ReactNode;
+  draggable?: boolean;
+  isDragging?: boolean;
+  removeDisabled?: boolean;
+  onChange: (field: keyof LinkItem, value: LinkFieldValue) => void;
+  onToggle: () => void;
+  onRemove: () => void;
+  onAddChild?: () => void;
+  onDragStart?: () => void;
+  onDragOver?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDrop?: () => void;
+}) => {
+  const enabled = link.enabled !== false;
+
+  return (
+    <div
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      className={[
+        "grid gap-3 rounded-lg border p-3 transition",
+        level === "child" ? "bg-ui-bg-base" : "bg-ui-bg-subtle",
+        enabled ? "" : "opacity-60",
+        isDragging ? "border-ui-border-interactive shadow-elevation-card-hover" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span className="cursor-grab rounded border bg-ui-bg-base px-2 py-1 text-xs text-ui-fg-subtle">
+            Arrastrar
+          </span>
+          <Text size="small" leading="compact" weight="plus">
+            {level === "parent" ? `Enlace ${index + 1}` : `Subenlace ${index + 1}`}
+          </Text>
+          <span
+            className={[
+              "rounded border px-2 py-1 text-xs",
+              enabled
+                ? "border-ui-border-base text-ui-fg-subtle"
+                : "border-ui-border-error text-ui-fg-error",
+            ].join(" ")}
+          >
+            {enabled ? "Activo" : "Inactivo"}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          {onAddChild ? (
+            <Button size="small" variant="secondary" onClick={onAddChild}>
+              <Plus />
+              Subenlace
+            </Button>
+          ) : null}
+          <Button size="small" variant="secondary" onClick={onToggle}>
+            {enabled ? "Desactivar" : "Activar"}
+          </Button>
+          <IconButton
+            size="small"
+            variant="transparent"
+            disabled={removeDisabled}
+            onClick={onRemove}
+          >
+            <Trash />
+          </IconButton>
+        </div>
+      </div>
+      <LinkFields link={link} onChange={onChange} />
+      {children ? (
+        <div className="ml-0 grid gap-2 border-l pl-3 small:ml-4">
+          {children}
+        </div>
+      ) : null}
+    </div>
+  );
+};
+
 const LinkFields = ({
   link,
   onChange,
 }: {
   link: LinkItem;
-  onChange: (field: keyof LinkItem, value: string) => void;
+  onChange: (field: keyof LinkItem, value: LinkFieldValue) => void;
 }) => (
   <div className="grid gap-3 small:grid-cols-2">
     <TextField

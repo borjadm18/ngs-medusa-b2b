@@ -32,23 +32,62 @@
     "main": [
       {
         "label": "Productos",
-        "href": "/store"
+        "href": "/store",
+        "enabled": true,
+        "children": [
+          {
+            "label": "Catalogo completo",
+            "href": "/store",
+            "enabled": true
+          },
+          {
+            "label": "Consumibles",
+            "href": "/store",
+            "enabled": true
+          },
+          {
+            "label": "Repuestos",
+            "href": "/store",
+            "enabled": true
+          }
+        ]
       },
       {
         "label": "Soluciones",
-        "href": "/store"
+        "href": "/store",
+        "enabled": true,
+        "children": [
+          {
+            "label": "Reposicion recurrente",
+            "href": "/store",
+            "enabled": true
+          },
+          {
+            "label": "Logistica por pallet",
+            "href": "/store",
+            "enabled": true
+          },
+          {
+            "label": "Compras con aprobaciones",
+            "href": "/account/approvals",
+            "enabled": true
+          }
+        ]
       },
       {
         "label": "Empresa",
-        "href": "/account/company"
+        "href": "/account/company",
+        "enabled": true
       },
       {
         "label": "Recursos",
-        "href": "/ngs-poc"
+        "href": "/ngs-poc",
+        "enabled": true
       },
       {
         "label": "Soporte",
-        "href": "/account"
+        "href": "/account",
+        "enabled": true
       }
     ]
   },

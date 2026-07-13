@@ -3,6 +3,8 @@ import { generatedProfileBundles } from "./generated-profiles"
 export type ClientProfileLink = {
   label: string
   href: string
+  enabled?: boolean
+  children?: ClientProfileLink[]
 }
 
 export type ClientProfile = {

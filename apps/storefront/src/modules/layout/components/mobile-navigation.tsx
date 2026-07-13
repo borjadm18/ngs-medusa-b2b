@@ -1,9 +1,9 @@
 "use client"
 
 import { clientProfile } from "@/lib/client-profile"
-import { ClientProfile } from "@/lib/client-profile"
-import LocalizedClientLink from "@/modules/common/components/localized-client-link"
+import { ClientProfile, ClientProfileLink } from "@/lib/client-profile"
 import BrandLogo from "@/modules/common/components/brand-logo"
+import LocalizedClientLink from "@/modules/common/components/localized-client-link"
 import { BarsThree, ChevronDownMini, XMark } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
 import { useState } from "react"
@@ -16,10 +16,13 @@ export function MobileNavigation({
   profile?: ClientProfile
 }) {
   const [open, setOpen] = useState(false)
+  const navigationLinks = profile.navigation.main.filter(
+    (link) => link.enabled !== false
+  )
   const productNavigation =
-    profile.navigation.main.find((link) => link.label === "Productos") ||
-    profile.navigation.main[0]
-  const staticLinks = profile.navigation.main.filter(
+    navigationLinks.find((link) => link.label === "Productos") ||
+    navigationLinks[0]
+  const staticLinks = navigationLinks.filter(
     (link) => link.label !== productNavigation?.label
   )
 
@@ -27,7 +30,7 @@ export function MobileNavigation({
     <div className="medium:hidden">
       <button
         type="button"
-        aria-label="Abrir navegación"
+        aria-label="Abrir navegacion"
         onClick={() => setOpen(true)}
         className="inline-flex h-10 w-10 items-center justify-center rounded border border-neutral-200 text-neutral-950"
       >
@@ -45,7 +48,7 @@ export function MobileNavigation({
               />
               <button
                 type="button"
-                aria-label="Cerrar navegación"
+                aria-label="Cerrar navegacion"
                 onClick={() => setOpen(false)}
                 className="inline-flex h-10 w-10 items-center justify-center rounded border border-neutral-200"
               >
@@ -53,36 +56,46 @@ export function MobileNavigation({
               </button>
             </div>
             <nav className="flex flex-col px-5 py-4 text-sm font-semibold text-neutral-950">
-              <details className="group border-b border-neutral-200 py-3" open>
-                <summary className="flex cursor-pointer list-none items-center justify-between">
-                  {productNavigation?.label || "Productos"}
-                  <ChevronDownMini className="h-4 w-4 transition group-open:rotate-180" />
-                </summary>
-                <div className="mt-3 grid gap-2 text-neutral-600">
-                  <LocalizedClientLink href="/store" onClick={() => setOpen(false)}>
-                    Ver catálogo completo
-                  </LocalizedClientLink>
-                  {categories.slice(0, 6).map((category) => (
+              <MobileMenuSection
+                label={productNavigation?.label || "Productos"}
+                href={productNavigation?.href || "/store"}
+                links={[
+                  { label: "Ver catalogo completo", href: "/store" },
+                  ...getEnabledChildren(productNavigation),
+                  ...categories.slice(0, 6).map((category) => ({
+                    label: category.name,
+                    href: `/categories/${category.handle}`,
+                  })),
+                ]}
+                defaultOpen
+                onNavigate={() => setOpen(false)}
+              />
+              {staticLinks.map((link) => {
+                const children = getEnabledChildren(link)
+
+                if (!children.length) {
+                  return (
                     <LocalizedClientLink
-                      key={category.id}
-                      href={`/categories/${category.handle}`}
+                      key={link.label}
+                      href={link.href}
                       onClick={() => setOpen(false)}
+                      className="border-b border-neutral-200 py-3"
                     >
-                      {category.name}
+                      {link.label}
                     </LocalizedClientLink>
-                  ))}
-                </div>
-              </details>
-              {staticLinks.map((link) => (
-                <LocalizedClientLink
-                  key={link.label}
-                  href={link.href}
-                  onClick={() => setOpen(false)}
-                  className="border-b border-neutral-200 py-3"
-                >
-                  {link.label}
-                </LocalizedClientLink>
-              ))}
+                  )
+                }
+
+                return (
+                  <MobileMenuSection
+                    key={link.label}
+                    label={link.label}
+                    href={link.href}
+                    links={children}
+                    onNavigate={() => setOpen(false)}
+                  />
+                )
+              })}
             </nav>
           </div>
         </div>
@@ -90,3 +103,43 @@ export function MobileNavigation({
     </div>
   )
 }
+
+const getEnabledChildren = (link?: ClientProfileLink) =>
+  (link?.children || []).filter((child) => child.enabled !== false)
+
+const MobileMenuSection = ({
+  label,
+  href,
+  links,
+  defaultOpen,
+  onNavigate,
+}: {
+  label: string
+  href: string
+  links: ClientProfileLink[]
+  defaultOpen?: boolean
+  onNavigate: () => void
+}) => (
+  <details
+    className="group border-b border-neutral-200 py-3"
+    defaultOpen={defaultOpen}
+  >
+    <summary className="flex cursor-pointer list-none items-center justify-between">
+      <LocalizedClientLink href={href} onClick={onNavigate}>
+        {label}
+      </LocalizedClientLink>
+      <ChevronDownMini className="h-4 w-4 transition group-open:rotate-180" />
+    </summary>
+    <div className="mt-3 grid gap-2 text-neutral-600">
+      {links.map((link) => (
+        <LocalizedClientLink
+          key={`${link.label}-${link.href}`}
+          href={link.href}
+          onClick={onNavigate}
+        >
+          {link.label}
+        </LocalizedClientLink>
+      ))}
+    </div>
+  </details>
+)

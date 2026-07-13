@@ -87,7 +87,9 @@ export default async function Footer() {
               <div key={group.title}>
                 <h3 className="text-sm font-semibold">{group.title}</h3>
                 <ul className="mt-4 grid gap-2 text-sm text-neutral-400">
-                  {group.links.map((link) => (
+                  {group.links
+                    .filter((link) => link.enabled !== false)
+                    .map((link) => (
                     <li key={link.label}>
                       <LocalizedClientLink
                         href={link.href}

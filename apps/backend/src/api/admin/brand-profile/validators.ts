@@ -1,9 +1,13 @@
 import { z } from "@medusajs/framework/zod";
 
-const BrandProfileLink = z.object({
+const BrandProfileLink: z.ZodType<any> = z.lazy(() =>
+  z.object({
   label: z.string().min(1),
   href: z.string().min(1),
-});
+  enabled: z.boolean().optional(),
+  children: z.array(BrandProfileLink).optional(),
+})
+);
 
 const FooterColumn = z.object({
   title: z.string().min(1),

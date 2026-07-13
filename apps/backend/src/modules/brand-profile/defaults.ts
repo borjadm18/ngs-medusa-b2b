@@ -1,6 +1,8 @@
 export type BrandProfileLink = {
   label: string;
   href: string;
+  enabled?: boolean;
+  children?: BrandProfileLink[];
 };
 
 export type BrandProfileContent = {
@@ -90,11 +92,29 @@ export const DEFAULT_BRAND_PROFILE_CONTENT: BrandProfileContent = {
   },
   navigation: {
     main: [
-      { label: "Productos", href: "/store" },
-      { label: "Soluciones", href: "/store" },
-      { label: "Empresa", href: "/account/company" },
-      { label: "Recursos", href: "/ngs-poc" },
-      { label: "Soporte", href: "/account" },
+      {
+        label: "Productos",
+        href: "/store",
+        enabled: true,
+        children: [
+          { label: "Catalogo completo", href: "/store", enabled: true },
+          { label: "Audio profesional", href: "/categories/audio", enabled: true },
+          { label: "Accesorios", href: "/categories/accesorios", enabled: true },
+        ],
+      },
+      {
+        label: "Soluciones",
+        href: "/store",
+        enabled: true,
+        children: [
+          { label: "Instalaciones fijas", href: "/store", enabled: true },
+          { label: "Eventos en vivo", href: "/store", enabled: true },
+          { label: "Retail y hosteleria", href: "/store", enabled: true },
+        ],
+      },
+      { label: "Empresa", href: "/account/company", enabled: true },
+      { label: "Recursos", href: "/ngs-poc", enabled: true },
+      { label: "Soporte", href: "/account", enabled: true },
     ],
   },
   footer: {
