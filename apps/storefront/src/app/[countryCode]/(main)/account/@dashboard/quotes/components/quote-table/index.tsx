@@ -1,3 +1,8 @@
+import {
+  formatPackagingDetails,
+  formatPackagingLine,
+  getCartLinePackaging,
+} from "@/lib/util/b2b-packaging"
 import { AmountCell } from "@/modules/common/components/amount-cell"
 import Thumbnail from "@/modules/products/components/thumbnail"
 import { AdminOrderLineItem, AdminOrderPreview } from "@medusajs/types"
@@ -14,20 +19,33 @@ export const QuoteTableItem = ({
   currencyCode: string
 }) => {
   const isAddedItem = useMemo(
-    () => !!item.actions?.find((a) => a.action === "ITEM_ADD"),
+    () => !!item.actions?.find((action) => action.action === "ITEM_ADD"),
     [item]
   )
 
   const isItemUpdated = useMemo(
-    () => !!item.actions?.find((a) => a.action === "ITEM_UPDATE"),
+    () => !!item.actions?.find((action) => action.action === "ITEM_UPDATE"),
     [item]
   )
 
   const isItemRemoved = useMemo(() => {
-    const updateAction = item.actions?.find((a) => a.action === "ITEM_UPDATE")
+    const updateAction = item.actions?.find(
+      (action) => action.action === "ITEM_UPDATE"
+    )
 
     return !!updateAction && item.quantity === item.detail.fulfilled_quantity
   }, [item])
+
+  const metadata = (item as { metadata?: Record<string, unknown> | null })
+    .metadata
+  const originalMetadata = (
+    originalItem as { metadata?: Record<string, unknown> | null } | undefined
+  )?.metadata
+  const packaging = getCartLinePackaging(
+    metadata ?? originalMetadata,
+    item.quantity
+  )
+  const packagingDetails = packaging ? formatPackagingDetails(packaging) : ""
 
   return (
     <div className="flex gap-x-4">
@@ -50,13 +68,19 @@ export const QuoteTableItem = ({
             </div>
           )}
           <Text size="small">
-            {item.variant?.options?.map((o) => o.value).join(" · ")}
+            {item.variant?.options?.map((option) => option.value).join(" - ")}
           </Text>
+          {packaging && (
+            <div className="mt-1 grid gap-0.5 text-xs text-ui-fg-subtle">
+              <span>{formatPackagingLine(packaging)}</span>
+              {packagingDetails && <span>{packagingDetails}</span>}
+            </div>
+          )}
         </div>
 
         <div className="flex justify-between w-full items-center">
           <div>
-            <Text className="text-">
+            <Text>
               <span>{item.quantity}</span>x{" "}
             </Text>
           </div>
@@ -70,25 +94,20 @@ export const QuoteTableItem = ({
             />
 
             {isAddedItem && (
-              <Badge
-                size="2xsmall"
-                rounded="full"
-                color="blue"
-                className="mr-1"
-              >
+              <Badge size="2xsmall" rounded="base" color="blue" className="mr-1">
                 New
               </Badge>
             )}
 
             {isItemRemoved ? (
-              <Badge size="2xsmall" rounded="full" color="red" className="mr-1">
+              <Badge size="2xsmall" rounded="base" color="red" className="mr-1">
                 Removed
               </Badge>
             ) : (
               isItemUpdated && (
                 <Badge
                   size="2xsmall"
-                  rounded="full"
+                  rounded="base"
                   color="orange"
                   className="mr-1"
                 >

@@ -1,6 +1,10 @@
 "use client"
 
-import { getCartLinePackaging } from "@/lib/util/b2b-packaging"
+import {
+  formatPackagingDetails,
+  formatPackagingLine,
+  getCartLinePackaging,
+} from "@/lib/util/b2b-packaging"
 import LineItemPrice from "@/modules/common/components/line-item-price"
 import LocalizedClientLink from "@/modules/common/components/localized-client-link"
 import Thumbnail from "@/modules/products/components/thumbnail"
@@ -16,8 +20,8 @@ type ItemProps = {
 const ItemPreview = ({ item, showBorders = true, currencyCode }: ItemProps) => {
   const { handle } = item.product ?? {}
 
-  const maxQuantity = item.variant?.inventory_quantity ?? 100
   const packaging = getCartLinePackaging(item.metadata, item.quantity)
+  const packagingDetails = packaging ? formatPackagingDetails(packaging) : ""
 
   return (
     <Container
@@ -45,10 +49,10 @@ const ItemPreview = ({ item, showBorders = true, currencyCode }: ItemProps) => {
               {item.variant?.title}
             </span>
             {packaging && (
-              <span className="text-neutral-600 text-xs">
-                {packaging.packageQuantity} cajas x {packaging.unitsPerBox} uds
-                = {packaging.unitQuantity} uds
-              </span>
+              <div className="grid gap-0.5 text-xs text-neutral-600">
+                <span>{formatPackagingLine(packaging)}</span>
+                {packagingDetails && <span>{packagingDetails}</span>}
+              </div>
             )}
           </div>
           <div className="flex small:flex-row flex-col gap-2">

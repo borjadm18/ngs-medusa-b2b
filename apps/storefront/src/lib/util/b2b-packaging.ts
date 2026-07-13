@@ -17,6 +17,18 @@ export type VariantPackaging = {
   palletUnits?: number
 }
 
+export type CartLinePackaging = {
+  purchaseUnit: PurchaseUnit
+  unitsPerBox: number
+  packageQuantity: number
+  unitQuantity: number
+  boxesPerPallet?: number
+  packageWeight?: number
+  packageDimensions?: string
+  totalWeight?: number
+  palletShare?: number
+}
+
 type MetadataSource = {
   metadata?: Record<string, unknown> | null
 }
@@ -149,7 +161,7 @@ export const getVariantPackaging = (
 export const getCartLinePackaging = (
   metadata: Record<string, unknown> | null | undefined,
   quantity: number
-) => {
+): CartLinePackaging | undefined => {
   const purchaseUnit = metadata?.purchase_unit as PurchaseUnit | undefined
   const unitsPerBox = toNumber(metadata?.units_per_box)
   const packageQuantity = toNumber(metadata?.package_quantity)
@@ -175,4 +187,63 @@ export const getCartLinePackaging = (
     totalWeight: packageWeight ? packageWeight * packageQuantity : undefined,
     palletShare: boxesPerPallet ? packageQuantity / boxesPerPallet : undefined,
   }
+}
+
+export const formatPackagingLine = (packaging: CartLinePackaging) => {
+  return `${packaging.packageQuantity} cajas x ${packaging.unitsPerBox} uds/caja = ${packaging.unitQuantity} uds`
+}
+
+export const formatPackagingDetails = (packaging: CartLinePackaging) => {
+  return [
+    packaging.totalWeight
+      ? `${packaging.totalWeight.toFixed(1)} kg estimados`
+      : null,
+    packaging.packageDimensions,
+    packaging.boxesPerPallet
+      ? `${packaging.boxesPerPallet} cajas/pallet`
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" - ")
+}
+
+export const getCartPackagingSummary = (
+  items:
+    | Array<{
+        quantity: number
+        metadata?: Record<string, unknown> | null
+      }>
+    | null
+    | undefined
+) => {
+  return (items || []).reduce(
+    (summary, item) => {
+      const packaging = getCartLinePackaging(item.metadata, item.quantity)
+
+      summary.totalUnits += item.quantity
+
+      if (!packaging) {
+        summary.looseUnits += item.quantity
+        return summary
+      }
+
+      summary.boxes += packaging.packageQuantity
+      summary.boxedUnits += packaging.unitQuantity
+      summary.estimatedWeight += packaging.totalWeight ?? 0
+
+      if (packaging.palletShare) {
+        summary.palletShare += packaging.palletShare
+      }
+
+      return summary
+    },
+    {
+      boxes: 0,
+      boxedUnits: 0,
+      looseUnits: 0,
+      totalUnits: 0,
+      estimatedWeight: 0,
+      palletShare: 0,
+    }
+  )
 }

@@ -1,7 +1,11 @@
 "use client"
 
 import { useCart } from "@/lib/context/cart-context"
-import { getCartLinePackaging } from "@/lib/util/b2b-packaging"
+import {
+  formatPackagingDetails,
+  formatPackagingLine,
+  getCartLinePackaging,
+} from "@/lib/util/b2b-packaging"
 import AddNoteButton from "@/modules/cart/components/add-note-button"
 import DeleteButton from "@/modules/common/components/delete-button"
 import LineItemPrice from "@/modules/common/components/line-item-price"
@@ -39,6 +43,7 @@ const ItemFull = ({
     : maxQuantity
   const displayedQuantity = quantity
   const quantityLabel = packaging ? "cajas" : "uds"
+  const packagingDetails = packaging ? formatPackagingDetails(packaging) : ""
 
   const changeQuantity = async (newQuantity: number) => {
     setError(null)
@@ -153,24 +158,11 @@ const ItemFull = ({
               {item.variant?.title}
             </span>
             {packaging && (
-              <div className="mt-1 grid gap-0.5 text-xs text-neutral-600">
-                <span>
-                  {packaging.packageQuantity} cajas x {packaging.unitsPerBox}{" "}
-                  uds/caja = {packaging.unitQuantity} uds
+              <div className="mt-2 grid gap-1 rounded-md border border-neutral-200 bg-neutral-50 px-2 py-1.5 text-xs text-neutral-700">
+                <span className="font-medium text-neutral-950">
+                  {formatPackagingLine(packaging)}
                 </span>
-                <span>
-                  {[
-                    packaging.totalWeight
-                      ? `${packaging.totalWeight.toFixed(1)} kg estimados`
-                      : null,
-                    packaging.packageDimensions,
-                    packaging.boxesPerPallet
-                      ? `${packaging.boxesPerPallet} cajas/pallet`
-                      : null,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </span>
+                {packagingDetails && <span>{packagingDetails}</span>}
               </div>
             )}
           </div>
@@ -181,10 +173,10 @@ const ItemFull = ({
               currencyCode={currencyCode}
             />
             <div className="flex gap-x-2">
-              <div className="flex gap-x-3 shadow-[0_0_0_1px_rgba(0,0,0,0.1)] rounded-full w-fit p-px items-center">
+              <div className="flex gap-x-3 shadow-[0_0_0_1px_rgba(0,0,0,0.1)] rounded-md w-fit p-px items-center">
                 <button
                   className={clx(
-                    "w-4 h-4 flex items-center justify-center text-neutral-600 hover:bg-neutral-100 rounded-full text-md",
+                    "w-4 h-4 flex items-center justify-center text-neutral-600 hover:bg-neutral-100 rounded-md text-md",
                     disabled ? "opacity-50 pointer-events-none" : "opacity-100"
                   )}
                   onClick={() =>
@@ -225,7 +217,7 @@ const ItemFull = ({
                 </span>
                 <button
                   className={clx(
-                    "w-4 h-4 flex items-center justify-center text-neutral-600 hover:bg-neutral-100 rounded-full text-md",
+                    "w-4 h-4 flex items-center justify-center text-neutral-600 hover:bg-neutral-100 rounded-md text-md",
                     disabled ? "opacity-50 pointer-events-none" : "opacity-100"
                   )}
                   onClick={() =>

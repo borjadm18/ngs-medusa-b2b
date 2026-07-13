@@ -2,6 +2,7 @@
 
 import { useCart } from "@/lib/context/cart-context"
 import { getCheckoutStep } from "@/lib/util/get-checkout-step"
+import CartLogisticsSummary from "@/modules/cart/components/cart-logistics-summary"
 import CartToCsvButton from "@/modules/cart/components/cart-to-csv-button"
 import CartTotals from "@/modules/cart/components/cart-totals"
 import PromotionCode from "@/modules/checkout/components/promotion-code"
@@ -38,6 +39,7 @@ const Summary = ({ customer, spendLimitExceeded }: SummaryProps) => {
 
   return (
     <Container className="flex flex-col gap-y-3">
+      <CartLogisticsSummary />
       <CartTotals />
       <Divider />
       <PromotionCode cart={cart} />
@@ -57,46 +59,46 @@ const Summary = ({ customer, spendLimitExceeded }: SummaryProps) => {
         data-testid="checkout-button"
       >
         <Button
-          className="w-full h-10 rounded-full shadow-none"
+          className="w-full h-10 rounded-md shadow-none"
           disabled={spendLimitExceeded}
         >
           {customer
             ? spendLimitExceeded
-              ? "Spending Limit Exceeded"
-              : "Checkout"
-            : "Log in to Checkout"}
+              ? "Limite de compra superado"
+              : "Finalizar compra"
+            : "Inicia sesion para comprar"}
         </Button>
       </LocalizedClientLink>
       {!!customer && (
         <RequestQuoteConfirmation>
           <Button
-            className="w-full h-10 rounded-full shadow-borders-base"
+            className="w-full h-10 rounded-md shadow-borders-base"
             variant="secondary"
             disabled={isPendingApproval}
           >
-            Request Quote
+            Solicitar presupuesto
           </Button>
         </RequestQuoteConfirmation>
       )}
       {!customer && (
         <RequestQuotePrompt>
           <Button
-            className="w-full h-10 rounded-full shadow-borders-base"
+            className="w-full h-10 rounded-md shadow-borders-base"
             variant="secondary"
             disabled={isPendingApproval}
           >
-            Request Quote
+            Solicitar presupuesto
           </Button>
         </RequestQuotePrompt>
       )}
       <CartToCsvButton cart={cart} />
       <Button
         onClick={handleEmptyCart}
-        className="w-full h-10 rounded-full shadow-borders-base"
+        className="w-full h-10 rounded-md shadow-borders-base"
         variant="secondary"
         disabled={isPendingApproval}
       >
-        Empty Cart
+        Vaciar carrito
       </Button>
     </Container>
   )
