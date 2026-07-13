@@ -82,6 +82,8 @@ Useful options:
 - `--dry-run`: previews files without writing.
 - `--no-sync`: skips artifact generation.
 
+Each generated profile includes `README.md`, `activation-checklist.md`, `.env.example`, `client-profile.json`, `homepage-content.json`, `product-packaging.csv`, and an `assets/` folder.
+
 This creates `profiles/acme-industrial` with brand, homepage, packaging CSV and asset folders, then runs `pnpm sync:client-profile` to generate storefront/backend artifacts. Activate it with:
 
 ```env

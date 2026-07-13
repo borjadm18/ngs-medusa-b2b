@@ -126,13 +126,15 @@ Perfiles actuales:
 pnpm template:new -- --id <cliente> --name "Nombre Cliente" --from example-industrial
 ```
 
-2. Revisa `profiles/<cliente>/client-profile.json`.
-3. Revisa `profiles/<cliente>/homepage-content.json`.
-4. Sustituye `profiles/<cliente>/product-packaging.csv` con SKUs reales.
-5. Deja assets en `profiles/<cliente>/assets` y referencia rutas `/images/<cliente>/...`.
-6. Ejecuta `pnpm sync:client-profile` si usaste `--no-sync` o editaste archivos manualmente.
-7. Define `NEXT_PUBLIC_B2B_CLIENT_PROFILE=<cliente>`.
-8. Ejecuta `pnpm --filter @b2b-starter/storefront build`.
+2. Revisa `profiles/<cliente>/activation-checklist.md`.
+3. Revisa `profiles/<cliente>/.env.example`.
+4. Revisa `profiles/<cliente>/client-profile.json`.
+5. Revisa `profiles/<cliente>/homepage-content.json`.
+6. Sustituye `profiles/<cliente>/product-packaging.csv` con SKUs reales.
+7. Deja assets en `profiles/<cliente>/assets` y referencia rutas `/images/<cliente>/...`.
+8. Ejecuta `pnpm sync:client-profile` si usaste `--no-sync` o editaste archivos manualmente.
+9. Define `NEXT_PUBLIC_B2B_CLIENT_PROFILE=<cliente>`.
+10. Ejecuta `pnpm --filter @b2b-starter/storefront build`.
 
 Opciones utiles:
 
@@ -141,6 +143,8 @@ pnpm template:new -- --id acme-industrial --name "ACME Industrial" --from ngs --
 pnpm template:new -- --id acme-industrial --name "ACME Industrial" --dry-run
 pnpm template:new -- --id acme-industrial --name "ACME Industrial" --no-sync
 ```
+
+Cada perfil generado incluye `README.md`, `activation-checklist.md`, `.env.example`, `client-profile.json`, `homepage-content.json`, `product-packaging.csv` y carpeta `assets/`.
 
 ## Assets Desde Admin
 

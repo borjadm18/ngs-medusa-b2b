@@ -134,6 +134,19 @@ const copyFileMaybe = (sourcePath, targetPath, force, dryRun) => {
   copyFile(sourcePath, targetPath, force)
 }
 
+const writeTextMaybe = (filePath, content, force, dryRun) => {
+  if (dryRun) {
+    console.log(`[dry-run] write ${path.relative(rootDir, filePath)}`)
+    return
+  }
+
+  if (fs.existsSync(filePath) && !force) {
+    throw new Error(`${path.relative(rootDir, filePath)} already exists. Use --force to overwrite.`)
+  }
+
+  fs.writeFileSync(filePath, content, "utf8")
+}
+
 const replaceClientImagePath = (value, profileId) => {
   if (typeof value !== "string") {
     return value
@@ -193,6 +206,77 @@ const resolveProfileSource = (from) => {
     assetsDir: path.join(sourceDir, "assets"),
   }
 }
+
+const buildActivationChecklist = ({
+  id,
+  brandName,
+  from,
+  country,
+  currency,
+}) => `# Activacion ${brandName}
+
+Checklist para convertir este perfil en una demo B2B funcional.
+
+## 1. Revisar perfil
+
+- [ ] \`client-profile.json\`: marca, SEO, colores, logo, menu, footer y fallbacks.
+- [ ] \`homepage-content.json\`: hero, categorias, bloques visuales, CTAs y productos destacados.
+- [ ] \`product-packaging.csv\`: SKUs reales, unidades/caja, minimos, multiplos, pallets y peso.
+- [ ] \`assets/\`: logos e imagenes con rutas \`/images/${id}/...\`.
+
+## 2. Sincronizar artefactos
+
+\`\`\`bash
+pnpm sync:client-profile
+\`\`\`
+
+## 3. Activar storefront local
+
+\`\`\`env
+NEXT_PUBLIC_B2B_CLIENT_PROFILE=${id}
+\`\`\`
+
+\`\`\`bash
+pnpm --filter @b2b-starter/storefront build
+\`\`\`
+
+## 4. Activar backend/seed
+
+\`\`\`env
+B2B_CLIENT_PROFILE=${id}
+\`\`\`
+
+Si hay reglas de packaging nuevas, ejecutar seed/migracion segun entorno.
+
+## 5. Deploy
+
+- [ ] Vercel storefront: \`NEXT_PUBLIC_B2B_CLIENT_PROFILE=${id}\`.
+- [ ] Render backend: \`B2B_CLIENT_PROFILE=${id}\`.
+- [ ] Confirmar region/pais por defecto: \`${country}\`.
+- [ ] Confirmar moneda: \`${currency}\`.
+- [ ] Confirmar assets visibles en home y PDP.
+
+## 6. QA minimo
+
+- [ ] Home carga en desktop y mobile.
+- [ ] Menu y mega menu muestran enlaces correctos.
+- [ ] Catalogo lista productos con imagen.
+- [ ] PDP permite unidad/caja y muestra packaging.
+- [ ] Carrito muestra precio solo con login y packaging/logistica.
+- [ ] Presupuesto exporta CSV/PDF si aplica.
+- [ ] Admin edita home, brand profile, assets y packaging.
+
+## Origen
+
+Generado desde \`${from || "template"}\`.
+`
+
+const buildEnvExample = ({ id }) => `# Storefront
+NEXT_PUBLIC_B2B_CLIENT_PROFILE=${id}
+
+# Backend seed/import helpers
+B2B_CLIENT_PROFILE=${id}
+`
 
 const createProfile = ({
   id,
@@ -304,13 +388,29 @@ NEXT_PUBLIC_B2B_CLIENT_PROFILE=${id} pnpm --filter @b2b-starter/storefront build
 \`\`\`
 
 Para produccion, configura \`NEXT_PUBLIC_B2B_CLIENT_PROFILE=${id}\` en Vercel y \`B2B_CLIENT_PROFILE=${id}\` en Render si quieres sembrar packaging de este perfil.
+
+Consulta \`activation-checklist.md\` para el checklist completo de activacion y QA.
 `
 
-  if (dryRun) {
-    console.log(`[dry-run] write ${path.relative(rootDir, path.join(targetDir, "README.md"))}`)
-  } else {
-    fs.writeFileSync(path.join(targetDir, "README.md"), readme, "utf8")
-  }
+  writeTextMaybe(path.join(targetDir, "README.md"), readme, force, dryRun)
+  writeTextMaybe(
+    path.join(targetDir, "activation-checklist.md"),
+    buildActivationChecklist({
+      id,
+      brandName,
+      from,
+      country: profile.markets.defaultCountryCode,
+      currency: profile.markets.currency,
+    }),
+    force,
+    dryRun
+  )
+  writeTextMaybe(
+    path.join(targetDir, ".env.example"),
+    buildEnvExample({ id }),
+    force,
+    dryRun
+  )
 
   if (sync && !dryRun) {
     const syncResult = spawnSync(process.execPath, ["scripts/sync-client-profile.mjs"], {
