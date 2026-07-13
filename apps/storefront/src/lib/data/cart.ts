@@ -19,6 +19,19 @@ import {
 import { retrieveCustomer } from "./customer"
 import { getRegion } from "./regions"
 
+const B2B_AUTH_REQUIRED_MESSAGE =
+  "Inicia sesion para ver tus tarifas B2B, comprar o solicitar presupuesto."
+
+async function requireB2BCustomer() {
+  const customer = await retrieveCustomer()
+
+  if (!customer) {
+    throw new Error(B2B_AUTH_REQUIRED_MESSAGE)
+  }
+
+  return customer
+}
+
 export async function retrieveCart(id?: string) {
   const cartId = id || (await getCartId())
 
@@ -56,7 +69,7 @@ export async function retrieveCart(id?: string) {
 export async function getOrSetCart(countryCode: string) {
   let cart = await retrieveCart()
   const region = await getRegion(countryCode)
-  const customer = await retrieveCustomer()
+  const customer = await requireB2BCustomer()
 
   if (!region) {
     throw new Error(`Region not found for country code: ${countryCode}`)
@@ -94,6 +107,8 @@ export async function getOrSetCart(countryCode: string) {
 }
 
 export async function updateCart(data: HttpTypes.StoreUpdateCart) {
+  await requireB2BCustomer()
+
   const cartId = await getCartId()
 
   if (!cartId) {
@@ -125,6 +140,8 @@ export async function addToCart({
   quantity: number
   countryCode: string
 }) {
+  await requireB2BCustomer()
+
   if (!variantId) {
     throw new Error("Missing variant ID when adding to cart")
   }
@@ -164,6 +181,8 @@ export async function addToCartBulk({
   lineItems: HttpTypes.StoreAddCartLineItem[]
   countryCode: string
 }) {
+  await requireB2BCustomer()
+
   const cart = await getOrSetCart(countryCode)
 
   if (!cart) {
@@ -202,6 +221,8 @@ export async function updateLineItem({
   lineId: string
   data: HttpTypes.StoreUpdateCartLineItem
 }) {
+  await requireB2BCustomer()
+
   if (!lineId) {
     throw new Error("Missing lineItem ID when updating line item")
   }
@@ -232,6 +253,8 @@ export async function updateLineItem({
 }
 
 export async function deleteLineItem(lineId: string) {
+  await requireB2BCustomer()
+
   if (!lineId) {
     throw new Error("Missing lineItem ID when deleting line item")
   }
@@ -257,6 +280,8 @@ export async function deleteLineItem(lineId: string) {
 }
 
 export async function emptyCart() {
+  await requireB2BCustomer()
+
   const cart = await retrieveCart()
   if (!cart) {
     throw new Error("No existing cart found when emptying cart")
@@ -277,6 +302,8 @@ export async function setShippingMethod({
   cartId: string
   shippingMethodId: string
 }) {
+  await requireB2BCustomer()
+
   const headers = {
     ...(await getAuthHeaders()),
   }
@@ -297,6 +324,8 @@ export async function initiatePaymentSession(
     context?: Record<string, unknown>
   }
 ) {
+  await requireB2BCustomer()
+
   const headers = {
     ...(await getAuthHeaders()),
   }
@@ -312,6 +341,8 @@ export async function initiatePaymentSession(
 }
 
 export async function applyPromotions(codes: string[]) {
+  await requireB2BCustomer()
+
   const cartId = await getCartId()
   if (!cartId) {
     throw new Error("No existing cart found")
@@ -385,12 +416,13 @@ export async function submitPromotionForm(
 // TODO: Pass a POJO instead of a form entity here
 export async function setShippingAddress(formData: FormData) {
   try {
+    const customer = await requireB2BCustomer()
+
     if (!formData) {
       throw new Error("No form data found when setting addresses")
     }
 
     const cartId = await getCartId()
-    const customer = await retrieveCustomer()
 
     if (!cartId) {
       throw new Error("No existing cart found when setting addresses")
@@ -420,7 +452,9 @@ export async function setShippingAddress(formData: FormData) {
 
 export async function setBillingAddress(formData: FormData) {
   try {
-    const cartId = getCartId()
+    await requireB2BCustomer()
+
+    const cartId = await getCartId()
     if (!cartId) {
       throw new Error("No existing cart found when setting billing address")
     }
@@ -451,7 +485,9 @@ export async function setContactDetails(
   formData: FormData
 ) {
   try {
-    const cartId = getCartId()
+    await requireB2BCustomer()
+
+    const cartId = await getCartId()
     if (!cartId) {
       throw new Error("No existing cart found when setting contact details")
     }
@@ -474,6 +510,8 @@ export async function setContactDetails(
 export async function placeOrder(
   cartId?: string
 ): Promise<HttpTypes.StoreCompleteCartResponse> {
+  await requireB2BCustomer()
+
   const id = cartId || (await getCartId())
 
   if (!id) {
@@ -527,6 +565,8 @@ export async function updateRegion(countryCode: string, currentPath: string) {
   }
 
   if (cartId) {
+    await requireB2BCustomer()
+
     await updateCart({ region_id: region.id })
     const cartCacheTag = await getCacheTag("carts")
     revalidateTag(cartCacheTag)
@@ -542,6 +582,8 @@ export async function updateRegion(countryCode: string, currentPath: string) {
 }
 
 export async function createCartApproval(cartId: string, createdBy: string) {
+  await requireB2BCustomer()
+
   const headers = {
     "Content-Type": "application/json",
     ...(await getAuthHeaders()),
