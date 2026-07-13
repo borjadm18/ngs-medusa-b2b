@@ -12,6 +12,7 @@ import { HttpTypes, StoreProduct, StoreProductVariant } from "@medusajs/types"
 import { clx } from "@medusajs/ui"
 import { useState } from "react"
 import BulkTableQuantity from "../bulk-table-quantity"
+import { InformationCircle } from "@medusajs/icons"
 
 const ProductVariantsTable = ({
   product,
@@ -188,23 +189,17 @@ const ProductVariantsTable = ({
                 cantidad total de unidades.
               </p>
             </div>
-            <div className="shrink-0 text-right">
-              <p className="text-xs text-neutral-500">
-                {canViewPrices ? "Desde" : "Tarifa privada"}
-              </p>
-              {canViewPrices ? (
+            {canViewPrices && (
+              <div className="shrink-0 text-right">
+                <p className="text-xs text-neutral-500">Desde</p>
                 <p className="text-2xl font-semibold text-neutral-950">
                   {cheapestPrice?.calculated_price || "Consultar"}
                 </p>
-              ) : (
-                <p className="mt-1 inline-flex rounded border border-red-200 bg-red-50 px-2 py-1 text-xs font-semibold text-red-800">
-                  Acceso requerido
+                <p className="text-[11px] uppercase text-neutral-500">
+                  Sin IVA
                 </p>
-              )}
-              <p className="text-[11px] uppercase text-neutral-500">
-                {canViewPrices ? "Sin IVA" : "Tarifa B2B privada"}
-              </p>
-            </div>
+              </div>
+            )}
           </div>
 
           {!canViewPrices && (
@@ -272,47 +267,18 @@ const ProductVariantsTable = ({
                         {variant.sku}
                       </span>
                     )}
+                    <PackagingInfoButton packaging={packaging} />
                   </div>
-                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-neutral-600">
-                    {canViewPrices && (
+                  {canViewPrices && (
+                    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-neutral-600">
                       <span>
                         <span className="text-neutral-500">Precio</span>{" "}
                         <strong className="font-semibold text-neutral-950">
                           {variantPrice?.calculated_price ?? "Consultar"}
                         </strong>
                       </span>
-                    )}
-                    <span>
-                      <span className="text-neutral-500">Caja</span>{" "}
-                      <strong className="font-semibold text-neutral-950">
-                        {packaging.unitsPerBox} uds
-                      </strong>
-                    </span>
-                    {packaging.palletUnits && (
-                      <span>
-                        <span className="text-neutral-500">Pallet</span>{" "}
-                        <strong className="font-semibold text-neutral-950">
-                          {packaging.palletUnits} uds
-                        </strong>
-                      </span>
-                    )}
-                    {packaging.minimumOrderQuantity > 1 && (
-                      <span>
-                        <span className="text-neutral-500">Min.</span>{" "}
-                        <strong className="font-semibold text-neutral-950">
-                          {packaging.minimumOrderQuantity} uds
-                        </strong>
-                      </span>
-                    )}
-                    {packaging.quantityIncrement > 1 && (
-                      <span>
-                        <span className="text-neutral-500">Multiplo</span>{" "}
-                        <strong className="font-semibold text-neutral-950">
-                          {packaging.quantityIncrement}
-                        </strong>
-                      </span>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid gap-3 xsmall:grid-cols-[150px_132px] xsmall:items-center small:grid-cols-[142px_126px]">
@@ -407,6 +373,47 @@ const PurchaseUnitToggle = ({
         </button>
       ))}
     </div>
+  )
+}
+
+const PackagingInfoButton = ({
+  packaging,
+}: {
+  packaging: ReturnType<typeof getVariantPackaging>
+}) => {
+  const details = [
+    `Caja: ${packaging.unitsPerBox} uds`,
+    packaging.palletUnits ? `Pallet: ${packaging.palletUnits} uds` : null,
+    packaging.minimumOrderQuantity > 1
+      ? `Minimo: ${packaging.minimumOrderQuantity} uds`
+      : null,
+    packaging.quantityIncrement > 1
+      ? `Multiplo: ${packaging.quantityIncrement}`
+      : null,
+  ].filter(Boolean) as string[]
+  const label = details.join(". ")
+
+  return (
+    <span className="group relative inline-flex">
+      <button
+        type="button"
+        aria-label={`Ver packaging. ${label}`}
+        title={label}
+        className="inline-flex h-7 w-7 items-center justify-center rounded border border-neutral-200 bg-white text-neutral-500 transition hover:border-neutral-400 hover:text-neutral-950 focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-1"
+      >
+        <InformationCircle className="h-4 w-4" />
+      </button>
+      <span className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 hidden w-52 -translate-x-1/2 rounded border border-neutral-200 bg-white p-3 text-xs leading-5 text-neutral-700 shadow-xl group-hover:block group-focus-within:block">
+        <span className="mb-1 block font-semibold text-neutral-950">
+          Packaging
+        </span>
+        {details.map((detail) => (
+          <span key={detail} className="block">
+            {detail}
+          </span>
+        ))}
+      </span>
+    </span>
   )
 }
 
