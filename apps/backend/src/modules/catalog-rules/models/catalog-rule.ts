@@ -32,10 +32,10 @@ export const CatalogRule = model.define("catalog_rule", {
       "requires_quote",
     ])
     .default("discount_percentage"),
-  discount_percentage: model.number().nullable(),
-  fixed_price: model.number().nullable(),
+  discount_percentage: model.float().nullable(),
+  fixed_price: model.float().nullable(),
   minimum_quantity: model.number().default(1),
   starts_at: model.text().nullable(),
   ends_at: model.text().nullable(),
-  metadata: model.text().nullable(),
+  metadata: model.json().nullable(),
 });

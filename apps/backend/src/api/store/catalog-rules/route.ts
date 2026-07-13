@@ -14,7 +14,7 @@ type CatalogRuleRecord = {
   currency_code?: string | null;
   starts_at?: string | null;
   ends_at?: string | null;
-  metadata?: string | null;
+  metadata?: Record<string, unknown> | string | null;
 };
 
 const firstQueryValue = (value: unknown) => {
@@ -63,6 +63,10 @@ const isActiveInWindow = (rule: CatalogRuleRecord, now: Date) => {
 
 const parseMetadata = (rule: CatalogRuleRecord) => {
   if (!rule.metadata) {
+    return rule;
+  }
+
+  if (typeof rule.metadata === "object") {
     return rule;
   }
 

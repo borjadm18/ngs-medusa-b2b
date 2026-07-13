@@ -78,6 +78,21 @@ type AdminCatalogRulesMutationResponse = {
   catalog_rules: AdminCatalogRule[];
 };
 
+type AdminCatalogRulePriceListSyncResponse = {
+  catalog_rule: AdminCatalogRule;
+  price_list: {
+    id: string;
+    title: string;
+  };
+  synced: boolean;
+};
+
+type AdminCatalogRulePriceListSyncPayload = {
+  id: string;
+  title?: string;
+  description?: string;
+};
+
 export const catalogRulesQueryKeys = queryKeysFactory("catalog_rules");
 
 const buildQuery = (filters?: CatalogRuleFilters) => {
@@ -177,6 +192,34 @@ export const useBulkUpsertCatalogRules = (
           body: {
             catalog_rules: catalogRules,
           },
+        }
+      ),
+    onSuccess: (data, variables, context) => {
+      queryClient.invalidateQueries({
+        queryKey: catalogRulesQueryKeys.all,
+      });
+      options?.onSuccess?.(data, variables, context);
+    },
+    ...options,
+  });
+};
+
+export const useSyncCatalogRulePriceList = (
+  options?: UseMutationOptions<
+    AdminCatalogRulePriceListSyncResponse,
+    FetchError,
+    AdminCatalogRulePriceListSyncPayload
+  >
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, ...body }) =>
+      sdk.client.fetch<AdminCatalogRulePriceListSyncResponse>(
+        `/admin/catalog-rules/${id}/sync-price-list`,
+        {
+          method: "POST",
+          body,
         }
       ),
     onSuccess: (data, variables, context) => {

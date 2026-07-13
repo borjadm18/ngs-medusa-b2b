@@ -37,7 +37,7 @@ export type UpsertCatalogRuleInput = {
   minimum_quantity?: number;
   starts_at?: string | null;
   ends_at?: string | null;
-  metadata?: string | null;
+  metadata?: Record<string, unknown> | null;
 };
 
 type CatalogRuleRecord = UpsertCatalogRuleInput & {

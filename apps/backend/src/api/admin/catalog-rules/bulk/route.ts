@@ -5,13 +5,6 @@ import {
 import { upsertCatalogRuleWorkflow } from "../../../../workflows/catalog-rules/workflows";
 import { AdminBulkUpsertCatalogRulesType } from "../validators";
 
-const serializeRulePayload = (
-  body: AdminBulkUpsertCatalogRulesType["catalog_rules"][number]
-) => ({
-  ...body,
-  metadata: body.metadata ? JSON.stringify(body.metadata) : null,
-});
-
 export const POST = async (
   req: AuthenticatedMedusaRequest<AdminBulkUpsertCatalogRulesType>,
   res: MedusaResponse
@@ -20,7 +13,7 @@ export const POST = async (
 
   for (const rule of req.validatedBody.catalog_rules) {
     const { result } = await upsertCatalogRuleWorkflow.run({
-      input: serializeRulePayload(rule),
+      input: rule,
       container: req.scope,
     });
 

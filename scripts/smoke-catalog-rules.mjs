@@ -69,7 +69,7 @@ const main = async () => {
   }
 
   const productsResponse = await request(
-    "/admin/products?limit=1&fields=id,title",
+    "/admin/products?limit=1&fields=id,title,variants.id,variants.title,variants.sku",
     {
       headers: adminHeaders,
     }
@@ -78,6 +78,12 @@ const main = async () => {
 
   if (!product?.id) {
     throw new Error("No product found to validate catalog rules.");
+  }
+
+  const variant = product.variants?.[0];
+
+  if (!variant?.id) {
+    throw new Error("No product variant found to validate price list sync.");
   }
 
   const payload = {
@@ -133,6 +139,55 @@ const main = async () => {
     throw new Error("Catalog rule was not visible through admin/store reads.");
   }
 
+  const syncPayload = {
+    name: `Smoke Price List Sync ${Date.now()}`,
+    description: "Regla fixed price por variante para validar Price Lists.",
+    status: "active",
+    priority: 5,
+    rule_type: "price",
+    target_type: "variant",
+    target_id: variant.id,
+    currency_code: "eur",
+    effect_type: "fixed_price",
+    fixed_price: 42.5,
+    minimum_quantity: 6,
+    metadata: {
+      source: "smoke-catalog-rules-price-list-sync",
+    },
+  };
+  const syncRuleResponse = await request("/admin/catalog-rules", {
+    method: "POST",
+    headers: adminHeaders,
+    body: JSON.stringify(syncPayload),
+  });
+  const syncRule = syncRuleResponse.catalog_rule;
+
+  if (!syncRule?.id) {
+    throw new Error("Sync catalog rule was not created.");
+  }
+
+  const syncResponse = await request(
+    `/admin/catalog-rules/${syncRule.id}/sync-price-list`,
+    {
+      method: "POST",
+      headers: adminHeaders,
+      body: JSON.stringify({}),
+    }
+  );
+
+  if (!syncResponse.synced || !syncResponse.price_list?.id) {
+    throw new Error("Catalog rule did not sync to a Medusa price list.");
+  }
+
+  const syncedMetadata =
+    typeof syncResponse.catalog_rule?.metadata === "string"
+      ? JSON.parse(syncResponse.catalog_rule.metadata)
+      : syncResponse.catalog_rule?.metadata;
+
+  if (syncedMetadata?.price_list_id !== syncResponse.price_list.id) {
+    throw new Error("Synced catalog rule metadata does not contain price_list_id.");
+  }
+
   console.log(
     JSON.stringify(
       {
@@ -144,6 +199,11 @@ const main = async () => {
           name: catalogRule.name,
           effect_type: catalogRule.effect_type,
           discount_percentage: catalogRule.discount_percentage,
+        },
+        price_list_sync: {
+          catalog_rule_id: syncRule.id,
+          variant_id: variant.id,
+          price_list_id: syncResponse.price_list.id,
         },
       },
       null,

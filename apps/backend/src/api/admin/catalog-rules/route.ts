@@ -46,11 +46,6 @@ const buildFilters = (query: Record<string, unknown>) => {
   return filters;
 };
 
-const serializeRulePayload = (body: AdminUpsertCatalogRuleType) => ({
-  ...body,
-  metadata: body.metadata ? JSON.stringify(body.metadata) : null,
-});
-
 export const GET = async (
   req: AuthenticatedMedusaRequest,
   res: MedusaResponse
@@ -83,7 +78,7 @@ export const POST = async (
   res: MedusaResponse
 ) => {
   const { result } = await upsertCatalogRuleWorkflow.run({
-    input: serializeRulePayload(req.validatedBody),
+    input: req.validatedBody,
     container: req.scope,
   });
 

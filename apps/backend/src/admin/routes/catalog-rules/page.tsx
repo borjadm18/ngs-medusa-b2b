@@ -1,6 +1,7 @@
 import { defineRouteConfig } from "@medusajs/admin-sdk";
 import {
   ArrowDownTray,
+  ArrowPath,
   ArrowUpTray,
   BuildingStorefront,
   PencilSquare,
@@ -34,6 +35,7 @@ import {
   useBulkUpsertCatalogRules,
   useCatalogRules,
   useDeleteCatalogRule,
+  useSyncCatalogRulePriceList,
   useUpsertCatalogRule,
 } from "../../hooks/api/catalog-rules";
 
@@ -414,6 +416,38 @@ const toFormState = (catalogRule?: AdminCatalogRule): CatalogRuleFormState => {
 
 const compact = (value?: string | null) => value || "-";
 
+const parseRuleMetadata = (metadata?: AdminCatalogRule["metadata"]) => {
+  if (!metadata) {
+    return {};
+  }
+
+  if (typeof metadata === "string") {
+    try {
+      return JSON.parse(metadata) as Record<string, unknown>;
+    } catch {
+      return {};
+    }
+  }
+
+  return metadata;
+};
+
+const canSyncPriceList = (rule: AdminCatalogRule) => {
+  const metadata = parseRuleMetadata(rule.metadata);
+
+  return (
+    rule.status === "active" &&
+    rule.rule_type === "price" &&
+    rule.effect_type === "fixed_price" &&
+    rule.target_type === "variant" &&
+    Boolean(rule.target_id) &&
+    rule.fixed_price !== null &&
+    rule.fixed_price !== undefined &&
+    Boolean(rule.currency_code) &&
+    !metadata.price_list_id
+  );
+};
+
 const effectLabel = (rule: AdminCatalogRule) => {
   if (rule.effect_type === "discount_percentage") {
     return `${rule.discount_percentage || 0}% discount`;
@@ -468,6 +502,12 @@ const CatalogRulesPage = () => {
     },
     onError: (error) =>
       toast.error(error.message || "Could not import catalog rules"),
+  });
+  const syncCatalogRulePriceList = useSyncCatalogRulePriceList({
+    onSuccess: (data) =>
+      toast.success(`Price list created: ${data.price_list.title}`),
+    onError: (error) =>
+      toast.error(error.message || "Could not sync price list"),
   });
 
   const validImportRows = useMemo(
@@ -771,6 +811,9 @@ const CatalogRulesPage = () => {
                             </Text>
                             <Text size="small" className="text-ui-fg-subtle">
                               {rule.rule_type}
+                              {parseRuleMetadata(rule.metadata).price_list_id
+                                ? " / price list synced"
+                                : ""}
                             </Text>
                           </div>
                         </Table.Cell>
@@ -795,6 +838,23 @@ const CatalogRulesPage = () => {
                         <Table.Cell>{rule.priority}</Table.Cell>
                         <Table.Cell>
                           <div className="flex items-center gap-x-1">
+                            <IconButton
+                              size="small"
+                              variant="transparent"
+                              disabled={
+                                !rule.id ||
+                                !canSyncPriceList(rule) ||
+                                syncCatalogRulePriceList.isPending
+                              }
+                              onClick={() =>
+                                rule.id &&
+                                syncCatalogRulePriceList.mutate({
+                                  id: rule.id,
+                                })
+                              }
+                            >
+                              <ArrowPath />
+                            </IconButton>
                             <IconButton
                               size="small"
                               variant="transparent"
