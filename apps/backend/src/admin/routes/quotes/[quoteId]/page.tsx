@@ -26,6 +26,10 @@ import {
   QuoteTotal,
 } from "../components/quote-details";
 import { QuoteMessages } from "../components/quote-messages";
+import {
+  getQuotePackagingSummary,
+  quoteItemsToCsv,
+} from "../utils/b2b-packaging";
 
 const QuoteDetails = () => {
   const { quoteId } = useParams();
@@ -110,6 +114,20 @@ const QuoteDetails = () => {
     }
   };
 
+  const handleExportCsv = () => {
+    const csv = quoteItemsToCsv(quote.draft_order?.items || []);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `presupuesto-${quote.id}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
   if (isLoading || !quote) {
     return <></>;
   }
@@ -121,6 +139,10 @@ const QuoteDetails = () => {
   if (!isPreviewLoading && !preview) {
     throw "preview not found";
   }
+
+  const packagingSummary = getQuotePackagingSummary(
+    quote.draft_order?.items || []
+  );
 
   return (
     <div className="flex flex-col gap-y-3">
@@ -152,6 +174,14 @@ const QuoteDetails = () => {
 
             {(showRejectQuote || showSendQuote) && (
               <div className="bg-ui-bg-subtle flex items-center justify-end gap-x-2 rounded-b-xl px-4 py-4">
+                <Button
+                  size="small"
+                  variant="secondary"
+                  onClick={handleExportCsv}
+                >
+                  Export CSV
+                </Button>
+
                 {showRejectQuote && (
                   <Button
                     size="small"
@@ -183,6 +213,30 @@ const QuoteDetails = () => {
         </div>
 
         <div className="mt-2 flex w-full max-w-[100%] flex-col gap-y-3 xl:mt-0 xl:max-w-[400px]">
+          <Container className="divide-y p-0">
+            <div className="flex items-center justify-between px-6 py-4">
+              <Heading level="h2">Packaging</Heading>
+            </div>
+            <div className="grid gap-3 px-6 py-4">
+              <PackagingMetric
+                label="Bultos"
+                value={`${packagingSummary.boxes} cajas`}
+              />
+              <PackagingMetric
+                label="Unidades"
+                value={`${packagingSummary.totalUnits} uds`}
+              />
+              <PackagingMetric
+                label="Peso estimado"
+                value={`${packagingSummary.estimatedWeight.toFixed(1)} kg`}
+              />
+              <PackagingMetric
+                label="Ocupacion pallet"
+                value={`${packagingSummary.palletShare.toFixed(2)} pallets`}
+              />
+            </div>
+          </Container>
+
           <Container className="divide-y p-0">
             <div className="flex items-center justify-between px-6 py-4">
               <Heading level="h2">Customer</Heading>
@@ -255,3 +309,20 @@ const QuoteDetails = () => {
 };
 
 export default QuoteDetails;
+
+const PackagingMetric = ({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) => (
+  <div className="flex items-center justify-between gap-3 rounded-md border bg-ui-bg-subtle px-3 py-2">
+    <Text size="small" leading="compact" className="text-ui-fg-subtle">
+      {label}
+    </Text>
+    <Text size="small" leading="compact" weight="plus">
+      {value}
+    </Text>
+  </div>
+);

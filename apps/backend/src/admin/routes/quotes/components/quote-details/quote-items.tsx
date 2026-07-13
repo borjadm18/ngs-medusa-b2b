@@ -7,6 +7,11 @@ import { Badge, Copy, Text } from "@medusajs/ui";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { AmountCell, Thumbnail } from "../../../../components/common";
+import {
+  formatQuotePackagingDetails,
+  formatQuotePackagingLine,
+  getQuoteLinePackaging,
+} from "../../utils/b2b-packaging";
 
 export const QuoteItems = ({
   order,
@@ -21,16 +26,14 @@ export const QuoteItems = ({
 
   return (
     <div>
-      {preview.items?.map((item) => {
-        return (
-          <QuoteItem
-            key={item.id}
-            item={item}
-            originalItem={originalItemsMap.get(item.id)}
-            currencyCode={order.currency_code}
-          />
-        );
-      })}
+      {preview.items?.map((item) => (
+        <QuoteItem
+          key={item.id}
+          item={item}
+          originalItem={originalItemsMap.get(item.id)}
+          currencyCode={order.currency_code}
+        />
+      ))}
     </div>
   );
 };
@@ -64,104 +67,127 @@ export const QuoteItem = ({
     return !!updateAction && item.quantity === item.detail.fulfilled_quantity;
   }, [item]);
 
+  const packaging = getQuoteLinePackaging(
+    ((item as { metadata?: Record<string, unknown> }).metadata ||
+      originalItem?.metadata) as Record<string, unknown>,
+    item.quantity
+  );
+  const packagingDetails = packaging
+    ? formatQuotePackagingDetails(packaging)
+    : "";
+
   return (
-    <>
-      <div
-        key={item.id}
-        className="text-ui-fg-subtle grid grid-cols-2 items-center gap-x-4 px-6 py-4 text-left"
-      >
-        <div className="flex items-start gap-x-4">
-          <Thumbnail src={item.thumbnail} />
+    <div
+      key={item.id}
+      className="text-ui-fg-subtle grid grid-cols-2 items-center gap-x-4 px-6 py-4 text-left"
+    >
+      <div className="flex items-start gap-x-4">
+        <Thumbnail src={item.thumbnail} />
 
-          <div>
-            <Text
-              size="small"
-              leading="compact"
-              weight="plus"
-              className="text-ui-fg-base"
-            >
-              {item.title}
-            </Text>
+        <div>
+          <Text
+            size="small"
+            leading="compact"
+            weight="plus"
+            className="text-ui-fg-base"
+          >
+            {item.title}
+          </Text>
 
-            {item.variant_sku && (
-              <div className="flex items-center gap-x-1">
-                <Text size="small">{item.variant_sku}</Text>
-                <Copy content={item.variant_sku} className="text-ui-fg-muted" />
-              </div>
-            )}
-            <Text size="small">
-              {item.variant?.options?.map((o) => o.value).join(" · ")}
-            </Text>
-          </div>
+          {item.variant_sku && (
+            <div className="flex items-center gap-x-1">
+              <Text size="small">{item.variant_sku}</Text>
+              <Copy content={item.variant_sku} className="text-ui-fg-muted" />
+            </div>
+          )}
+          <Text size="small">
+            {item.variant?.options?.map((o) => o.value).join(" - ")}
+          </Text>
+          {packaging ? (
+            <div className="mt-2 grid gap-1 rounded-md border bg-ui-bg-subtle px-2 py-1.5">
+              <Text size="xsmall" leading="compact" weight="plus">
+                {formatQuotePackagingLine(packaging)}
+              </Text>
+              {packagingDetails ? (
+                <Text
+                  size="xsmall"
+                  leading="compact"
+                  className="text-ui-fg-subtle"
+                >
+                  {packagingDetails}
+                </Text>
+              ) : null}
+            </div>
+          ) : null}
         </div>
+      </div>
 
-        <div className="grid grid-cols-3 items-center gap-x-4">
-          <div className="flex items-center justify-end gap-x-4">
-            <AmountCell
-              className="text-sm text-right justify-end items-end"
-              currencyCode={currencyCode}
-              amount={item.unit_price}
-              originalAmount={
-                isAddedItem ? item.unit_price : originalItem?.unit_price
-              }
-            />
-          </div>
-
-          <div className="flex items-center gap-x-2">
-            <div className="w-fit min-w-[27px]">
-              <Badge size="xsmall" color="grey">
-                <span className="tabular-nums text-xs">{item.quantity}</span>x
-              </Badge>
-            </div>
-
-            <div>
-              {isAddedItem && (
-                <Badge
-                  size="2xsmall"
-                  rounded="full"
-                  color="blue"
-                  className="mr-1"
-                >
-                  {t("general.new")}
-                </Badge>
-              )}
-
-              {isItemRemoved ? (
-                <Badge
-                  size="2xsmall"
-                  rounded="full"
-                  color="red"
-                  className="mr-1"
-                >
-                  {t("general.removed")}
-                </Badge>
-              ) : (
-                isItemUpdated && (
-                  <Badge
-                    size="2xsmall"
-                    rounded="full"
-                    color="orange"
-                    className="mr-1"
-                  >
-                    {t("general.modified")}
-                  </Badge>
-                )
-              )}
-            </div>
-
-            <div className="overflow-visible"></div>
-          </div>
-
+      <div className="grid grid-cols-3 items-center gap-x-4">
+        <div className="flex items-center justify-end gap-x-4">
           <AmountCell
             className="text-sm text-right justify-end items-end"
             currencyCode={currencyCode}
-            amount={
-              isAddedItem ? item.detail.quantity * item.unit_price : item.total
+            amount={item.unit_price}
+            originalAmount={
+              isAddedItem ? item.unit_price : originalItem?.unit_price
             }
-            originalAmount={isAddedItem ? item?.total : originalItem?.total}
           />
         </div>
+
+        <div className="flex items-center gap-x-2">
+          <div className="w-fit min-w-[27px]">
+            <Badge size="xsmall" color="grey">
+              <span className="tabular-nums text-xs">{item.quantity}</span>x
+            </Badge>
+          </div>
+
+          <div>
+            {isAddedItem && (
+              <Badge
+                size="2xsmall"
+                rounded="full"
+                color="blue"
+                className="mr-1"
+              >
+                {t("general.new")}
+              </Badge>
+            )}
+
+            {isItemRemoved ? (
+              <Badge
+                size="2xsmall"
+                rounded="full"
+                color="red"
+                className="mr-1"
+              >
+                {t("general.removed")}
+              </Badge>
+            ) : (
+              isItemUpdated && (
+                <Badge
+                  size="2xsmall"
+                  rounded="full"
+                  color="orange"
+                  className="mr-1"
+                >
+                  {t("general.modified")}
+                </Badge>
+              )
+            )}
+          </div>
+
+          <div className="overflow-visible"></div>
+        </div>
+
+        <AmountCell
+          className="text-sm text-right justify-end items-end"
+          currencyCode={currencyCode}
+          amount={
+            isAddedItem ? item.detail.quantity * item.unit_price : item.total
+          }
+          originalAmount={isAddedItem ? item?.total : originalItem?.total}
+        />
       </div>
-    </>
+    </div>
   );
 };
