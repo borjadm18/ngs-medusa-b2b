@@ -20,6 +20,8 @@ El siguiente salto es cerrar el backoffice no tecnico. La home, marca, navegacio
 | Admin B2B              | Parcial alto              | Widget packaging con import/export y bulk basico. Admin Home, Brand profile y Assets existen. Falta UX avanzada de packaging, storage externo de assets y editores por perfil activo.                                                                                     |
 | Presupuestos           | Base heredada + integrado | Flujo existe; falta enriquecer presupuesto con packaging/logistica completa.                                                                                                                                                                                              |
 | Aprobaciones           | Base heredada + integrado | Existe en cuenta/carrito/checkout; falta validacion UX y casos demo claros.                                                                                                                                                                                               |
+| Reglas catalogo/precio | Pendiente estrategico     | Falta capa para descuentos por cliente, zona, canal, segmento y visibilidad de catalogo por region/canal. Debe apoyarse en price lists, regions, customer groups y sales channels de Medusa antes de crear logica propia.                                                   |
+| Multicanal/multiregion | Pendiente estrategico     | Falta modelar canales B2B, distribuidores, instaladores, regiones, monedas, impuestos y surtidos por mercado.                                                                                                                                                              |
 | Import/export          | Parcial                   | Packaging CSV y cart CSV. Falta import/export homepage, brand profile y presupuesto.                                                                                                                                                                                      |
 | Documentacion template | Iniciada                  | `docs/b2b-template`, `templates`, `profiles/ngs`.                                                                                                                                                                                                                         |
 
@@ -136,6 +138,22 @@ Pendiente:
 - Export de presupuesto con packaging/logistica.
 - Importadores CLI.
 
+### Reglas de catalogo, precio y canal
+
+Pendiente estrategico.
+
+- Descuentos por cliente, compania, grupo, zona, region y canal.
+- Price lists demo por segmento/cuenta.
+- Visibilidad de productos y categorias por canal o segmento.
+- Surtidos por region y mercado.
+- Simulador en Admin para ver el catalogo como un cliente/canal/region.
+- Import/export CSV de reglas comerciales.
+
+Principio:
+
+- Reutilizar primero capacidades core de Medusa: price lists, customer groups, regions, currencies, sales channels y pricing.
+- Crear modulo propio solo para reglas industriales no cubiertas por el core, como zona comercial, canal operativo, visibilidad avanzada o descuentos ligados a packaging/pallet.
+
 ### OpenWiki
 
 Bloqueado.
@@ -178,8 +196,10 @@ Siguiente accion:
 1. Presupuesto con packaging/logistica completa.
 2. Export PDF/CSV de presupuesto.
 3. Busqueda por SKU/EAN/atributos tecnicos.
-4. Price lists por segmento/cuenta demo.
-5. Integracion ERP/PIM por CSV primero.
+4. Reglas de catalogo/precio por cliente, zona, region y canal.
+5. Multicanal y multiregion: sales channels, regions, monedas, impuestos y surtidos.
+6. Price lists por segmento/cuenta demo.
+7. Integracion ERP/PIM por CSV primero.
 
 ### P4 - Producto Template
 

@@ -7,6 +7,8 @@ Este repositorio debe evolucionar de POC NGS a un template reusable para ecommer
 Crear una base repetible para clientes B2B que necesitan:
 
 - Catalogo con precios por cuenta, region, canal o volumen.
+- Reglas de catalogo por cliente, zona, canal, region y segmento.
+- Multicanal y multiregion con surtidos, precios, impuestos y condiciones diferenciadas.
 - Compra por unidad, caja, multiplo, minimo y pallet.
 - Presupuesto, aprobaciones, companias y roles.
 - Admin operativo para contenido, packaging y datos B2B.
@@ -26,6 +28,8 @@ Crear una base repetible para clientes B2B que necesitan:
 | --- | --- | --- |
 | Medusa backend B2B | Base existente | Companias, empleados, aprobaciones, presupuestos, carrito y checkout. |
 | Product packaging module | Implementado | Reglas por variante: unidad/caja, minimo, multiplo, pallet, peso, dimensiones. |
+| Catalog/pricing rules | Pendiente estrategico | Descuentos y visibilidad por cliente, zona, canal, region y segmento apoyandose en core Medusa. |
+| Multicanal/multiregion | Pendiente estrategico | Sales channels, regiones, monedas, impuestos, surtidos y condiciones comerciales por mercado. |
 | Homepage content module | Implementado | Contenido editable de home desde backend. |
 | Admin widgets | Implementado parcial | Edicion de packaging y acciones masivas basicas. |
 | Storefront B2B | Implementado NGS | Home, PDP, catalogo, carrito y presupuesto con patron industrial. |
@@ -72,9 +76,10 @@ client-profile
 3. Packaging se puede importar/exportar por CSV.
 4. El storefront no contiene copy de NGS fuera del perfil activo.
 5. El backend valida reglas B2B en add-to-cart, edicion de carrito y checkout.
-6. La demo seed crea datos consistentes en menos de 10 minutos.
-7. Hay guia de despliegue Render/Vercel y guia local.
-8. Hay tests o checks automatizados para las reglas criticas.
+6. Hay reglas demostrables de precio/catalogo por cliente, region, canal o segmento.
+7. La demo seed crea datos consistentes en menos de 10 minutos.
+8. Hay guia de despliegue Render/Vercel y guia local.
+9. Hay tests o checks automatizados para las reglas criticas.
 
 ## Perfil Activo En Storefront
 

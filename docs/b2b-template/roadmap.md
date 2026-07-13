@@ -87,7 +87,46 @@ Resultado esperado:
 
 - Operaciones puede alimentar la demo desde Excel.
 
-## Fase 5. Template Launcher
+## Fase 5. Reglas De Catalogo, Multicanal Y Multirregion
+
+Prioridad: alta.
+
+- Reglas de catalogo por cliente, compania, zona, region y canal.
+- Descuentos por:
+  - cliente o compania.
+  - segmento comercial.
+  - zona geografica.
+  - canal B2B, distribuidor, instalador, retail o marketplace.
+  - volumen, caja, pallet o recurrencia.
+- Price lists demo por segmento/cuenta usando capacidades core de Medusa siempre que sea posible.
+- Visibilidad de catalogo por canal:
+  - productos visibles/ocultos por cliente o segmento.
+  - categorias diferentes por canal.
+  - surtidos por region.
+- Multiregion:
+  - regiones, monedas, impuestos y paises soportados.
+  - disponibilidad y reglas logisticas por region.
+  - copy y condiciones comerciales por mercado.
+- Multicanal:
+  - storefront B2B directo.
+  - portal distribuidores.
+  - canal instaladores/proyectos.
+  - posible marketplace o integracion ERP/PIM.
+- Admin para gestionar o importar reglas:
+  - CSV reglas catalogo/precio.
+  - preview y validacion por fila.
+  - simulador "ver catalogo como cliente/canal/region".
+
+Resultado esperado:
+
+- El template puede demostrar escenarios B2B reales donde un cliente ve precios, surtido y condiciones distintos segun quien es, donde compra y por que canal entra.
+
+Notas de arquitectura:
+
+- Reutilizar price lists, regions, customer groups, sales channels y pricing core de Medusa cuando cubran el caso.
+- Crear modulo propio solo para reglas industriales que Medusa no cubra de forma nativa, como visibilidad avanzada, zona comercial, canal operativo o descuentos ligados a packaging/pallet.
+
+## Fase 6. Template Launcher
 
 Prioridad: media.
 
@@ -118,7 +157,7 @@ pnpm sync:client-profile
 
 Siguiente paso: convertirlo en launcher interactivo que cree la carpeta de perfil, copie assets, valide packaging y prepare envs.
 
-## Fase 6. Vertical Packs
+## Fase 7. Vertical Packs
 
 Prioridad: media.
 
