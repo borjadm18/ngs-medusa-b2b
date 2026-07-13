@@ -1,5 +1,6 @@
 import { getClientSeoTitle } from "@/lib/client-profile"
 import { getCollectionByHandle } from "@/lib/data/collections"
+import { retrieveCustomer } from "@/lib/data/customer"
 import CollectionTemplate from "@/modules/collections/templates"
 import { SortOptions } from "@/modules/store/components/refinement-list/sort-products"
 import { Metadata } from "next"
@@ -24,7 +25,10 @@ export async function generateStaticParams() {
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params
-  const collection = await getCollectionByHandle(params.handle)
+  const [collection, customer] = await Promise.all([
+    getCollectionByHandle(params.handle),
+    retrieveCustomer().catch(() => null),
+  ])
 
   if (!collection) {
     notFound()
@@ -55,6 +59,7 @@ export default async function CollectionPage(props: Props) {
       page={page}
       sortBy={sortBy}
       countryCode={params.countryCode}
+      customer={customer}
     />
   )
 }

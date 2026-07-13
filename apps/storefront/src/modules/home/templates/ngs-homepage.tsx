@@ -10,17 +10,23 @@ export function NgsHomepage({
   content,
   categories,
   products,
+  canViewPrices = false,
 }: {
   content: HomepageContent
   categories: HttpTypes.StoreProductCategory[]
   products: HttpTypes.StoreProduct[]
+  canViewPrices?: boolean
 }) {
   return (
     <main className="bg-white text-neutral-950">
       <HeroSection content={content} />
       <FeaturedCategories categories={categories} content={content} />
       <BusinessSolutions content={content} />
-      <FeaturedProducts products={products} content={content} />
+      <FeaturedProducts
+        products={products}
+        content={content}
+        canViewPrices={canViewPrices}
+      />
       <CommercialCta content={content} />
     </main>
   )

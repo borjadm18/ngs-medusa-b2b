@@ -18,6 +18,7 @@ type ProductTemplateProps = {
   region: HttpTypes.StoreRegion
   countryCode: string
   profile?: ClientProfile
+  canViewPrices?: boolean
 }
 
 const ProductTemplate: React.FC<ProductTemplateProps> = ({
@@ -25,6 +26,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   region,
   countryCode,
   profile,
+  canViewPrices = false,
 }) => {
   if (!product || !product.id) {
     return notFound()
@@ -40,11 +42,25 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
       >
         <ImageGallery product={product} />
         <div className="flex h-fit w-full flex-col items-start gap-7 rounded-lg bg-neutral-50 p-6 small:p-10 medium:sticky medium:top-24">
-          <ProductInfo product={product} profile={profile} />
+          <ProductInfo
+            product={product}
+            profile={profile}
+            canViewPrices={canViewPrices}
+          />
           <Suspense
-            fallback={<ProductActions product={product} region={region} />}
+            fallback={
+              <ProductActions
+                product={product}
+                region={region}
+                canViewPrices={canViewPrices}
+              />
+            }
           >
-            <ProductActionsWrapper id={product.id} region={region} />
+            <ProductActionsWrapper
+              id={product.id}
+              region={region}
+              canViewPrices={canViewPrices}
+            />
           </Suspense>
         </div>
       </div>
@@ -60,6 +76,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
             product={product}
             countryCode={countryCode}
             profile={profile}
+            canViewPrices={canViewPrices}
           />
         </Suspense>
       </div>

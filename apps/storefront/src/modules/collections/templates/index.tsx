@@ -3,6 +3,7 @@ import SkeletonProductGrid from "@/modules/skeletons/templates/skeleton-product-
 import RefinementList from "@/modules/store/components/refinement-list"
 import { SortOptions } from "@/modules/store/components/refinement-list/sort-products"
 import PaginatedProducts from "@/modules/store/templates/paginated-products"
+import { B2BCustomer } from "@/types"
 import { HttpTypes } from "@medusajs/types"
 import { Suspense } from "react"
 
@@ -11,11 +12,13 @@ export default function CollectionTemplate({
   collection,
   page,
   countryCode,
+  customer,
 }: {
   sortBy?: SortOptions
   collection: HttpTypes.StoreCollection
   page?: string
   countryCode: string
+  customer?: B2BCustomer | null
 }) {
   const pageNumber = page ? parseInt(page) : 1
   const sort = sortBy || "created_at"
@@ -37,6 +40,7 @@ export default function CollectionTemplate({
                 page={pageNumber}
                 collectionId={collection.id}
                 countryCode={countryCode}
+                customer={customer}
               />
             </Suspense>
           </div>

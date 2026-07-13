@@ -6,17 +6,20 @@ import { getProductPrice } from "@/lib/util/get-product-price"
 import { ArrowRight } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
 import Image from "next/image"
+import { PriceLoginGate } from "../price-login-gate"
 
 type RelatedProductsProps = {
   product: HttpTypes.StoreProduct
   countryCode: string
   profile?: ClientProfile
+  canViewPrices?: boolean
 }
 
 export default async function RelatedProducts({
   product,
   countryCode,
   profile,
+  canViewPrices = false,
 }: RelatedProductsProps) {
   const region = await getRegion(countryCode)
 
@@ -104,9 +107,15 @@ export default async function RelatedProducts({
                 <h3 className="mt-1 line-clamp-2 min-h-10 text-sm font-semibold text-neutral-950">
                   {relatedProduct.title}
                 </h3>
-                <p className="mt-3 text-sm font-semibold text-neutral-950">
-                  {cheapestPrice?.calculated_price || "Consultar"}
-                </p>
+                <div className="mt-3">
+                  {canViewPrices ? (
+                    <p className="text-sm font-semibold text-neutral-950">
+                      {cheapestPrice?.calculated_price || "Consultar"}
+                    </p>
+                  ) : (
+                    <PriceLoginGate compact />
+                  )}
+                </div>
                 <p className="mt-2 text-xs text-green-600">En stock</p>
               </LocalizedClientLink>
             </li>

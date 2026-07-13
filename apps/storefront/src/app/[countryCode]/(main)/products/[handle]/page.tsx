@@ -1,4 +1,5 @@
 import { retrieveBrandProfile } from "@/lib/data/brand-profile"
+import { retrieveCustomer } from "@/lib/data/customer"
 import { getProductByHandle } from "@/lib/data/products"
 import { getRegion } from "@/lib/data/regions"
 import { getProductPrice } from "@/lib/util/get-product-price"
@@ -62,8 +63,12 @@ export default async function ProductPage(props: Props) {
   if (!pricedProduct) {
     notFound()
   }
-  const profile = await retrieveBrandProfile()
+  const [profile, customer] = await Promise.all([
+    retrieveBrandProfile(),
+    retrieveCustomer().catch(() => null),
+  ])
   const { cheapestPrice } = getProductPrice({ product: pricedProduct })
+  const canViewPrices = Boolean(customer)
   const category = pricedProduct.categories?.[0]
   const productJsonLd = {
     "@context": "https://schema.org",
@@ -76,7 +81,7 @@ export default async function ProductPage(props: Props) {
       name: profile.brand.name,
     },
     image: pricedProduct.images?.map((image) => image.url).filter(Boolean),
-    offers: cheapestPrice
+    offers: canViewPrices && cheapestPrice
       ? {
           "@type": "Offer",
           price: cheapestPrice.calculated_price_number,
@@ -134,6 +139,7 @@ export default async function ProductPage(props: Props) {
         region={region}
         countryCode={params.countryCode}
         profile={profile}
+        canViewPrices={canViewPrices}
       />
     </>
   )

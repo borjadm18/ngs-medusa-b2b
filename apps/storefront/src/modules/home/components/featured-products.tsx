@@ -5,15 +5,18 @@ import { HttpTypes } from "@medusajs/types"
 import Image from "next/image"
 import { Container } from "./container"
 import { SectionHeading } from "./section-heading"
+import { PriceLoginGate } from "@/modules/products/components/price-login-gate"
 
 function ProductCard({
   product,
   image,
   fallbackCategoryLabel,
+  canViewPrices,
 }: {
   product: HttpTypes.StoreProduct
   image: string
   fallbackCategoryLabel: string
+  canViewPrices: boolean
 }) {
   const { cheapestPrice } = getProductPrice({ product })
   const productImage = product.thumbnail || product.images?.[0]?.url || image
@@ -49,9 +52,15 @@ function ProductCard({
         <h3 className="mt-1 line-clamp-2 min-h-[42px] text-base font-semibold leading-5 text-neutral-950">
           {product.title}
         </h3>
-        <p className="mt-2 text-sm font-semibold text-neutral-950">
-          {cheapestPrice?.calculated_price || "Consultar precio"}
-        </p>
+        <div className="mt-2">
+          {canViewPrices ? (
+            <p className="text-sm font-semibold text-neutral-950">
+              {cheapestPrice?.calculated_price || "Consultar precio"}
+            </p>
+          ) : (
+            <PriceLoginGate compact />
+          )}
+        </div>
         <span className="mt-4 inline-flex min-h-10 items-center justify-center rounded bg-neutral-100 px-4 text-sm font-semibold text-neutral-950 transition group-hover:bg-neutral-950 group-hover:text-white">
           Ver detalles
         </span>
@@ -63,9 +72,11 @@ function ProductCard({
 export function FeaturedProducts({
   products,
   content,
+  canViewPrices = false,
 }: {
   products: HttpTypes.StoreProduct[]
   content: HomepageContent
+  canViewPrices?: boolean
 }) {
   const fallbackProductImages = content.productFallbackImages
 
@@ -89,6 +100,7 @@ export function FeaturedProducts({
                     ] || ""
                   }
                   fallbackCategoryLabel={content.catalogEyebrow}
+                  canViewPrices={canViewPrices}
                 />
               </div>
             ))}

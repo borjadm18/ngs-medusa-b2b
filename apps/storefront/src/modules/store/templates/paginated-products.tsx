@@ -71,6 +71,7 @@ export default async function PaginatedProducts({
   })
 
   const totalPages = Math.ceil(count / PRODUCT_LIMIT)
+  const canViewPrices = Boolean(customer)
 
   return (
     <>
@@ -82,7 +83,11 @@ export default async function PaginatedProducts({
           products.map((p) => {
             return (
               <li key={p.id}>
-                <ProductPreview product={p} region={region} />
+                <ProductPreview
+                  product={p}
+                  region={region}
+                  canViewPrices={canViewPrices}
+                />
               </li>
             )
           })

@@ -7,6 +7,7 @@ import { convertToLocale } from "@/lib/util/money"
 import Button from "@/modules/common/components/button"
 import FilePlus from "@/modules/common/icons/file-plus"
 import ShoppingBag from "@/modules/common/icons/shopping-bag"
+import { PriceLoginGate } from "../price-login-gate"
 import { HttpTypes, StoreProduct, StoreProductVariant } from "@medusajs/types"
 import { clx } from "@medusajs/ui"
 import { useState } from "react"
@@ -16,10 +17,12 @@ const ProductVariantsTable = ({
   product,
   region,
   packagingByVariantId = {},
+  canViewPrices = false,
 }: {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
   packagingByVariantId?: Record<string, StoreProductPackaging>
+  canViewPrices?: boolean
 }) => {
   const [isAdding, setIsAdding] = useState(false)
   const [lineItemsMap, setLineItemsMap] = useState<
@@ -45,15 +48,17 @@ const ProductVariantsTable = ({
     0
   )
   const { cheapestPrice } = getProductPrice({ product })
-  const totalPrice = Array.from(lineItemsMap.values()).reduce((acc, lineItem) => {
-    const { variantPrice } = getProductPrice({
-      product,
-      variantId: lineItem.id,
-    })
-    const unitPrice = Number(variantPrice?.calculated_price_number || 0)
+  const totalPrice = canViewPrices
+    ? Array.from(lineItemsMap.values()).reduce((acc, lineItem) => {
+        const { variantPrice } = getProductPrice({
+          product,
+          variantId: lineItem.id,
+        })
+        const unitPrice = Number(variantPrice?.calculated_price_number || 0)
 
-    return acc + unitPrice * lineItem.quantity
-  }, 0)
+        return acc + unitPrice * lineItem.quantity
+      }, 0)
+    : 0
   const totalCurrency =
     Array.from(lineItemsMap.values())
       .map((lineItem) =>
@@ -66,7 +71,7 @@ const ProductVariantsTable = ({
     cheapestPrice?.currency_code ||
     region.currency_code
   const formattedTotal =
-    totalUnits > 0
+    canViewPrices && totalUnits > 0
       ? convertToLocale({
           amount: totalPrice,
           currency_code: totalCurrency,
@@ -186,13 +191,19 @@ const ProductVariantsTable = ({
             <div className="shrink-0 text-right">
               <p className="text-xs text-neutral-500">Desde</p>
               <p className="text-2xl font-semibold text-neutral-950">
-                {cheapestPrice?.calculated_price || "Consultar"}
+                {canViewPrices
+                  ? cheapestPrice?.calculated_price || "Consultar"
+                  : "Acceso requerido"}
               </p>
-              <p className="text-[11px] uppercase text-neutral-500">Sin IVA</p>
+              <p className="text-[11px] uppercase text-neutral-500">
+                {canViewPrices ? "Sin IVA" : "Tarifa B2B privada"}
+              </p>
             </div>
           </div>
 
-          {priceRule && (
+          {!canViewPrices && <div className="mt-4"><PriceLoginGate /></div>}
+
+          {canViewPrices && priceRule && (
             <div className="mt-4 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="font-semibold text-neutral-950">
@@ -253,12 +264,14 @@ const ProductVariantsTable = ({
                     )}
                   </div>
                   <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-neutral-600">
-                    <span>
-                      <span className="text-neutral-500">Precio</span>{" "}
-                      <strong className="font-semibold text-neutral-950">
-                        {variantPrice?.calculated_price ?? "Consultar"}
-                      </strong>
-                    </span>
+                    {canViewPrices && (
+                      <span>
+                        <span className="text-neutral-500">Precio</span>{" "}
+                        <strong className="font-semibold text-neutral-950">
+                          {variantPrice?.calculated_price ?? "Consultar"}
+                        </strong>
+                      </span>
+                    )}
                     <span>
                       <span className="text-neutral-500">Caja</span>{" "}
                       <strong className="font-semibold text-neutral-950">
@@ -328,14 +341,16 @@ const ProductVariantsTable = ({
         variant="primary"
         className="h-12 w-full rounded-lg text-sm"
         isLoading={isAdding}
-        disabled={totalUnits === 0}
+        disabled={!canViewPrices || totalUnits === 0}
         data-testid="add-product-button"
       >
         <ShoppingBag
           className="text-white"
           fill={totalUnits === 0 ? "none" : "#fff"}
         />
-        {totalUnits === 0
+        {!canViewPrices
+          ? "Inicia sesion para comprar"
+          : totalUnits === 0
           ? "Selecciona cantidades"
           : `Anadir ${formattedTotal} (${totalUnits} uds) al carrito`}
       </Button>
@@ -343,11 +358,13 @@ const ProductVariantsTable = ({
       <Button
         variant="secondary"
         className="h-11 w-full rounded-lg text-sm"
-        disabled={totalUnits === 0}
+        disabled={!canViewPrices || totalUnits === 0}
         onClick={handleAddToCart}
       >
         <FilePlus />
-        {totalUnits === 0
+        {!canViewPrices
+          ? "Inicia sesion para solicitar presupuesto"
+          : totalUnits === 0
           ? "Solicitar presupuesto"
           : "Anadir seleccion al presupuesto"}
       </Button>

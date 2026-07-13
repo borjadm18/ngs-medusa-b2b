@@ -9,9 +9,11 @@ import ProductActions from "@/modules/products/components/product-actions"
 export default async function ProductActionsWrapper({
   id,
   region,
+  canViewPrices = false,
 }: {
   id: string
   region: HttpTypes.StoreRegion
+  canViewPrices?: boolean
 }) {
   const [product] = await getProductsById({
     ids: [id],
@@ -31,6 +33,7 @@ export default async function ProductActionsWrapper({
       product={product}
       region={region}
       packagingByVariantId={packagingByVariantId}
+      canViewPrices={canViewPrices}
     />
   )
 }

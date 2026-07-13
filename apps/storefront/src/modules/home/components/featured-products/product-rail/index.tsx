@@ -1,4 +1,5 @@
 import { getProductsById } from "@/lib/data/products"
+import { retrieveCustomer } from "@/lib/data/customer"
 import { HttpTypes } from "@medusajs/types"
 import { Text } from "@medusajs/ui"
 
@@ -22,6 +23,7 @@ export default async function ProductRail({
     ids: products.map((p) => p.id!),
     regionId: region.id,
   })
+  const customer = await retrieveCustomer().catch(() => null)
 
   return (
     <div className="content-container py-12 small:py-24 bg-neutral-100">
@@ -35,7 +37,12 @@ export default async function ProductRail({
         {productsWithPrices &&
           productsWithPrices.map((product) => (
             <li key={product.id}>
-              <ProductPreview product={product} region={region} isFeatured />
+              <ProductPreview
+                product={product}
+                region={region}
+                isFeatured
+                canViewPrices={Boolean(customer)}
+              />
             </li>
           ))}
       </ul>

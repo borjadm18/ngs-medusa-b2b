@@ -12,9 +12,14 @@ import { HttpTypes } from "@medusajs/types"
 type ProductInfoProps = {
   product: HttpTypes.StoreProduct
   profile?: ClientProfile
+  canViewPrices?: boolean
 }
 
-const ProductInfo = ({ product, profile }: ProductInfoProps) => {
+const ProductInfo = ({
+  product,
+  profile,
+  canViewPrices = false,
+}: ProductInfoProps) => {
   const firstVariant = product.variants?.[0]
   const inventory = getInventorySummary(product)
   const highlights = getProductHighlights(product, profile)
@@ -83,7 +88,7 @@ const ProductInfo = ({ product, profile }: ProductInfoProps) => {
         {getProductSubtitle(product, profile)}
       </p>
 
-      {(priceRule || catalogRuleSummary?.requiresQuote) && (
+      {canViewPrices && (priceRule || catalogRuleSummary?.requiresQuote) && (
         <div className="mt-5 rounded-lg border border-neutral-200 bg-white p-4">
           <p className="text-xs font-semibold uppercase tracking-normal text-neutral-500">
             Condicion comercial B2B

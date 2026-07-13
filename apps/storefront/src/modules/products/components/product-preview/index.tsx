@@ -6,15 +6,18 @@ import LocalizedClientLink from "@/modules/common/components/localized-client-li
 import Thumbnail from "../thumbnail"
 import PreviewAddToCart from "./preview-add-to-cart"
 import PreviewPrice from "./price"
+import { PriceLoginGate } from "../price-login-gate"
 
 export default async function ProductPreview({
   product,
   isFeatured,
   region,
+  canViewPrices = false,
 }: {
   product: HttpTypes.StoreProduct
   isFeatured?: boolean
   region: HttpTypes.StoreRegion
+  canViewPrices?: boolean
 }) {
   if (!product) {
     return null
@@ -47,7 +50,7 @@ export default async function ProductPreview({
         <div className="flex flex-col txt-compact-medium">
           <div className="flex flex-wrap items-center gap-2">
             <Text className="text-neutral-600 text-xs">BRAND</Text>
-            {priceRule && (
+            {canViewPrices && priceRule && (
               <span className="rounded border border-neutral-950 bg-neutral-950 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-white">
                 {priceRule.effect_type === "discount_percentage"
                   ? `${priceRule.discount_percentage}% B2B`
@@ -65,8 +68,14 @@ export default async function ProductPreview({
           </Text>
         </div>
         <div className="flex flex-col gap-0">
-          {cheapestPrice && <PreviewPrice price={cheapestPrice} />}
-          <Text className="text-neutral-600 text-[0.6rem]">Excl. VAT</Text>
+          {canViewPrices && cheapestPrice ? (
+            <>
+              <PreviewPrice price={cheapestPrice} />
+              <Text className="text-neutral-600 text-[0.6rem]">Excl. VAT</Text>
+            </>
+          ) : (
+            <PriceLoginGate compact />
+          )}
         </div>
         <div className="flex justify-between">
           <div className="flex flex-row gap-1 items-center">
@@ -86,7 +95,7 @@ export default async function ProductPreview({
               {inventoryQuantity} left
             </Text>
           </div>
-          <PreviewAddToCart product={product} region={region} />
+          {canViewPrices && <PreviewAddToCart product={product} region={region} />}
         </div>
       </div>
     </LocalizedClientLink>

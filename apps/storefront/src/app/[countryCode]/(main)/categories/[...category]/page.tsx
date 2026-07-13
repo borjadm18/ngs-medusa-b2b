@@ -1,5 +1,6 @@
 import { getClientSeoTitle } from "@/lib/client-profile"
 import { getCategoryByHandle, listCategories } from "@/lib/data/categories"
+import { retrieveCustomer } from "@/lib/data/customer"
 import CategoryTemplate from "@/modules/categories/templates"
 import { SortOptions } from "@/modules/store/components/refinement-list/sort-products"
 import { Metadata } from "next"
@@ -47,7 +48,10 @@ export default async function CategoryPage(props: Props) {
   const params = await props.params
   const { sortBy, page } = searchParams
 
-  const categories = await listCategories()
+  const [categories, customer] = await Promise.all([
+    listCategories(),
+    retrieveCustomer().catch(() => null),
+  ])
 
   const currentCategory = categories.find(
     (category) => category.handle === params.category.join("/")
@@ -64,6 +68,7 @@ export default async function CategoryPage(props: Props) {
       sortBy={sortBy}
       page={page}
       countryCode={params.countryCode}
+      customer={customer}
     />
   )
 }

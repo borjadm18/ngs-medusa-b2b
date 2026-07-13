@@ -1,5 +1,6 @@
 import { retrieveBrandProfile } from "@/lib/data/brand-profile"
 import { listCategories } from "@/lib/data/categories"
+import { retrieveCustomer } from "@/lib/data/customer"
 import {
   DEFAULT_HOMEPAGE_CONTENT,
   getHomepageContent,
@@ -46,7 +47,7 @@ export default async function Home(props: {
 }) {
   const { countryCode } = await props.params
 
-  const [categories, productsResult, homepage, profile] = await Promise.all([
+  const [categories, productsResult, homepage, profile, customer] = await Promise.all([
     withTimeout(
       listCategories({ limit: 12 }).catch(() => []),
       []
@@ -62,6 +63,7 @@ export default async function Home(props: {
     ),
     withTimeout(getHomepageContent(), DEFAULT_HOMEPAGE_CONTENT),
     retrieveBrandProfile(),
+    retrieveCustomer().catch(() => null),
   ])
 
   const products = productsResult?.response.products || []
@@ -83,6 +85,7 @@ export default async function Home(props: {
         content={homepage}
         categories={categories}
         products={products}
+        canViewPrices={Boolean(customer)}
       />
     </>
   )

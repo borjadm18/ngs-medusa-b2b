@@ -8,12 +8,14 @@ type ProductActionsProps = {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
   packagingByVariantId?: Record<string, StoreProductPackaging>
+  canViewPrices?: boolean
 }
 
 export default function ProductActions({
   product,
   region,
   packagingByVariantId,
+  canViewPrices = false,
 }: ProductActionsProps) {
   return (
     <>
@@ -22,6 +24,7 @@ export default function ProductActions({
           product={product}
           region={region}
           packagingByVariantId={packagingByVariantId}
+          canViewPrices={canViewPrices}
         />
       </div>
     </>

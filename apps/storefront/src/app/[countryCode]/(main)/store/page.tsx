@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: `Catalogo | ${profile.brand.name} B2B`,
-    description: `Catalogo mayorista ${profile.brand.name} con filtros, precios por region y disponibilidad.`,
+    description: `Catalogo mayorista ${profile.brand.name} con filtros, disponibilidad y tarifas B2B bajo acceso.`,
   }
 }
 
@@ -60,8 +60,8 @@ export default async function StorePage(props: Params) {
             Productos {profile.brand.name} para compra B2B
           </h1>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-600">
-            Filtra por categoria y atributos, revisa precio calculado por region
-            y anade unidades al carrito para pedido o solicitud de presupuesto.
+            Filtra por categoria y atributos. Las tarifas negociadas, descuentos
+            y compra online estan disponibles tras iniciar sesion.
           </p>
         </div>
       </section>

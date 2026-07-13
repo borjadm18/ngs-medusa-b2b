@@ -1,12 +1,19 @@
 import { clx, Text } from "@medusajs/ui"
 import { getProductPrice } from "@/lib/util/get-product-price"
 import { HttpTypes } from "@medusajs/types"
+import { PriceLoginGate } from "../price-login-gate"
 
 export default function ProductPrice({
   product,
+  canViewPrices = false,
 }: {
   product: HttpTypes.StoreProduct
+  canViewPrices?: boolean
 }) {
+  if (!canViewPrices) {
+    return <PriceLoginGate />
+  }
+
   const { cheapestPrice } = getProductPrice({
     product,
   })

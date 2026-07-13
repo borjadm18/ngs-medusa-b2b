@@ -8,6 +8,7 @@ import ChevronDown from "@/modules/common/icons/chevron-down"
 import X from "@/modules/common/icons/x"
 import React, { Fragment, useMemo } from "react"
 import OptionSelect from "./option-select"
+import { PriceLoginGate } from "../price-login-gate"
 
 type MobileActionsProps = {
   product: HttpTypes.StoreProduct
@@ -19,6 +20,7 @@ type MobileActionsProps = {
   isAdding?: boolean
   show: boolean
   optionsDisabled: boolean
+  canViewPrices?: boolean
 }
 
 const MobileActions: React.FC<MobileActionsProps> = ({
@@ -31,6 +33,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   isAdding,
   show,
   optionsDisabled,
+  canViewPrices = false,
 }) => {
   const { state, open, close } = useToggleState()
 
@@ -72,7 +75,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
             <div className="flex items-center gap-x-2">
               <span data-testid="mobile-title">{product.title}</span>
               <span>—</span>
-              {selectedPrice ? (
+              {canViewPrices && selectedPrice ? (
                 <div className="flex items-end gap-x-2 text-ui-fg-base">
                   {selectedPrice.price_type === "sale" && (
                     <p>
@@ -90,8 +93,10 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                     {selectedPrice.calculated_price}
                   </span>
                 </div>
-              ) : (
+              ) : canViewPrices ? (
                 <div></div>
+              ) : (
+                <PriceLoginGate compact />
               )}
             </div>
             <div className="grid grid-cols-2 w-full gap-x-4">
@@ -112,12 +117,14 @@ const MobileActions: React.FC<MobileActionsProps> = ({
               </Button>
               <Button
                 onClick={handleAddToCart}
-                disabled={!inStock || !variant}
+                disabled={!canViewPrices || !inStock || !variant}
                 className="w-full"
                 isLoading={isAdding}
                 data-testid="mobile-cart-button"
               >
-                {!variant
+                {!canViewPrices
+                  ? "Inicia sesion"
+                  : !variant
                   ? "Select variant"
                   : !inStock
                   ? "Out of stock"
