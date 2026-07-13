@@ -15,6 +15,7 @@ Modulos registrados en `apps/backend/medusa-config.ts`:
 - `homepage`
 - `brandProfile`
 - `assetLibrary`
+- `catalogRules`
 - `Modules.CACHE`
 - `Modules.WORKFLOW_ENGINE`
 
@@ -86,6 +87,37 @@ Mostrar la implicacion logistica de la seleccion:
 - Pallet share.
 
 Estado: implementado en carrito, pendiente profundizar en presupuesto.
+
+### Catalog Rules
+
+Reglas comerciales por contexto B2B:
+
+- cliente/compania.
+- customer group.
+- region.
+- sales channel.
+- zona comercial.
+- moneda.
+- producto, variante, categoria, coleccion o todo el catalogo.
+- descuento porcentual, precio fijo, ocultacion, surtido exclusivo o requiere presupuesto.
+
+Estado: base backend implementada.
+
+Incluye:
+
+- modulo `catalogRules`.
+- tabla `catalog_rule`.
+- Admin API para crear/listar/eliminar reglas.
+- Store API para evaluar reglas activas aplicables a un contexto.
+- smoke remoto `pnpm smoke:catalog-rules`.
+
+Siguiente mejora:
+
+- Admin UI para reglas.
+- import/export CSV con preview.
+- integracion real con price lists/pricing de Medusa cuando sea descuento/precio.
+- integracion con catalogo/storefront para ocultar o priorizar surtidos.
+- simulador "ver catalogo como cliente/canal/region".
 
 ## Content Operations
 

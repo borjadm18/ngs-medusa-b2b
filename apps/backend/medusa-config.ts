@@ -5,6 +5,7 @@ import { HOMEPAGE_MODULE } from "./src/modules/homepage";
 import { PRODUCT_PACKAGING_MODULE } from "./src/modules/product-packaging";
 import { BRAND_PROFILE_MODULE } from "./src/modules/brand-profile";
 import { ASSET_LIBRARY_MODULE } from "./src/modules/asset-library";
+import { CATALOG_RULES_MODULE } from "./src/modules/catalog-rules";
 import { loadEnv, defineConfig, Modules } from "@medusajs/framework/utils";
 
 loadEnv(process.env.NODE_ENV || "development", process.cwd());
@@ -42,6 +43,9 @@ module.exports = defineConfig({
     },
     [ASSET_LIBRARY_MODULE]: {
       resolve: "./modules/asset-library",
+    },
+    [CATALOG_RULES_MODULE]: {
+      resolve: "./modules/catalog-rules",
     },
     [Modules.CACHE]: {
       resolve: "@medusajs/medusa/cache-inmemory",

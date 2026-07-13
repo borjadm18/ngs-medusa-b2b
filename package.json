@@ -10,6 +10,7 @@
     "lint": "turbo run lint",
     "sync:client-profile": "node scripts/sync-client-profile.mjs",
     "smoke:admin-packaging": "node scripts/smoke-admin-packaging.mjs",
+    "smoke:catalog-rules": "node scripts/smoke-catalog-rules.mjs",
     "smoke:brand-profile": "node scripts/smoke-brand-profile.mjs",
     "smoke:assets": "node scripts/smoke-assets.mjs",
     "test": "turbo run test",

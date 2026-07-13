@@ -122,6 +122,21 @@ Resultado esperado:
 
 - El template puede demostrar escenarios B2B reales donde un cliente ve precios, surtido y condiciones distintos segun quien es, donde compra y por que canal entra.
 
+Estado 2026-07-13:
+
+- Modulo backend `catalogRules` creado.
+- Admin API inicial: `GET/POST /admin/catalog-rules`, `GET/DELETE /admin/catalog-rules/:id`.
+- Store API inicial: `GET /store/catalog-rules` devuelve reglas activas aplicables a producto/variante/categoria/coleccion + compania/grupo/region/canal/zona/moneda.
+- Migracion `catalog_rule` generada con indices para estado, target, compania, grupo, region y canal.
+- Smoke remoto `pnpm smoke:catalog-rules` preparado.
+
+Pendiente:
+
+- Aplicar reglas de precio contra price lists/pricing core de Medusa.
+- Aplicar visibilidad/surtidos en listados Storefront.
+- Admin UI de gestion y simulador.
+- Import/export CSV con preview.
+
 Notas de arquitectura:
 
 - Reutilizar price lists, regions, customer groups, sales channels y pricing core de Medusa cuando cubran el caso.
