@@ -253,9 +253,9 @@ const ProductVariantsTable = ({
                 )}
               >
                 <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
                     <VariantSwatches options={visibleOptions} />
-                    <p className="text-sm font-semibold text-neutral-950">
+                    <p className="min-w-0 truncate text-sm font-semibold text-neutral-950">
                       {visibleOptions && visibleOptions.length > 0
                         ? visibleOptions
                             .map((option) => option.value)
@@ -263,7 +263,7 @@ const ProductVariantsTable = ({
                         : variant.title}
                     </p>
                     {variant.sku && (
-                      <span className="rounded border border-neutral-200 bg-white px-2 py-1 text-[11px] font-medium uppercase text-neutral-500">
+                      <span className="shrink-0 rounded border border-neutral-200 bg-white px-2 py-1 text-[11px] font-medium uppercase text-neutral-500">
                         {variant.sku}
                       </span>
                     )}
@@ -394,7 +394,7 @@ const PackagingInfoButton = ({
   const label = details.join(". ")
 
   return (
-    <span className="group relative inline-flex">
+    <span className="group relative inline-flex shrink-0 items-center">
       <button
         type="button"
         aria-label={`Ver packaging. ${label}`}
