@@ -1,6 +1,10 @@
 "use server"
 
 import { sdk } from "@/lib/config"
+import {
+  applyCatalogRulesToProduct,
+  applyCatalogRulesToProducts,
+} from "@/lib/data/catalog-rules"
 import { getAuthHeaders, getCacheOptions } from "@/lib/data/cookies"
 import { getRegion } from "@/lib/data/regions"
 import { sortProducts } from "@/lib/util/sort-products"
@@ -55,12 +59,30 @@ export const getProductByHandle = async (handle: string, regionId: string) => {
         handle,
         region_id: regionId,
         fields:
-          "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags",
+          "*variants.calculated_price,+variants.inventory_quantity,+metadata,+tags,*categories,*collection",
       },
       headers,
       next,
     })
-    .then(({ products }) => products[0])
+    .then(async ({ products }) => {
+      const product = products[0]
+
+      if (!product) {
+        return undefined
+      }
+
+      const currencyCode =
+        product.variants?.find((variant) => variant.calculated_price)
+          ?.calculated_price?.currency_code || "eur"
+
+      return applyCatalogRulesToProduct({
+        product,
+        region: {
+          id: regionId,
+          currency_code: currencyCode,
+        } as HttpTypes.StoreRegion,
+      })
+    })
 }
 
 export const listProducts = async ({
@@ -106,20 +128,33 @@ export const listProducts = async ({
           limit,
           offset,
           region_id: region.id,
-          fields: "*variants.calculated_price,*variants.options",
+          fields:
+            "*variants.calculated_price,*variants.options,*categories,*collection",
           ...queryParams,
         },
         headers,
         next,
       }
     )
-    .then(({ products, count }) => {
-      const nextPage = count > offset + limit ? pageParam + 1 : null
+    .then(async ({ products, count }) => {
+      const visibleProducts = await applyCatalogRulesToProducts({
+        products,
+        region,
+        categoryId: Array.isArray(queryParams?.category_id)
+          ? queryParams?.category_id[0]
+          : queryParams?.category_id,
+        collectionId: Array.isArray(queryParams?.collection_id)
+          ? queryParams?.collection_id[0]
+          : queryParams?.collection_id,
+      })
+      const visibleCount =
+        visibleProducts.length === products.length ? count : visibleProducts.length
+      const nextPage = visibleCount > offset + limit ? pageParam + 1 : null
 
       return {
         response: {
-          products,
-          count,
+          products: visibleProducts,
+          count: visibleCount,
         },
         nextPage: nextPage,
         queryParams,

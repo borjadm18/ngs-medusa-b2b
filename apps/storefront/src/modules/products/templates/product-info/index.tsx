@@ -1,3 +1,4 @@
+import { getCatalogRuleSummary } from "@/lib/util/catalog-rules"
 import {
   getInventorySummary,
   getProductHighlights,
@@ -18,6 +19,8 @@ const ProductInfo = ({ product, profile }: ProductInfoProps) => {
   const inventory = getInventorySummary(product)
   const highlights = getProductHighlights(product, profile)
   const category = product.categories?.[0]?.name
+  const catalogRuleSummary = getCatalogRuleSummary(product)
+  const priceRule = catalogRuleSummary?.priceRule
 
   return (
     <section id="product-info" className="w-full">
@@ -79,6 +82,26 @@ const ProductInfo = ({ product, profile }: ProductInfoProps) => {
       >
         {getProductSubtitle(product, profile)}
       </p>
+
+      {(priceRule || catalogRuleSummary?.requiresQuote) && (
+        <div className="mt-5 rounded-lg border border-neutral-200 bg-white p-4">
+          <p className="text-xs font-semibold uppercase tracking-normal text-neutral-500">
+            Condicion comercial B2B
+          </p>
+          <p className="mt-1 text-sm font-semibold text-neutral-950">
+            {priceRule?.effect_type === "discount_percentage"
+              ? `${priceRule.discount_percentage}% de descuento aplicado a este contexto`
+              : priceRule?.effect_type === "fixed_price"
+              ? `Precio fijo B2B aplicado`
+              : "Este producto requiere presupuesto"}
+          </p>
+          {priceRule?.minimum_quantity && priceRule.minimum_quantity > 1 && (
+            <p className="mt-1 text-xs text-neutral-500">
+              Pedido minimo para esta regla: {priceRule.minimum_quantity} uds.
+            </p>
+          )}
+        </div>
+      )}
 
       {highlights.length > 0 && (
         <ul className="mt-5 grid grid-cols-2 gap-2 medium:grid-cols-4">

@@ -1,3 +1,4 @@
+import { getCatalogRuleSummary } from "@/lib/util/catalog-rules"
 import { HttpTypes } from "@medusajs/types"
 import { getPercentageDiff } from "./get-precentage-diff"
 import { convertToLocale } from "./money"
@@ -13,27 +14,87 @@ export type VariantPrice = {
   percentage_diff: string
 }
 
-export const getPricesForVariant = (variant: any): VariantPrice | null => {
+const applyB2BPriceRule = ({
+  amount,
+  product,
+}: {
+  amount: number
+  product?: HttpTypes.StoreProduct
+}) => {
+  const priceRule = getCatalogRuleSummary(product)?.priceRule
+
+  if (!priceRule) {
+    return {
+      amount,
+      priceType: undefined,
+    }
+  }
+
+  if (
+    priceRule.effect_type === "discount_percentage" &&
+    priceRule.discount_percentage !== null &&
+    priceRule.discount_percentage !== undefined
+  ) {
+    return {
+      amount: Number(
+        (amount * (1 - Number(priceRule.discount_percentage) / 100)).toFixed(2)
+      ),
+      priceType: "sale",
+    }
+  }
+
+  if (
+    priceRule.effect_type === "fixed_price" &&
+    priceRule.fixed_price !== null &&
+    priceRule.fixed_price !== undefined
+  ) {
+    return {
+      amount: Number(priceRule.fixed_price),
+      priceType: "sale",
+    }
+  }
+
+  return {
+    amount,
+    priceType: undefined,
+  }
+}
+
+export const getPricesForVariant = (
+  variant: any,
+  product?: HttpTypes.StoreProduct
+): VariantPrice | null => {
   if (!variant?.calculated_price?.calculated_amount) {
     return null
   }
 
+  const originalAmount =
+    variant.calculated_price.original_amount ||
+    variant.calculated_price.calculated_amount
+  const b2bPrice = applyB2BPriceRule({
+    amount: variant.calculated_price.calculated_amount,
+    product,
+  })
+  const calculatedAmount = b2bPrice.amount
+
   return {
-    calculated_price_number: variant.calculated_price.calculated_amount,
+    calculated_price_number: calculatedAmount,
     calculated_price: convertToLocale({
-      amount: variant.calculated_price.calculated_amount,
+      amount: calculatedAmount,
       currency_code: variant.calculated_price.currency_code,
     }),
-    original_price_number: variant.calculated_price.original_amount,
+    original_price_number: originalAmount,
     original_price: convertToLocale({
-      amount: variant.calculated_price.original_amount,
+      amount: originalAmount,
       currency_code: variant.calculated_price.currency_code,
     }),
     currency_code: variant.calculated_price.currency_code,
-    price_type: variant.calculated_price.calculated_price.price_list_type,
+    price_type:
+      b2bPrice.priceType ||
+      variant.calculated_price.calculated_price.price_list_type,
     percentage_diff: getPercentageDiff(
-      variant.calculated_price.original_amount,
-      variant.calculated_price.calculated_amount
+      originalAmount,
+      calculatedAmount
     ),
   }
 }
@@ -63,7 +124,7 @@ export function getProductPrice({
         )
       })[0]
 
-    return getPricesForVariant(cheapestVariant)
+    return getPricesForVariant(cheapestVariant, product)
   }
 
   const variantPrice = () => {
@@ -79,7 +140,7 @@ export function getProductPrice({
       return null
     }
 
-    return getPricesForVariant(variant)
+    return getPricesForVariant(variant, product)
   }
 
   return {

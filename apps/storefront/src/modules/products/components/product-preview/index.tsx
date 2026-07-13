@@ -1,3 +1,4 @@
+import { getCatalogRuleSummary } from "@/lib/util/catalog-rules"
 import { getProductPrice } from "@/lib/util/get-product-price"
 import { HttpTypes } from "@medusajs/types"
 import { Text, clx } from "@medusajs/ui"
@@ -26,6 +27,8 @@ export default async function ProductPreview({
   const inventoryQuantity = product.variants?.reduce((acc, variant) => {
     return acc + (variant?.inventory_quantity || 0)
   }, 0)
+  const catalogRuleSummary = getCatalogRuleSummary(product)
+  const priceRule = catalogRuleSummary?.priceRule
 
   return (
     <LocalizedClientLink href={`/products/${product.handle}`} className="group">
@@ -42,7 +45,21 @@ export default async function ProductPreview({
           />
         </div>
         <div className="flex flex-col txt-compact-medium">
-          <Text className="text-neutral-600 text-xs">BRAND</Text>
+          <div className="flex flex-wrap items-center gap-2">
+            <Text className="text-neutral-600 text-xs">BRAND</Text>
+            {priceRule && (
+              <span className="rounded border border-neutral-950 bg-neutral-950 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-white">
+                {priceRule.effect_type === "discount_percentage"
+                  ? `${priceRule.discount_percentage}% B2B`
+                  : "Precio B2B"}
+              </span>
+            )}
+            {catalogRuleSummary?.requiresQuote && (
+              <span className="rounded border border-neutral-300 bg-white px-1.5 py-0.5 text-[10px] font-semibold uppercase text-neutral-700">
+                Presupuesto
+              </span>
+            )}
+          </div>
           <Text className="text-ui-fg-base" data-testid="product-title">
             {product.title}
           </Text>

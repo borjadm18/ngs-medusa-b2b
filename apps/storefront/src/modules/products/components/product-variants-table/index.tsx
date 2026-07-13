@@ -1,4 +1,5 @@
 import { addToCartEventBus } from "@/lib/data/cart-event-bus"
+import { getCatalogRuleSummary } from "@/lib/util/catalog-rules"
 import { StoreProductPackaging } from "@/lib/data/product-packaging"
 import { getVariantPackaging, PurchaseUnit } from "@/lib/util/b2b-packaging"
 import { getProductPrice } from "@/lib/util/get-product-price"
@@ -71,6 +72,8 @@ const ProductVariantsTable = ({
           currency_code: totalCurrency,
         })
       : null
+  const catalogRuleSummary = getCatalogRuleSummary(product)
+  const priceRule = catalogRuleSummary?.priceRule
 
   const handleLineItemChange = (
     variantId: string,
@@ -189,21 +192,22 @@ const ProductVariantsTable = ({
             </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-3 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-50 text-center text-[11px]">
-            {[
-              ["5-9 uds", "5% dto."],
-              ["10-19 uds", "10% dto."],
-              ["20+ uds", "15% dto."],
-            ].map(([range, discount]) => (
-              <div
-                key={range}
-                className="border-r border-neutral-200 px-2 py-2 last:border-r-0"
-              >
-                <p className="font-semibold text-neutral-950">{range}</p>
-                <p className="mt-0.5 text-neutral-500">{discount}</p>
+          {priceRule && (
+            <div className="mt-4 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="font-semibold text-neutral-950">
+                  {priceRule.effect_type === "discount_percentage"
+                    ? `${priceRule.discount_percentage}% dto. B2B aplicado`
+                    : "Precio fijo B2B aplicado"}
+                </span>
+                {priceRule.minimum_quantity > 1 && (
+                  <span className="text-neutral-500">
+                    Min. {priceRule.minimum_quantity} uds
+                  </span>
+                )}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
 
         <div className="divide-y divide-neutral-200">

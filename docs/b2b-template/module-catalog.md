@@ -112,11 +112,16 @@ Incluye:
 - Admin UI inicial `Catalog rules` con listado, filtros y drawer de creacion/edicion.
 - Import/export CSV en Admin con preview y validacion por fila.
 - Store API para evaluar reglas activas aplicables a un contexto.
+- Storefront aplica reglas activas para:
+  - ocultar productos con `hide`.
+  - mostrar badge de descuento/precio B2B.
+  - marcar productos que requieren presupuesto.
+  - ajustar precio mostrado en PLP/PDP para reglas porcentuales o precio fijo.
 - smoke remoto `pnpm smoke:catalog-rules`.
 
 Siguiente mejora:
 
-- integracion real con price lists/pricing de Medusa cuando sea descuento/precio.
+- integracion persistente con price lists/pricing core de Medusa cuando sea descuento/precio.
 - integracion con catalogo/storefront para ocultar o priorizar surtidos.
 - simulador "ver catalogo como cliente/canal/region".
 
