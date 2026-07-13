@@ -13,7 +13,7 @@ import {
   Toaster,
   toast,
 } from "@medusajs/ui";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   AdminAsset,
   AssetType,
@@ -22,6 +22,7 @@ import {
   useUploadAsset,
   useUpsertAsset,
 } from "../../hooks/api/assets";
+import { useBrandProfileContent } from "../../hooks/api/brand-profile";
 import { resolveAdminAssetPreviewUrl } from "../../lib/assets";
 
 const assetTypes: Array<AssetType | "all"> = [
@@ -45,6 +46,11 @@ const emptyAsset: AdminAsset = {
   sort_order: 0,
 };
 
+const createEmptyAsset = (profileId: string): AdminAsset => ({
+  ...emptyAsset,
+  client_profile_id: profileId,
+});
+
 const fileToBase64 = (file: File) =>
   new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -58,10 +64,27 @@ const fileToBase64 = (file: File) =>
   });
 
 const AssetsPage = () => {
+  const { data: brandProfileData } = useBrandProfileContent();
   const [profileId, setProfileId] = useState("ngs");
   const [type, setType] = useState<AssetType | "all">("all");
   const [form, setForm] = useState<AdminAsset>(emptyAsset);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const activeProfileId = brandProfileData?.brand_profile?.id || "ngs";
+
+  useEffect(() => {
+    if (!brandProfileData?.brand_profile?.id) {
+      return;
+    }
+
+    setProfileId((current) =>
+      current === "ngs" ? brandProfileData.brand_profile.id : current
+    );
+    setForm((current) =>
+      current.client_profile_id === "ngs"
+        ? { ...current, client_profile_id: brandProfileData.brand_profile.id }
+        : current
+    );
+  }, [brandProfileData?.brand_profile?.id]);
 
   const { data, isPending } = useAssets({
     client_profile_id: profileId,
@@ -80,10 +103,7 @@ const AssetsPage = () => {
   const upsertAsset = useUpsertAsset({
     onSuccess: () => {
       toast.success("Asset guardado");
-      setForm({
-        ...emptyAsset,
-        client_profile_id: profileId,
-      });
+      setForm(createEmptyAsset(profileId));
     },
     onError: (error) => toast.error(error.message || "No se pudo guardar"),
   });
@@ -183,18 +203,13 @@ const AssetsPage = () => {
             <Heading className="font-sans font-medium h1-core">Assets</Heading>
             <Text size="small" className="text-ui-fg-subtle">
               Libreria de imagenes reutilizables para home, marca, categorias y
-              producto.
+              producto. Perfil activo: {activeProfileId}.
             </Text>
           </div>
           <Button
             size="small"
             variant="secondary"
-            onClick={() =>
-              setForm({
-                ...emptyAsset,
-                client_profile_id: profileId,
-              })
-            }
+            onClick={() => setForm(createEmptyAsset(profileId))}
           >
             <Plus />
             Nuevo asset
