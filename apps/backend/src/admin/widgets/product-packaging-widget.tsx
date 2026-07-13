@@ -42,6 +42,13 @@ type CsvImportPreview = {
   rows: CsvImportRow[];
 };
 
+type PackagingTemplate = {
+  id: string;
+  label: string;
+  description: string;
+  values: Omit<AdminUpsertProductPackaging, "variant_id">;
+};
+
 const DEFAULT_FORM: AdminUpsertProductPackaging = {
   variant_id: "",
   sales_unit: "unit",
@@ -88,6 +95,7 @@ const ProductPackagingWidget = ({
   const [selectedVariant, setSelectedVariant] =
     useState<ProductVariant | null>(null);
   const [form, setForm] = useState<AdminUpsertProductPackaging>(DEFAULT_FORM);
+  const [copySourceVariantId, setCopySourceVariantId] = useState("");
   const [importPreview, setImportPreview] =
     useState<CsvImportPreview | null>(null);
   const importInputRef = useRef<HTMLInputElement | null>(null);
@@ -96,12 +104,18 @@ const ProductPackagingWidget = ({
     queryKey: ["admin-product-packaging-product", data.id],
     queryFn: () =>
       sdk.admin.product.retrieve(data.id, {
-        fields: "+variants.*",
+        fields: "+variants.*,categories.*",
       }),
   });
 
   const variants = useMemo<ProductVariant[]>(() => {
     return ((productData as any)?.product?.variants || []) as ProductVariant[];
+  }, [productData]);
+
+  const productCategoryNames = useMemo(() => {
+    return (((productData as any)?.product?.categories || []) as any[])
+      .map((category) => category.name || category.handle)
+      .filter(Boolean);
   }, [productData]);
 
   const variantIds = useMemo(
@@ -122,6 +136,112 @@ const ProductPackagingWidget = ({
       return acc;
     }, {});
   }, [packagingData]);
+
+  const packagingTemplates = useMemo<PackagingTemplate[]>(() => {
+    const context = `${data.title || ""} ${productCategoryNames.join(" ")}`
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+    const templates: PackagingTemplate[] = [
+      {
+        id: "unit-standard",
+        label: "Unidad estandar",
+        description: "Pedido minimo de 1 unidad y sin restriccion de caja.",
+        values: {
+          sales_unit: "unit",
+          minimum_order_quantity: 1,
+          quantity_increment: 1,
+          units_per_box: 1,
+          boxes_per_pallet: null,
+          package_weight: null,
+          package_dimensions: null,
+        },
+      },
+      {
+        id: "box-six",
+        label: "Caja B2B 6 uds",
+        description: "Venta por caja pequena para producto electronico.",
+        values: {
+          sales_unit: "box",
+          minimum_order_quantity: 6,
+          quantity_increment: 6,
+          units_per_box: 6,
+          boxes_per_pallet: 48,
+          package_weight: null,
+          package_dimensions: null,
+        },
+      },
+    ];
+
+    if (
+      context.includes("altavoz") ||
+      context.includes("audio") ||
+      context.includes("speaker") ||
+      context.includes("subwoofer")
+    ) {
+      templates.push(
+        {
+          id: "audio-b2b",
+          label: "Audio profesional",
+          description: "Caja de 2 uds, minimo 2 y pallet de 24 cajas.",
+          values: {
+            sales_unit: "box",
+            minimum_order_quantity: 2,
+            quantity_increment: 2,
+            units_per_box: 2,
+            boxes_per_pallet: 24,
+            package_weight: null,
+            package_dimensions: "600 x 355 x 350 mm",
+          },
+        },
+        {
+          id: "audio-pallet",
+          label: "Pallet audio",
+          description: "Pedido logistico de 48 uds para distribuidores.",
+          values: {
+            sales_unit: "box",
+            minimum_order_quantity: 48,
+            quantity_increment: 2,
+            units_per_box: 2,
+            boxes_per_pallet: 24,
+            package_weight: null,
+            package_dimensions: "1200 x 800 x 1600 mm",
+          },
+        }
+      );
+    }
+
+    if (
+      context.includes("packaging") ||
+      context.includes("embalaje") ||
+      context.includes("cable") ||
+      context.includes("accesorio")
+    ) {
+      templates.push({
+        id: "accessory-bulk",
+        label: "Accesorio 100 uds",
+        description: "Caja de reposicion para consumibles y accesorios.",
+        values: {
+          sales_unit: "box",
+          minimum_order_quantity: 100,
+          quantity_increment: 100,
+          units_per_box: 100,
+          boxes_per_pallet: 24,
+          package_weight: null,
+          package_dimensions: null,
+        },
+      });
+    }
+
+    return templates;
+  }, [data.title, productCategoryNames]);
+
+  const copyableVariants = useMemo(() => {
+    return variants.filter(
+      (variant) =>
+        variant.id !== selectedVariant?.id && packagingByVariantId[variant.id]
+    );
+  }, [packagingByVariantId, selectedVariant?.id, variants]);
 
   const upsertPackaging = useUpsertProductPackaging({
     onSuccess: () => {
@@ -154,7 +274,34 @@ const ProductPackagingWidget = ({
       ...existing,
       variant_id: selectedVariant.id,
     });
+    setCopySourceVariantId("");
   }, [packagingByVariantId, selectedVariant]);
+
+  const applyTemplate = (template: PackagingTemplate) => {
+    setForm((current) => ({
+      ...current,
+      ...template.values,
+      variant_id: current.variant_id,
+    }));
+  };
+
+  const copyPackagingFromVariant = (sourceVariantId: string) => {
+    const source = packagingByVariantId[sourceVariantId];
+
+    if (!source) {
+      toast.error("La variante seleccionada no tiene regla de packaging");
+      return;
+    }
+
+    const { id: _id, variant_id: _variantId, ...values } = source as any;
+
+    setForm((current) => ({
+      ...current,
+      ...values,
+      variant_id: current.variant_id,
+    }));
+    toast.success("Regla copiada al formulario");
+  };
 
   const handleSave = () => {
     if (!form.variant_id) {
@@ -515,6 +662,80 @@ const ProductPackagingWidget = ({
             </Drawer.Title>
           </Drawer.Header>
           <Drawer.Body className="flex flex-1 flex-col gap-y-4 overflow-auto p-4">
+            <div className="grid gap-y-3 rounded-lg border bg-ui-bg-subtle p-3">
+              <div>
+                <Text size="small" leading="compact" weight="plus">
+                  Plantillas rapidas
+                </Text>
+                <Text size="small" leading="compact" className="text-ui-fg-subtle">
+                  Aplica una base y ajusta solo los datos especificos.
+                </Text>
+              </div>
+              <div className="grid gap-2">
+                {packagingTemplates.map((template) => (
+                  <button
+                    key={template.id}
+                    type="button"
+                    className="rounded-md border bg-ui-bg-base px-3 py-2 text-left transition-colors hover:bg-ui-bg-base-hover"
+                    onClick={() => applyTemplate(template)}
+                  >
+                    <Text size="small" leading="compact" weight="plus">
+                      {template.label}
+                    </Text>
+                    <Text
+                      size="small"
+                      leading="compact"
+                      className="text-ui-fg-subtle"
+                    >
+                      {template.description}
+                    </Text>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid gap-y-3 rounded-lg border bg-ui-bg-subtle p-3">
+              <div>
+                <Text size="small" leading="compact" weight="plus">
+                  Copiar regla existente
+                </Text>
+                <Text size="small" leading="compact" className="text-ui-fg-subtle">
+                  Reutiliza el packaging ya configurado en otra variante.
+                </Text>
+              </div>
+              {copyableVariants.length ? (
+                <div className="grid gap-2 small:grid-cols-[minmax(0,1fr)_auto]">
+                  <Select
+                    value={copySourceVariantId}
+                    onValueChange={setCopySourceVariantId}
+                  >
+                    <Select.Trigger>
+                      <Select.Value placeholder="Selecciona variante" />
+                    </Select.Trigger>
+                    <Select.Content>
+                      {copyableVariants.map((variant) => (
+                        <Select.Item key={variant.id} value={variant.id}>
+                          {variant.sku || variant.title || variant.id}
+                        </Select.Item>
+                      ))}
+                    </Select.Content>
+                  </Select>
+                  <Button
+                    size="small"
+                    variant="secondary"
+                    disabled={!copySourceVariantId}
+                    onClick={() => copyPackagingFromVariant(copySourceVariantId)}
+                  >
+                    Copiar
+                  </Button>
+                </div>
+              ) : (
+                <Text size="small" leading="compact" className="text-ui-fg-subtle">
+                  Aun no hay otras variantes con regla guardada.
+                </Text>
+              )}
+            </div>
+
             <div className="flex flex-col gap-y-2">
               <Label>Unidad de venta</Label>
               <Select

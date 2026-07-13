@@ -44,6 +44,7 @@ Estado 2026-07-12:
 - Assets page implementada como libreria operativa de URLs/rutas con preview, filtros, copia de ruta y CRUD Admin.
 - Selector de assets embebido en los editores de Homepage y Brand profile para elegir hero, bloques visuales y logos sin copiar rutas a mano.
 - Upload binario local desde Admin implementado y servido por backend para demos.
+- Admin packaging permite aplicar a todas, copiar desde otra variante, usar plantillas rapidas, importar CSV con preview y exportar CSV.
 - Pendiente: storage/CDN persistente, import/export dedicado y plantillas por cliente.
 
 ## Fase 3. Validacion B2B Robusta

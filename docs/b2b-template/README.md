@@ -136,6 +136,6 @@ Esto es suficiente para demos y POCs. Para produccion real, el siguiente paso es
 
 ## Packaging Desde Admin
 
-En Admin > Products > producto > Packaging B2B se pueden editar reglas por variante, aplicar una regla a todas las variantes, exportar CSV e importar CSV.
+En Admin > Products > producto > Packaging B2B se pueden editar reglas por variante, aplicar una regla a todas las variantes, copiar reglas desde otra variante, usar plantillas rapidas, exportar CSV e importar CSV.
 
 La importacion no aplica cambios inmediatamente: primero abre un preview con filas validas, errores por fila y emparejamiento por `variant_id` o `sku`. Solo las filas validas se aplican al confirmar.

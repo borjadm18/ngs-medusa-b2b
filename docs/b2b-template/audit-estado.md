@@ -17,7 +17,7 @@ El siguiente salto es cerrar el backoffice no tecnico. La home, marca, navegacio
 | Product packaging      | Implementado              | Modulo, API store/admin, seed NGS, validacion carrito y UI en PDP/carrito. HTTP live validado.                                                                                                                                                                            |
 | Homepage editable      | Parcial alto              | Modulo backend, store API, fallback JSON y Admin page con editor estructurado existen. Assets page permite registrar rutas, subir imagenes locales y seleccionarlas desde el editor de Home. Falta storage externo persistente.                                             |
 | Client profile         | Parcial alto              | Marca/logo/nav/footer/SEO/home/categorias/store/checkout/PDP fallbacks salen de JSON o Brand profile runtime. `pnpm sync:client-profile` empaqueta perfiles y valida packaging CSV. Admin Brand profile existe con formularios por seccion, preview y modo JSON avanzado. |
-| Admin B2B              | Parcial alto              | Widget packaging con import/export y bulk basico. Admin Home, Brand profile y Assets existen. Falta UX avanzada de packaging, storage externo de assets y editores por perfil activo.                                                                                     |
+| Admin B2B              | Parcial alto              | Widget packaging con import/export, bulk basico, copia entre variantes y plantillas rapidas. Admin Home, Brand profile y Assets existen. Falta storage externo de assets y editores por perfil activo.                                                                     |
 | Presupuestos           | Base heredada + integrado | Flujo existe; falta enriquecer presupuesto con packaging/logistica completa.                                                                                                                                                                                              |
 | Aprobaciones           | Base heredada + integrado | Existe en cuenta/carrito/checkout; falta validacion UX y casos demo claros.                                                                                                                                                                                               |
 | Reglas catalogo/precio | Pendiente estrategico     | Falta capa para descuentos por cliente, zona, canal, segmento y visibilidad de catalogo por region/canal. Debe apoyarse en price lists, regions, customer groups y sales channels de Medusa antes de crear logica propia.                                                   |
@@ -74,6 +74,8 @@ Implementado parcialmente.
 - Widget en producto.
 - Edicion por variante.
 - Aplicar a todas las variantes.
+- Copiar regla desde otra variante.
+- Plantillas rapidas por tipo/categoria de producto.
 - Importar CSV.
 - Preview de CSV antes de aplicar.
 - Validacion de errores por fila.
@@ -84,8 +86,7 @@ Implementado parcialmente.
 Pendiente:
 
 - QA visual del widget en navegador real.
-- Copiar desde otra variante.
-- Plantilla por categoria.
+- Plantillas avanzadas configurables por cliente/categoria.
 - Historial de cambios.
 
 ### Homepage editable
@@ -186,7 +187,7 @@ Siguiente accion:
 
 ### P2 - Backoffice No Tecnico
 
-1. Admin packaging con copiar desde otra variante y plantillas por categoria.
+1. Admin packaging con plantillas avanzadas configurables por cliente/categoria.
 2. Migrar upload local de imagenes a storage persistente/CDN.
 3. Selector de perfil activo para editar varios clientes desde el mismo Admin.
 4. Import/export JSON para homepage y brand profile.
