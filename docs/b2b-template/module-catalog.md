@@ -108,12 +108,12 @@ Incluye:
 - modulo `catalogRules`.
 - tabla `catalog_rule`.
 - Admin API para crear/listar/eliminar reglas.
+- Admin UI inicial `Catalog rules` con listado, filtros y drawer de creacion/edicion.
 - Store API para evaluar reglas activas aplicables a un contexto.
 - smoke remoto `pnpm smoke:catalog-rules`.
 
 Siguiente mejora:
 
-- Admin UI para reglas.
 - import/export CSV con preview.
 - integracion real con price lists/pricing de Medusa cuando sea descuento/precio.
 - integracion con catalogo/storefront para ocultar o priorizar surtidos.
