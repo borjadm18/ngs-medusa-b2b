@@ -106,7 +106,7 @@ pnpm install
 cp apps/backend/.env.template apps/backend/.env
 ```
 
-3. Set the database URL in `apps/backend.env`:
+3. Set the database URL in `apps/backend/.env`:
 
 ```bash
 # Replace with actual database URL, make sure the database exists.
@@ -157,7 +157,7 @@ pnpm dev
 
 The storefront runs on `http://localhost:8000`.
 
-You can slo run the following command from the root to start both backend and storefront:
+You can also run the following command from the root to start both backend and storefront:
 
 ```bash
 pnpm dev
@@ -182,6 +182,24 @@ pnpm dev
 | `NEXT_PUBLIC_BASE_URL` | Public URL of the storefront |
 | `NEXT_PUBLIC_DEFAULT_REGION` | Default region code (e.g. `us`) |
 | `REVALIDATE_SECRET` | Secret for on-demand cache revalidation |
+
+## Testing
+
+Unit tests do not need external services:
+
+```bash
+pnpm --filter @b2b-starter/backend test:unit
+```
+
+HTTP integration tests need PostgreSQL because Medusa creates isolated test databases:
+
+```bash
+cp apps/backend/.env.test.template apps/backend/.env.test
+pnpm --filter @b2b-starter/backend test:integration:http
+```
+
+Update `apps/backend/.env.test` if your local PostgreSQL user, password, host, or port are different.
+The integration runner uses `DB_HOST`, `DB_USERNAME`, `DB_PASSWORD`, and `DB_PORT` to create temporary databases, and `DATABASE_URL` for the Medusa application connection.
 
 ## Resources
 

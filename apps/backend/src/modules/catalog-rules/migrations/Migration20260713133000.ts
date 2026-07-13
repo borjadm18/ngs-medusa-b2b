@@ -9,7 +9,23 @@ export class Migration20260713133000 extends Migration {
       `alter table if exists "catalog_rule" alter column "fixed_price" type double precision using "fixed_price"::double precision;`
     );
     this.addSql(
-      `alter table if exists "catalog_rule" alter column "metadata" type jsonb using case when "metadata" is null or "metadata" = '' then null else "metadata"::jsonb end;`
+      `do $$
+      begin
+        if exists (
+          select 1
+          from information_schema.columns
+          where table_name = 'catalog_rule'
+            and column_name = 'metadata'
+            and udt_name <> 'jsonb'
+        ) then
+          alter table if exists "catalog_rule"
+            alter column "metadata" type jsonb
+            using case
+              when "metadata" is null or btrim("metadata"::text) = '' then null
+              else "metadata"::jsonb
+            end;
+        end if;
+      end $$;`
     );
   }
 

@@ -45,6 +45,13 @@ medusaIntegrationTestRunner({
           sales_channels: [{ id: salesChannel.id }],
         },
       });
+      product = (
+        await api.post(
+          `/admin/products/${product.id}`,
+          { status: "published" },
+          adminHeaders
+        )
+      ).data.product;
       variant = product.variants[0];
 
       await api.post(
