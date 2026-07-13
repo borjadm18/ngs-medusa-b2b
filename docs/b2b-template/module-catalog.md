@@ -4,11 +4,25 @@ Catalogo de capacidades que debe ofrecer el framework B2B.
 
 ## Core B2B
 
+Fuente base: `medusajs/b2b-starter-medusa`.
+
+Modulos registrados en `apps/backend/medusa-config.ts`:
+
+- `company`
+- `approval`
+- `quote`
+- `productPackaging`
+- `homepage`
+- `brandProfile`
+- `assetLibrary`
+- `Modules.CACHE`
+- `Modules.WORKFLOW_ENGINE`
+
 ### Companies
 
 Gestion de empresas, empleados, roles y permisos.
 
-Estado: heredado del starter B2B.
+Estado: heredado del starter B2B e importado en backend.
 
 ### Approvals
 
