@@ -189,19 +189,29 @@ const ProductVariantsTable = ({
               </p>
             </div>
             <div className="shrink-0 text-right">
-              <p className="text-xs text-neutral-500">Desde</p>
-              <p className="text-2xl font-semibold text-neutral-950">
-                {canViewPrices
-                  ? cheapestPrice?.calculated_price || "Consultar"
-                  : "Acceso requerido"}
+              <p className="text-xs text-neutral-500">
+                {canViewPrices ? "Desde" : "Tarifa privada"}
               </p>
+              {canViewPrices ? (
+                <p className="text-2xl font-semibold text-neutral-950">
+                  {cheapestPrice?.calculated_price || "Consultar"}
+                </p>
+              ) : (
+                <p className="mt-1 inline-flex rounded border border-red-200 bg-red-50 px-2 py-1 text-xs font-semibold text-red-800">
+                  Acceso requerido
+                </p>
+              )}
               <p className="text-[11px] uppercase text-neutral-500">
                 {canViewPrices ? "Sin IVA" : "Tarifa B2B privada"}
               </p>
             </div>
           </div>
 
-          {!canViewPrices && <div className="mt-4"><PriceLoginGate /></div>}
+          {!canViewPrices && (
+            <div className="mt-3">
+              <PriceLoginGate compact />
+            </div>
+          )}
 
           {canViewPrices && priceRule && (
             <div className="mt-4 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs">

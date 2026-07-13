@@ -109,6 +109,7 @@ const CartDrawer = ({
       ? `/checkout?step=${checkoutStep}`
       : "/checkout"
     : "/account"
+  const canViewPrices = Boolean(customer)
 
   return (
     <>
@@ -149,7 +150,7 @@ const CartDrawer = ({
               <ApprovalStatusBanner cart={cart} />
             </div>
           )}
-          {promotions.length > 0 && (
+          {canViewPrices && promotions.length > 0 && (
             <div className="p-4">
               <AppliedPromotions promotions={promotions} />
             </div>
@@ -161,24 +162,34 @@ const CartDrawer = ({
                   cart={cart}
                   showBorders={false}
                   showTotal={false}
+                  canViewPrices={canViewPrices}
                 />
                 <div className="flex flex-col gap-y-3 w-full p-4">
-                  {cart && freeShippingPrices && (
+                  {canViewPrices && cart && freeShippingPrices && (
                     <FreeShippingPriceNudge
                       variant="inline"
                       cart={cart as StoreCart}
                       freeShippingPrices={freeShippingPrices}
                     />
                   )}
-                  <div className="flex justify-between">
-                    <Text>Subtotal</Text>
-                    <Text>
-                      {convertToLocale({
-                        amount: subtotal,
-                        currency_code: cart?.currency_code,
-                      })}
-                    </Text>
-                  </div>
+                  {canViewPrices ? (
+                    <div className="flex justify-between">
+                      <Text>Subtotal</Text>
+                      <Text>
+                        {convertToLocale({
+                          amount: subtotal,
+                          currency_code: cart?.currency_code,
+                        })}
+                      </Text>
+                    </div>
+                  ) : (
+                    <div className="rounded border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-800">
+                      <p className="font-semibold text-red-950">
+                        Tarifa B2B privada
+                      </p>
+                      <p>Inicia sesion para ver precios y descuentos.</p>
+                    </div>
+                  )}
                   <div className="flex flex-col gap-y-2">
                     <LocalizedClientLink href="/cart">
                       <Button

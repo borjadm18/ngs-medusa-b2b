@@ -41,7 +41,10 @@ const CartTemplate = ({ customer }: { customer: B2BCustomer | null }) => {
                   {cart?.approvals && cart.approvals.length > 0 && (
                     <ApprovalStatusBanner cart={cart} />
                   )}
-                  <ItemsTemplate cart={cart} />
+                  <ItemsTemplate
+                    cart={cart}
+                    canViewPrices={Boolean(customer)}
+                  />
                 </div>
                 <div className="relative">
                   <div className="flex flex-col gap-y-8 sticky top-20">

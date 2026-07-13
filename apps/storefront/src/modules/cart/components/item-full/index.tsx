@@ -21,6 +21,7 @@ type ItemProps = {
   showBorders?: boolean
   currencyCode: string
   disabled?: boolean
+  showPrices?: boolean
 }
 
 const ItemFull = ({
@@ -28,6 +29,7 @@ const ItemFull = ({
   showBorders = true,
   currencyCode,
   disabled,
+  showPrices = true,
 }: ItemProps) => {
   const [updating, setUpdating] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -167,11 +169,13 @@ const ItemFull = ({
             )}
           </div>
           <div className="flex small:flex-row flex-col gap-2">
-            <LineItemPrice
-              className="flex small:hidden self-start"
-              item={item}
-              currencyCode={currencyCode}
-            />
+            {showPrices && (
+              <LineItemPrice
+                className="flex small:hidden self-start"
+                item={item}
+                currencyCode={currencyCode}
+              />
+            )}
             <div className="flex gap-x-2">
               <div className="flex gap-x-3 shadow-[0_0_0_1px_rgba(0,0,0,0.1)] rounded-md w-fit p-px items-center">
                 <button
@@ -246,12 +250,18 @@ const ItemFull = ({
         </div>
       </div>
       <div className="flex flex-col items-start justify-between min-h-full self-stretch">
-        <LineItemPrice
-          className="hidden small:flex"
-          item={item}
-          currencyCode={currencyCode}
-          style="default"
-        />
+        {showPrices ? (
+          <LineItemPrice
+            className="hidden small:flex"
+            item={item}
+            currencyCode={currencyCode}
+            style="default"
+          />
+        ) : (
+          <span className="hidden rounded border border-red-200 bg-red-50 px-2 py-1 text-xs font-medium text-red-800 small:flex">
+            Precio privado
+          </span>
+        )}
       </div>
     </Container>
   )

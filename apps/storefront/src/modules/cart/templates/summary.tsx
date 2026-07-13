@@ -41,9 +41,21 @@ const Summary = ({ customer, spendLimitExceeded }: SummaryProps) => {
   return (
     <Container className="flex flex-col gap-y-3">
       <CartLogisticsSummary />
-      <CartTotals />
-      <Divider />
-      <PromotionCode cart={cart} />
+      {customer ? (
+        <>
+          <CartTotals />
+          <Divider />
+          <PromotionCode cart={cart} />
+        </>
+      ) : (
+        <div className="rounded border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-800">
+          <p className="font-semibold text-red-950">Tarifa B2B privada</p>
+          <p>
+            Inicia sesion para ver subtotales, descuentos, promociones y
+            documentos comerciales.
+          </p>
+        </div>
+      )}
       <Divider className="my-6" />
       {spendLimitExceeded && (
         <div className="flex items-center gap-x-2 bg-neutral-100 p-3 rounded-md shadow-borders-base">
@@ -92,8 +104,12 @@ const Summary = ({ customer, spendLimitExceeded }: SummaryProps) => {
           </Button>
         </RequestQuotePrompt>
       )}
-      <CartToCsvButton cart={cart} />
-      <CartToPdfButton cart={cart} />
+      {!!customer && (
+        <>
+          <CartToCsvButton cart={cart} />
+          <CartToPdfButton cart={cart} />
+        </>
+      )}
       <Button
         onClick={handleEmptyCart}
         className="w-full h-10 rounded-md shadow-borders-base"

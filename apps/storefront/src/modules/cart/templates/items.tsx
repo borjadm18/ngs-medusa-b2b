@@ -10,12 +10,14 @@ type ItemsTemplateProps = {
   cart: B2BCart
   showBorders?: boolean
   showTotal?: boolean
+  canViewPrices?: boolean
 }
 
 const ItemsTemplate = ({
   cart,
   showBorders = true,
   showTotal = true,
+  canViewPrices = true,
 }: ItemsTemplateProps) => {
   const items = cart?.items
   const totalQuantity = useMemo(
@@ -39,6 +41,7 @@ const ItemsTemplate = ({
                 disabled={isPendingApproval}
                 currencyCode={cart?.currency_code}
                 showBorders={showBorders}
+                showPrices={canViewPrices}
                 key={item.id}
                 item={
                   item as StoreCartLineItem & {
@@ -53,12 +56,16 @@ const ItemsTemplate = ({
         <Container>
           <div className="flex items-start justify-between h-full self-stretch">
             <Text>Total: {totalQuantity} items</Text>
-            <Text>
-              {convertToLocale({
-                amount: cart?.item_total,
-                currency_code: cart?.currency_code,
-              })}
-            </Text>
+            {canViewPrices ? (
+              <Text>
+                {convertToLocale({
+                  amount: cart?.item_total,
+                  currency_code: cart?.currency_code,
+                })}
+              </Text>
+            ) : (
+              <Text className="text-red-800">Precios privados</Text>
+            )}
           </div>
         </Container>
       )}
