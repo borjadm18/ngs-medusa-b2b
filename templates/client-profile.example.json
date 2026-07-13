@@ -30,23 +30,62 @@
     "main": [
       {
         "label": "Productos",
-        "href": "/store"
+        "href": "/store",
+        "enabled": true,
+        "children": [
+          {
+            "label": "Catalogo completo",
+            "href": "/store",
+            "enabled": true
+          },
+          {
+            "label": "Categorias destacadas",
+            "href": "/store",
+            "enabled": true
+          },
+          {
+            "label": "Novedades",
+            "href": "/store",
+            "enabled": false
+          }
+        ]
       },
       {
         "label": "Soluciones",
-        "href": "/solutions"
+        "href": "/store",
+        "enabled": true,
+        "children": [
+          {
+            "label": "Compras recurrentes",
+            "href": "/store",
+            "enabled": true
+          },
+          {
+            "label": "Packaging industrial",
+            "href": "/store",
+            "enabled": true
+          },
+          {
+            "label": "Presupuestos y aprobaciones",
+            "href": "/account/quotes",
+            "enabled": true
+          }
+        ]
       },
       {
         "label": "Empresa",
-        "href": "/company"
+        "href": "/account/company",
+        "enabled": true
       },
       {
         "label": "Recursos",
-        "href": "/resources"
+        "href": "/ngs-poc",
+        "enabled": true
       },
       {
         "label": "Soporte",
-        "href": "/support"
+        "href": "/account",
+        "enabled": true
       }
     ]
   },

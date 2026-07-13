@@ -68,6 +68,20 @@ Create a new reusable client profile:
 pnpm create:client-profile -- --id acme-industrial --name "ACME Industrial"
 ```
 
+You can also clone an existing vertical/profile as the starting point:
+
+```bash
+pnpm template:new -- --id acme-industrial --name "ACME Industrial" --from ngs --accent "#d71920"
+```
+
+Useful options:
+
+- `--from ngs` or `--from example-industrial`: starts from an existing profile.
+- `--tagline "..."`: sets the visible brand tagline.
+- `--country es --currency EUR`: sets default market values.
+- `--dry-run`: previews files without writing.
+- `--no-sync`: skips artifact generation.
+
 This creates `profiles/acme-industrial` with brand, homepage, packaging CSV and asset folders, then runs `pnpm sync:client-profile` to generate storefront/backend artifacts. Activate it with:
 
 ```env

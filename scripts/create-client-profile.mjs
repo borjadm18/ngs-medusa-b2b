@@ -9,18 +9,31 @@ const templatesDir = path.join(rootDir, "templates")
 
 const usage = `Usage:
   pnpm create:client-profile -- --id <cliente> --name "Cliente"
+  pnpm create:client-profile -- --id acme --name "ACME" --from ngs --accent "#d71920"
 
 Options:
   --id       Perfil slug en kebab-case. Ej: ngs, acme-industrial
   --name     Nombre comercial visible. Ej: "ACME Industrial"
   --legal    Nombre legal opcional
+  --tagline  Tagline visible opcional
+  --from     Perfil base existente en ./profiles o "template". Por defecto: template
+  --accent   Color acento hex. Ej: "#d71920"
+  --country  Pais por defecto. Por defecto: es
+  --currency Moneda. Por defecto: EUR
   --force    Permite sobrescribir archivos existentes del perfil
+  --no-sync  Crea archivos sin ejecutar sync-client-profile
+  --dry-run  Muestra lo que se crearia sin escribir archivos
 `
 
 const parseArgs = () => {
   const args = process.argv.slice(2)
   const options = {
     force: false,
+    sync: true,
+    dryRun: false,
+    from: "template",
+    country: "es",
+    currency: "EUR",
   }
 
   for (let index = 0; index < args.length; index += 1) {
@@ -35,7 +48,26 @@ const parseArgs = () => {
       continue
     }
 
-    if (arg === "--id" || arg === "--name" || arg === "--legal") {
+    if (arg === "--no-sync") {
+      options.sync = false
+      continue
+    }
+
+    if (arg === "--dry-run") {
+      options.dryRun = true
+      continue
+    }
+
+    if (
+      arg === "--id" ||
+      arg === "--name" ||
+      arg === "--legal" ||
+      arg === "--tagline" ||
+      arg === "--from" ||
+      arg === "--accent" ||
+      arg === "--country" ||
+      arg === "--currency"
+    ) {
       options[arg.slice(2)] = args[index + 1]
       index += 1
       continue
@@ -55,6 +87,12 @@ const assertValidId = (profileId) => {
   }
 }
 
+const assertHexColor = (color, label) => {
+  if (color && !/^#[0-9a-fA-F]{6}$/.test(color)) {
+    throw new Error(`${label} must be a hex color like #d71920`)
+  }
+}
+
 const readJson = (filePath) => JSON.parse(fs.readFileSync(filePath, "utf8"))
 
 const writeJson = (filePath, data, force) => {
@@ -71,6 +109,29 @@ const copyFile = (sourcePath, targetPath, force) => {
   }
 
   fs.copyFileSync(sourcePath, targetPath)
+}
+
+const writeJsonMaybe = (filePath, data, force, dryRun) => {
+  if (dryRun) {
+    console.log(`[dry-run] write ${path.relative(rootDir, filePath)}`)
+    return
+  }
+
+  writeJson(filePath, data, force)
+}
+
+const copyFileMaybe = (sourcePath, targetPath, force, dryRun) => {
+  if (dryRun) {
+    console.log(
+      `[dry-run] copy ${path.relative(rootDir, sourcePath)} -> ${path.relative(
+        rootDir,
+        targetPath
+      )}`
+    )
+    return
+  }
+
+  copyFile(sourcePath, targetPath, force)
 }
 
 const replaceClientImagePath = (value, profileId) => {
@@ -102,33 +163,85 @@ const titleCaseFromId = (profileId) =>
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ")
 
-const createProfile = ({ id, name, legal, force }) => {
+const resolveProfileSource = (from) => {
+  if (!from || from === "template") {
+    return {
+      profilePath: path.join(templatesDir, "client-profile.example.json"),
+      homepagePath: path.join(templatesDir, "homepage-content.example.json"),
+      packagingPath: path.join(templatesDir, "product-packaging.example.csv"),
+      assetsDir: null,
+    }
+  }
+
+  assertValidId(from)
+
+  const sourceDir = path.join(profilesDir, from)
+  const profilePath = path.join(sourceDir, "client-profile.json")
+  const homepagePath = path.join(sourceDir, "homepage-content.json")
+  const packagingPath = path.join(sourceDir, "product-packaging.csv")
+
+  if (!fs.existsSync(profilePath) || !fs.existsSync(homepagePath)) {
+    throw new Error(`profiles/${from} is missing client-profile.json or homepage-content.json`)
+  }
+
+  return {
+    profilePath,
+    homepagePath,
+    packagingPath: fs.existsSync(packagingPath)
+      ? packagingPath
+      : path.join(templatesDir, "product-packaging.example.csv"),
+    assetsDir: path.join(sourceDir, "assets"),
+  }
+}
+
+const createProfile = ({
+  id,
+  name,
+  legal,
+  tagline,
+  from,
+  accent,
+  country,
+  currency,
+  force,
+  sync,
+  dryRun,
+}) => {
   assertValidId(id)
+  assertHexColor(accent, "--accent")
 
   const brandName = name || titleCaseFromId(id)
   const legalName = legal || brandName
   const targetDir = path.join(profilesDir, id)
   const assetsDir = path.join(targetDir, "assets")
+  const source = resolveProfileSource(from)
 
   if (fs.existsSync(targetDir) && !force) {
     throw new Error(`profiles/${id} already exists. Use --force to overwrite.`)
   }
 
-  fs.mkdirSync(assetsDir, { recursive: true })
+  if (!dryRun) {
+    fs.mkdirSync(assetsDir, { recursive: true })
+  } else {
+    console.log(`[dry-run] create ${path.relative(rootDir, targetDir)}`)
+  }
 
-  const profile = readJson(path.join(templatesDir, "client-profile.example.json"))
+  const profile = readJson(source.profilePath)
   profile.id = id
   profile.brand.name = brandName
   profile.brand.legalName = legalName
+  profile.brand.tagline =
+    tagline || profile.brand.tagline || "Portal B2B profesional para empresas"
   profile.brand.logo.light = `/images/${id}/logo-light.png`
   profile.brand.logo.dark = `/images/${id}/logo-dark.png`
+  profile.brand.colors.accent = accent || profile.brand.colors.accent
   profile.seo.title = `${brandName} | Portal B2B`
   profile.seo.description = `Portal B2B ${brandName} para compra profesional con precios por cuenta, packaging industrial y presupuestos.`
+  profile.markets.defaultCountryCode = country || profile.markets.defaultCountryCode
+  profile.markets.currency = currency || profile.markets.currency
   profile.footer.description = `Soluciones profesionales ${brandName} para empresas que necesitan comprar con precision, control y disponibilidad.`
 
-  const homepageTemplate = readJson(
-    path.join(templatesDir, "homepage-content.example.json")
-  )
+  const homepageTemplate = readJson(source.homepagePath)
   const homepage = mapDeep(homepageTemplate, (value) =>
     replaceClientImagePath(value, id)
   )
@@ -136,13 +249,37 @@ const createProfile = ({ id, name, legal, force }) => {
   homepage.heroTitle = `Compra profesional ${brandName} con reglas reales de empresa.`
   homepage.heroImageAlt = `Producto profesional ${brandName} en contexto B2B`
 
-  writeJson(path.join(targetDir, "client-profile.json"), profile, force)
-  writeJson(path.join(targetDir, "homepage-content.json"), homepage, force)
-  copyFile(
-    path.join(templatesDir, "product-packaging.example.csv"),
-    path.join(targetDir, "product-packaging.csv"),
-    force
+  writeJsonMaybe(
+    path.join(targetDir, "client-profile.json"),
+    profile,
+    force,
+    dryRun
   )
+  writeJsonMaybe(
+    path.join(targetDir, "homepage-content.json"),
+    homepage,
+    force,
+    dryRun
+  )
+  copyFileMaybe(
+    source.packagingPath,
+    path.join(targetDir, "product-packaging.csv"),
+    force,
+    dryRun
+  )
+
+  if (source.assetsDir && fs.existsSync(source.assetsDir)) {
+    if (dryRun) {
+      console.log(
+        `[dry-run] copy ${path.relative(rootDir, source.assetsDir)} -> ${path.relative(
+          rootDir,
+          assetsDir
+        )}`
+      )
+    } else {
+      fs.cpSync(source.assetsDir, assetsDir, { recursive: true })
+    }
+  }
 
   const readme = `# ${brandName} Profile
 
@@ -155,6 +292,10 @@ Perfil generado para activar una demo B2B industrial sobre el template Medusa.
 - \`product-packaging.csv\`: reglas demo de packaging por SKU.
 - \`assets/\`: logos e imagenes que se publicaran como \`/images/${id}/...\`.
 
+## Origen
+
+Generado desde \`${from || "template"}\`.
+
 ## Activacion
 
 \`\`\`bash
@@ -165,18 +306,26 @@ NEXT_PUBLIC_B2B_CLIENT_PROFILE=${id} pnpm --filter @b2b-starter/storefront build
 Para produccion, configura \`NEXT_PUBLIC_B2B_CLIENT_PROFILE=${id}\` en Vercel y \`B2B_CLIENT_PROFILE=${id}\` en Render si quieres sembrar packaging de este perfil.
 `
 
-  fs.writeFileSync(path.join(targetDir, "README.md"), readme, "utf8")
-
-  const syncResult = spawnSync(process.execPath, ["scripts/sync-client-profile.mjs"], {
-    cwd: rootDir,
-    stdio: "inherit",
-  })
-
-  if (syncResult.status !== 0) {
-    throw new Error("Profile created, but sync-client-profile failed")
+  if (dryRun) {
+    console.log(`[dry-run] write ${path.relative(rootDir, path.join(targetDir, "README.md"))}`)
+  } else {
+    fs.writeFileSync(path.join(targetDir, "README.md"), readme, "utf8")
   }
 
-  console.log(`Created profiles/${id}`)
+  if (sync && !dryRun) {
+    const syncResult = spawnSync(process.execPath, ["scripts/sync-client-profile.mjs"], {
+      cwd: rootDir,
+      stdio: "inherit",
+    })
+
+    if (syncResult.status !== 0) {
+      throw new Error("Profile created, but sync-client-profile failed")
+    }
+  } else if (!sync) {
+    console.log("Skipped sync-client-profile because --no-sync was provided")
+  }
+
+  console.log(`${dryRun ? "Would create" : "Created"} profiles/${id}`)
 }
 
 try {

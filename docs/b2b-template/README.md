@@ -35,7 +35,7 @@ Crear una base repetible para clientes B2B que necesitan:
 | Storefront B2B | Implementado NGS | Home, PDP, catalogo, carrito y presupuesto con patron industrial. |
 | Import/export ops | Implementado parcial | CSV packaging por SKU y CSV de carrito. |
 | Client adapter | Implementado parcial | Perfiles JSON sincronizables para marca, home, nav, footer, SEO, store, checkout, PDP fallbacks y assets; upload local desde Admin para demos. |
-| Template CLI/onboarding | Pendiente | Crear nuevo ecommerce desde prompts/configuracion. |
+| Template CLI/onboarding | Implementado inicial | Crear perfiles nuevos desde plantilla o perfil existente, validar y sincronizar artefactos. |
 
 ## Principio De Arquitectura
 
@@ -120,13 +120,27 @@ Perfiles actuales:
 
 ## Nuevo Cliente En 10 Minutos
 
-1. Copia `profiles/example-industrial` a `profiles/<cliente>`.
-2. Cambia `id`, marca, SEO, navegacion y footer en `client-profile.json`.
-3. Cambia hero, categorias, bloques comerciales e imagenes en `homepage-content.json`.
-4. Deja assets en `profiles/<cliente>/assets` y referencia rutas `/images/<cliente>/...`.
-5. Ejecuta `pnpm sync:client-profile`.
-6. Define `NEXT_PUBLIC_B2B_CLIENT_PROFILE=<cliente>`.
-7. Ejecuta `pnpm --filter @b2b-starter/storefront build`.
+1. Crea el perfil:
+
+```bash
+pnpm template:new -- --id <cliente> --name "Nombre Cliente" --from example-industrial
+```
+
+2. Revisa `profiles/<cliente>/client-profile.json`.
+3. Revisa `profiles/<cliente>/homepage-content.json`.
+4. Sustituye `profiles/<cliente>/product-packaging.csv` con SKUs reales.
+5. Deja assets en `profiles/<cliente>/assets` y referencia rutas `/images/<cliente>/...`.
+6. Ejecuta `pnpm sync:client-profile` si usaste `--no-sync` o editaste archivos manualmente.
+7. Define `NEXT_PUBLIC_B2B_CLIENT_PROFILE=<cliente>`.
+8. Ejecuta `pnpm --filter @b2b-starter/storefront build`.
+
+Opciones utiles:
+
+```bash
+pnpm template:new -- --id acme-industrial --name "ACME Industrial" --from ngs --accent "#d71920" --tagline "Portal profesional ACME"
+pnpm template:new -- --id acme-industrial --name "ACME Industrial" --dry-run
+pnpm template:new -- --id acme-industrial --name "ACME Industrial" --no-sync
+```
 
 ## Assets Desde Admin
 

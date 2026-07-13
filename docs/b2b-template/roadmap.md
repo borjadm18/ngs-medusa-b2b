@@ -167,13 +167,19 @@ Resultado esperado:
 
 - Crear una demo nueva en horas, no dias.
 
-Primer bloque implementado:
+Estado 2026-07-13:
 
 ```bash
 pnpm sync:client-profile
+pnpm template:new -- --id acme-industrial --name "ACME Industrial" --from example-industrial
 ```
 
-Siguiente paso: convertirlo en launcher interactivo que cree la carpeta de perfil, copie assets, valide packaging y prepare envs.
+- `sync:client-profile` empaqueta perfiles para storefront y backend.
+- `template:new` crea `profiles/<cliente>` desde `templates` o desde un perfil existente.
+- Soporta `--from`, `--accent`, `--tagline`, `--country`, `--currency`, `--dry-run`, `--no-sync` y `--force`.
+- Copia packaging CSV, assets si existen, genera README por cliente y ejecuta sync por defecto.
+
+Siguiente paso: convertirlo en launcher interactivo con preguntas guiadas, checklist de deploy Render/Vercel y opcion para generar un vertical pack completo.
 
 ## Fase 7. Vertical Packs
 
