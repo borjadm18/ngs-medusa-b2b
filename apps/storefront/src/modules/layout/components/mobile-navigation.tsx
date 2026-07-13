@@ -38,7 +38,11 @@ export function MobileNavigation({
         <div className="fixed inset-0 z-[80] bg-black/30">
           <div className="ml-auto flex h-full w-full max-w-sm flex-col bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
-              <BrandLogo className="h-9 w-[140px]" name={profile.brand.name} />
+              <BrandLogo
+                className="h-9 w-[140px]"
+                name={profile.brand.name}
+                logoUrl={profile.brand.logo.dark}
+              />
               <button
                 type="button"
                 aria-label="Cerrar navegación"

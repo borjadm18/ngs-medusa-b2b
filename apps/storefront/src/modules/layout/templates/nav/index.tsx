@@ -41,6 +41,7 @@ export async function NavigationHeader() {
               <BrandLogo
                 className="h-10 w-[156px]"
                 name={clientProfile.brand.name}
+                logoUrl={clientProfile.brand.logo.dark}
               />
             </LocalizedClientLink>
 

@@ -5,19 +5,33 @@ type BrandLogoProps = {
   className?: string
   imageClassName?: string
   name?: string
+  logoUrl?: string
 }
 
-const BrandLogo = ({ className, name = clientProfile.brand.name }: BrandLogoProps) => {
+const BrandLogo = ({
+  className,
+  imageClassName,
+  name = clientProfile.brand.name,
+  logoUrl,
+}: BrandLogoProps) => {
   return (
     <span
       className={clx(
-        "inline-flex items-center justify-center rounded bg-transparent text-current",
+        "inline-flex items-center justify-center overflow-hidden rounded bg-transparent text-current",
         className
       )}
     >
-      <span className="text-[32px] font-semibold leading-none tracking-normal">
-        {name}
-      </span>
+      {logoUrl ? (
+        <img
+          src={logoUrl}
+          alt={name}
+          className={clx("h-full w-full object-contain", imageClassName)}
+        />
+      ) : (
+        <span className="text-[32px] font-semibold leading-none tracking-normal">
+          {name}
+        </span>
+      )}
     </span>
   )
 }

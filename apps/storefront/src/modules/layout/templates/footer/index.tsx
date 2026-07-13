@@ -39,6 +39,7 @@ export default async function Footer() {
               <BrandLogo
                 className="h-12 w-[188px] border border-neutral-800"
                 name={clientProfile.brand.name}
+                logoUrl={clientProfile.brand.logo.light}
               />
             </LocalizedClientLink>
             <p className="mt-5 max-w-xs text-sm leading-6 text-neutral-400">
