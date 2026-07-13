@@ -41,6 +41,16 @@ const request = async (path, options = {}) => {
   return body;
 };
 
+const requestAbsolute = async (url) => {
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`GET ${url} failed with ${response.status}`);
+  }
+
+  return response;
+};
+
 const main = async () => {
   const auth = await request("/auth/user/emailpass", {
     method: "POST",
@@ -79,6 +89,29 @@ const main = async () => {
     throw new Error("Asset create response did not include an id.");
   }
 
+  const uploaded = await request("/admin/assets/upload", {
+    method: "POST",
+    headers: adminHeaders,
+    body: JSON.stringify({
+      label: "Smoke uploaded asset",
+      filename: "smoke-upload.png",
+      mime_type: "image/png",
+      content_base64:
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=",
+      alt: "Smoke uploaded image",
+      type: "homepage",
+      client_profile_id: "ngs",
+      tags: "smoke,upload",
+      sort_order: 1000,
+    }),
+  });
+
+  if (!uploaded.asset?.id || !uploaded.asset?.url) {
+    throw new Error("Asset upload response did not include id and url.");
+  }
+
+  await requestAbsolute(uploaded.asset.url);
+
   const listAfterCreate = await request("/admin/assets?client_profile_id=ngs", {
     headers: adminHeaders,
   });
@@ -94,6 +127,10 @@ const main = async () => {
     method: "DELETE",
     headers: adminHeaders,
   });
+  await request(`/admin/assets/${uploaded.asset.id}`, {
+    method: "DELETE",
+    headers: adminHeaders,
+  });
 
   console.log(
     JSON.stringify(
@@ -102,6 +139,7 @@ const main = async () => {
         backendUrl,
         defaultAssets: listBefore.assets?.length || 0,
         createdAsset: created.asset.id,
+        uploadedAsset: uploaded.asset.id,
       },
       null,
       2

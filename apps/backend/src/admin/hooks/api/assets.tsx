@@ -30,6 +30,12 @@ export type AdminAsset = {
   sort_order?: number;
 };
 
+export type AdminAssetUpload = Omit<AdminAsset, "url"> & {
+  filename: string;
+  mime_type: string;
+  content_base64: string;
+};
+
 type AdminAssetsResponse = {
   assets: AdminAsset[];
 };
@@ -107,6 +113,27 @@ export const useDeleteAsset = (
     mutationFn: (id) =>
       sdk.client.fetch<{ deleted: { id: string } }>(`/admin/assets/${id}`, {
         method: "DELETE",
+      }),
+    onSuccess: (data, variables, context) => {
+      queryClient.invalidateQueries({
+        queryKey: assetsQueryKey.all,
+      });
+      options?.onSuccess?.(data, variables, context);
+    },
+    ...options,
+  });
+};
+
+export const useUploadAsset = (
+  options?: UseMutationOptions<AdminAssetResponse, FetchError, AdminAssetUpload>
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (asset) =>
+      sdk.client.fetch<AdminAssetResponse>("/admin/assets/upload", {
+        method: "POST",
+        body: asset,
       }),
     onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({

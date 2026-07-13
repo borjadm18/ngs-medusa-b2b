@@ -30,7 +30,7 @@ Crear una base repetible para clientes B2B que necesitan:
 | Admin widgets | Implementado parcial | Edicion de packaging y acciones masivas basicas. |
 | Storefront B2B | Implementado NGS | Home, PDP, catalogo, carrito y presupuesto con patron industrial. |
 | Import/export ops | Implementado parcial | CSV packaging por SKU y CSV de carrito. |
-| Client adapter | Implementado parcial | Perfiles JSON sincronizables para marca, home, nav, footer, SEO, store, checkout, PDP fallbacks y assets. |
+| Client adapter | Implementado parcial | Perfiles JSON sincronizables para marca, home, nav, footer, SEO, store, checkout, PDP fallbacks y assets; upload local desde Admin para demos. |
 | Template CLI/onboarding | Pendiente | Crear nuevo ecommerce desde prompts/configuracion. |
 
 ## Principio De Arquitectura
@@ -122,3 +122,9 @@ Perfiles actuales:
 5. Ejecuta `pnpm sync:client-profile`.
 6. Define `NEXT_PUBLIC_B2B_CLIENT_PROFILE=<cliente>`.
 7. Ejecuta `pnpm --filter @b2b-starter/storefront build`.
+
+## Assets Desde Admin
+
+Admin > Assets permite registrar rutas existentes o subir imagenes desde el equipo. En esta fase, los archivos subidos se guardan en el filesystem del backend y se sirven desde `/store/asset-files/<filename>`.
+
+Esto es suficiente para demos y POCs. Para produccion real, el siguiente paso es sustituir esa capa por storage persistente tipo S3, R2 o equivalente, manteniendo el mismo contrato de Asset Library.

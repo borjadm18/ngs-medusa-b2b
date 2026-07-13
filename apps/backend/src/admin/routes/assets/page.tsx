@@ -19,6 +19,7 @@ import {
   AssetType,
   useAssets,
   useDeleteAsset,
+  useUploadAsset,
   useUpsertAsset,
 } from "../../hooks/api/assets";
 import { resolveAdminAssetPreviewUrl } from "../../lib/assets";
@@ -44,10 +45,23 @@ const emptyAsset: AdminAsset = {
   sort_order: 0,
 };
 
+const fileToBase64 = (file: File) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const result = String(reader.result || "");
+      resolve(result.includes(",") ? result.split(",")[1] : result);
+    };
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+
 const AssetsPage = () => {
   const [profileId, setProfileId] = useState("ngs");
   const [type, setType] = useState<AssetType | "all">("all");
   const [form, setForm] = useState<AdminAsset>(emptyAsset);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const { data, isPending } = useAssets({
     client_profile_id: profileId,
@@ -77,6 +91,21 @@ const AssetsPage = () => {
   const deleteAsset = useDeleteAsset({
     onSuccess: () => toast.success("Asset eliminado"),
     onError: (error) => toast.error(error.message || "No se pudo eliminar"),
+  });
+
+  const uploadAsset = useUploadAsset({
+    onSuccess: ({ asset }) => {
+      toast.success("Imagen subida");
+      setSelectedFile(null);
+      setForm({
+        ...emptyAsset,
+        ...asset,
+        alt: asset.alt || "",
+        tags: asset.tags || "",
+        sort_order: asset.sort_order || 0,
+      });
+    },
+    onError: (error) => toast.error(error.message || "No se pudo subir"),
   });
 
   const updateField = (
@@ -116,6 +145,33 @@ const AssetsPage = () => {
       alt: form.alt || null,
       tags: form.tags || null,
       sort_order: Number(form.sort_order || 0),
+    });
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      toast.error("Selecciona una imagen");
+      return;
+    }
+
+    if (!form.label) {
+      toast.error("El nombre es obligatorio");
+      return;
+    }
+
+    const contentBase64 = await fileToBase64(selectedFile);
+
+    uploadAsset.mutate({
+      id: form.id,
+      label: form.label,
+      alt: form.alt || null,
+      type: form.type,
+      client_profile_id: form.client_profile_id || profileId,
+      tags: form.tags || null,
+      sort_order: Number(form.sort_order || 0),
+      filename: selectedFile.name,
+      mime_type: selectedFile.type,
+      content_base64: contentBase64,
     });
   };
 
@@ -253,7 +309,7 @@ const AssetsPage = () => {
             </Text>
             <Text size="small" className="mt-1 text-ui-fg-subtle">
               Usa rutas internas como /images/ngs/home-hero.png o URLs
-              absolutas.
+              absolutas, o sube un archivo desde tu equipo.
             </Text>
 
             <div className="mt-4 grid gap-3">
@@ -267,6 +323,33 @@ const AssetsPage = () => {
                 value={form.url}
                 onChange={(value) => updateField("url", value)}
               />
+              <div className="grid gap-2 rounded-lg border bg-ui-bg-subtle p-3">
+                <Text size="small" leading="compact" weight="plus">
+                  Subir imagen
+                </Text>
+                <Input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
+                  onChange={(event) =>
+                    setSelectedFile(event.target.files?.[0] || null)
+                  }
+                />
+                {selectedFile ? (
+                  <Text size="small" className="text-ui-fg-subtle">
+                    {selectedFile.name} -{" "}
+                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                  </Text>
+                ) : null}
+                <Button
+                  size="small"
+                  variant="secondary"
+                  onClick={handleUpload}
+                  isLoading={uploadAsset.isPending}
+                  disabled={!selectedFile || !form.label}
+                >
+                  Subir y registrar asset
+                </Button>
+              </div>
               <TextAreaField
                 label="Alt text"
                 value={form.alt || ""}

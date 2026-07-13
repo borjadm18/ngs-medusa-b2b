@@ -22,3 +22,19 @@ export const AdminUpsertAsset = z.object({
 });
 
 export type AdminUpsertAssetType = z.infer<typeof AdminUpsertAsset>;
+
+export const AdminUploadAsset = AdminUpsertAsset.omit({
+  url: true,
+}).extend({
+  filename: z.string().min(1),
+  mime_type: z.enum([
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+    "image/svg+xml",
+  ]),
+  content_base64: z.string().min(1).max(6_000_000),
+});
+
+export type AdminUploadAssetType = z.infer<typeof AdminUploadAsset>;
