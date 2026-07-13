@@ -1,5 +1,12 @@
 import { defineRouteConfig } from "@medusajs/admin-sdk";
-import { BuildingStorefront, PencilSquare, Plus, Trash } from "@medusajs/icons";
+import {
+  ArrowDownTray,
+  ArrowUpTray,
+  BuildingStorefront,
+  PencilSquare,
+  Plus,
+  Trash,
+} from "@medusajs/icons";
 import {
   Badge,
   Button,
@@ -16,7 +23,7 @@ import {
   Toaster,
   toast,
 } from "@medusajs/ui";
-import { useEffect, useMemo, useState } from "react";
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   AdminCatalogRule,
   CatalogRuleEffectType,
@@ -24,6 +31,7 @@ import {
   CatalogRuleStatus,
   CatalogRuleTargetType,
   CatalogRuleType,
+  useBulkUpsertCatalogRules,
   useCatalogRules,
   useDeleteCatalogRule,
   useUpsertCatalogRule,
@@ -31,6 +39,18 @@ import {
 
 type CatalogRuleFormState = AdminCatalogRule & {
   metadataJson: string;
+};
+
+type CsvImportRow = {
+  rowNumber: number;
+  catalogRule?: AdminCatalogRule;
+  errors: string[];
+  raw: Record<string, string>;
+};
+
+type CsvImportPreview = {
+  filename: string;
+  rows: CsvImportRow[];
 };
 
 const EMPTY_FORM: CatalogRuleFormState = {
@@ -85,6 +105,291 @@ const effectTypeOptions: CatalogRuleEffectType[] = [
   "requires_quote",
 ];
 
+const csvHeaders = [
+  "id",
+  "name",
+  "description",
+  "status",
+  "priority",
+  "rule_type",
+  "target_type",
+  "target_id",
+  "company_id",
+  "customer_group_id",
+  "region_id",
+  "sales_channel_id",
+  "zone_code",
+  "currency_code",
+  "effect_type",
+  "discount_percentage",
+  "fixed_price",
+  "minimum_quantity",
+  "starts_at",
+  "ends_at",
+  "metadata",
+];
+
+const statusImportOptions: CatalogRuleStatus[] = ["draft", "active", "archived"];
+const ruleTypeImportOptions: CatalogRuleType[] = [
+  "price",
+  "visibility",
+  "assortment",
+  "quote",
+];
+
+const escapeCsvCell = (value: unknown) => {
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  const stringValue =
+    typeof value === "object" ? JSON.stringify(value) : String(value);
+
+  if (/[",\n\r]/.test(stringValue)) {
+    return `"${stringValue.replace(/"/g, '""')}"`;
+  }
+
+  return stringValue;
+};
+
+const parseCsvRow = (line: string) => {
+  const cells: string[] = [];
+  let current = "";
+  let insideQuotes = false;
+
+  for (let index = 0; index < line.length; index += 1) {
+    const character = line[index];
+    const nextCharacter = line[index + 1];
+
+    if (character === '"' && insideQuotes && nextCharacter === '"') {
+      current += '"';
+      index += 1;
+      continue;
+    }
+
+    if (character === '"') {
+      insideQuotes = !insideQuotes;
+      continue;
+    }
+
+    if (character === "," && !insideQuotes) {
+      cells.push(current.trim());
+      current = "";
+      continue;
+    }
+
+    current += character;
+  }
+
+  cells.push(current.trim());
+
+  return cells;
+};
+
+const parseCsvText = (text: string) => {
+  const lines = text
+    .replace(/^\uFEFF/, "")
+    .split(/\r?\n/)
+    .filter((line) => line.trim().length);
+  const headers = parseCsvRow(lines[0] || "").map((header) =>
+    header.trim().toLowerCase()
+  );
+
+  return lines.slice(1).map((line, index) => {
+    const values = parseCsvRow(line);
+    const row: Record<string, string> = {};
+
+    headers.forEach((header, headerIndex) => {
+      row[header] = values[headerIndex] || "";
+    });
+
+    return {
+      rowNumber: index + 2,
+      row,
+    };
+  });
+};
+
+const nullable = (value?: string) => value?.trim() || null;
+
+const parseOptionalNumber = (
+  rawValue: string | undefined,
+  field: string,
+  errors: string[]
+) => {
+  if (!rawValue?.trim()) {
+    return null;
+  }
+
+  const value = Number(rawValue.replace(",", "."));
+
+  if (!Number.isFinite(value)) {
+    errors.push(`${field} must be numeric`);
+    return null;
+  }
+
+  return value;
+};
+
+const parsePositiveInteger = (
+  rawValue: string | undefined,
+  field: string,
+  fallback: number,
+  errors: string[]
+) => {
+  if (!rawValue?.trim()) {
+    return fallback;
+  }
+
+  const value = Number(rawValue);
+
+  if (!Number.isInteger(value) || value <= 0) {
+    errors.push(`${field} must be a positive integer`);
+    return fallback;
+  }
+
+  return value;
+};
+
+const parseMetadata = (value: string | undefined, errors: string[]) => {
+  if (!value?.trim()) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      errors.push("metadata must be a JSON object");
+      return null;
+    }
+
+    return parsed as Record<string, unknown>;
+  } catch {
+    errors.push("metadata must be valid JSON");
+    return null;
+  }
+};
+
+const isOneOf = <TValue extends string>(
+  value: string,
+  options: readonly TValue[]
+): value is TValue => options.includes(value as TValue);
+
+const metadataToJson = (metadata?: AdminCatalogRule["metadata"]) => {
+  if (!metadata) {
+    return "";
+  }
+
+  if (typeof metadata === "string") {
+    try {
+      return JSON.stringify(JSON.parse(metadata), null, 2);
+    } catch {
+      return metadata;
+    }
+  }
+
+  return JSON.stringify(metadata, null, 2);
+};
+
+const buildCatalogRuleFromCsvRow = (
+  row: Record<string, string>
+): Omit<CsvImportRow, "rowNumber"> => {
+  const errors: string[] = [];
+  const name = row.name?.trim();
+  const status = row.status?.trim() || "draft";
+  const ruleType = row.rule_type?.trim() || "price";
+  const targetType = row.target_type?.trim() || "all";
+  const effectType = row.effect_type?.trim() || "discount_percentage";
+
+  if (!name) {
+    errors.push("name is required");
+  }
+
+  if (!isOneOf(status, statusImportOptions)) {
+    errors.push("status is invalid");
+  }
+
+  if (!isOneOf(ruleType, ruleTypeImportOptions)) {
+    errors.push("rule_type is invalid");
+  }
+
+  if (!isOneOf(targetType, targetTypeOptions)) {
+    errors.push("target_type is invalid");
+  }
+
+  if (!isOneOf(effectType, effectTypeOptions)) {
+    errors.push("effect_type is invalid");
+  }
+
+  if (targetType !== "all" && !row.target_id?.trim()) {
+    errors.push("target_id is required when target_type is not all");
+  }
+
+  const priority = parsePositiveInteger(row.priority, "priority", 100, errors);
+  const minimumQuantity = parsePositiveInteger(
+    row.minimum_quantity,
+    "minimum_quantity",
+    1,
+    errors
+  );
+  const discountPercentage = parseOptionalNumber(
+    row.discount_percentage,
+    "discount_percentage",
+    errors
+  );
+  const fixedPrice = parseOptionalNumber(row.fixed_price, "fixed_price", errors);
+  const metadata = parseMetadata(row.metadata, errors);
+
+  if (effectType === "discount_percentage" && discountPercentage === null) {
+    errors.push("discount_percentage is required for discount rules");
+  }
+
+  if (effectType === "fixed_price" && fixedPrice === null) {
+    errors.push("fixed_price is required for fixed price rules");
+  }
+
+  if (discountPercentage !== null && (discountPercentage < 0 || discountPercentage > 100)) {
+    errors.push("discount_percentage must be between 0 and 100");
+  }
+
+  if (errors.length) {
+    return {
+      errors,
+      raw: row,
+    };
+  }
+
+  return {
+    errors,
+    raw: row,
+    catalogRule: {
+      id: row.id?.trim() || undefined,
+      name,
+      description: nullable(row.description),
+      status: status as CatalogRuleStatus,
+      priority,
+      rule_type: ruleType as CatalogRuleType,
+      target_type: targetType as CatalogRuleTargetType,
+      target_id: targetType === "all" ? null : nullable(row.target_id),
+      company_id: nullable(row.company_id),
+      customer_group_id: nullable(row.customer_group_id),
+      region_id: nullable(row.region_id),
+      sales_channel_id: nullable(row.sales_channel_id),
+      zone_code: nullable(row.zone_code),
+      currency_code: nullable(row.currency_code),
+      effect_type: effectType as CatalogRuleEffectType,
+      discount_percentage:
+        effectType === "discount_percentage" ? discountPercentage : null,
+      fixed_price: effectType === "fixed_price" ? fixedPrice : null,
+      minimum_quantity: minimumQuantity,
+      starts_at: nullable(row.starts_at),
+      ends_at: nullable(row.ends_at),
+      metadata,
+    },
+  };
+};
+
 const toFormState = (catalogRule?: AdminCatalogRule): CatalogRuleFormState => {
   if (!catalogRule) {
     return EMPTY_FORM;
@@ -103,9 +408,7 @@ const toFormState = (catalogRule?: AdminCatalogRule): CatalogRuleFormState => {
     currency_code: catalogRule.currency_code || "eur",
     starts_at: catalogRule.starts_at || "",
     ends_at: catalogRule.ends_at || "",
-    metadataJson: catalogRule.metadata
-      ? JSON.stringify(catalogRule.metadata, null, 2)
-      : "",
+    metadataJson: metadataToJson(catalogRule.metadata),
   };
 };
 
@@ -132,6 +435,10 @@ const CatalogRulesPage = () => {
   });
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<CatalogRuleFormState>(EMPTY_FORM);
+  const [importPreview, setImportPreview] = useState<CsvImportPreview | null>(
+    null
+  );
+  const importInputRef = useRef<HTMLInputElement | null>(null);
 
   const { data, isPending } = useCatalogRules(filters);
   const catalogRules = data?.catalog_rules || [];
@@ -154,6 +461,25 @@ const CatalogRulesPage = () => {
     onError: (error) =>
       toast.error(error.message || "Could not delete catalog rule"),
   });
+  const bulkUpsertCatalogRules = useBulkUpsertCatalogRules({
+    onSuccess: (data) => {
+      toast.success(`${data.catalog_rules.length} catalog rules imported`);
+      setImportPreview(null);
+    },
+    onError: (error) =>
+      toast.error(error.message || "Could not import catalog rules"),
+  });
+
+  const validImportRows = useMemo(
+    () =>
+      importPreview?.rows.filter((row) => row.catalogRule && !row.errors.length) ||
+      [],
+    [importPreview]
+  );
+  const invalidImportRows = useMemo(
+    () => importPreview?.rows.filter((row) => row.errors.length) || [],
+    [importPreview]
+  );
 
   useEffect(() => {
     if (!open) {
@@ -179,6 +505,69 @@ const CatalogRulesPage = () => {
   const handleEdit = (catalogRule: AdminCatalogRule) => {
     setForm(toFormState(catalogRule));
     setOpen(true);
+  };
+
+  const handleExportCsv = () => {
+    if (!catalogRules.length) {
+      toast.error("There are no visible catalog rules to export");
+      return;
+    }
+
+    const rows = catalogRules.map((rule) =>
+      csvHeaders
+        .map((header) => escapeCsvCell(rule[header as keyof AdminCatalogRule]))
+        .join(",")
+    );
+    const csv = [csvHeaders.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `catalog-rules-${new Date()
+      .toISOString()
+      .slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportCsv = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    const text = await file.text();
+    const parsedRows = parseCsvText(text);
+
+    if (!parsedRows.length) {
+      toast.error("CSV file has no data rows");
+      return;
+    }
+
+    setImportPreview({
+      filename: file.name,
+      rows: parsedRows.map(({ rowNumber, row }) => ({
+        rowNumber,
+        ...buildCatalogRuleFromCsvRow(row),
+      })),
+    });
+  };
+
+  const handleConfirmImport = () => {
+    const catalogRulesToImport = validImportRows
+      .map((row) => row.catalogRule)
+      .filter((rule): rule is AdminCatalogRule => Boolean(rule));
+
+    if (!catalogRulesToImport.length) {
+      toast.error("There are no valid rows to import");
+      return;
+    }
+
+    bulkUpsertCatalogRules.mutate(catalogRulesToImport);
   };
 
   const handleSubmit = () => {
@@ -262,10 +651,36 @@ const CatalogRulesPage = () => {
               assortment.
             </Text>
           </div>
-          <Button size="small" onClick={handleCreate}>
-            <Plus />
-            New rule
-          </Button>
+          <div className="flex items-center gap-x-2">
+            <input
+              ref={importInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              className="hidden"
+              onChange={handleImportCsv}
+            />
+            <Button
+              size="small"
+              variant="secondary"
+              disabled={!catalogRules.length}
+              onClick={handleExportCsv}
+            >
+              <ArrowDownTray />
+              Export CSV
+            </Button>
+            <Button
+              size="small"
+              variant="secondary"
+              onClick={() => importInputRef.current?.click()}
+            >
+              <ArrowUpTray />
+              Import CSV
+            </Button>
+            <Button size="small" onClick={handleCreate}>
+              <Plus />
+              New rule
+            </Button>
+          </div>
         </div>
 
         <div className="grid gap-4 p-6">
@@ -575,6 +990,142 @@ const CatalogRulesPage = () => {
                 isLoading={upsertCatalogRule.isPending}
               >
                 Save rule
+              </Button>
+            </div>
+          </Drawer.Footer>
+        </Drawer.Content>
+      </Drawer>
+
+      <Drawer
+        open={Boolean(importPreview)}
+        onOpenChange={(nextOpen) => !nextOpen && setImportPreview(null)}
+      >
+        <Drawer.Content>
+          <Drawer.Header>
+            <Drawer.Title>Import catalog rules</Drawer.Title>
+          </Drawer.Header>
+          <Drawer.Body className="flex flex-1 flex-col gap-y-4 overflow-auto p-4">
+            <div>
+              <Text size="small" weight="plus">
+                {importPreview?.filename}
+              </Text>
+              <Text size="small" className="text-ui-fg-subtle">
+                Review valid and invalid rows before applying changes.
+              </Text>
+            </div>
+
+            <div className="grid gap-3 small:grid-cols-3">
+              <Metric label="Rows" value={importPreview?.rows.length || 0} />
+              <Metric label="Valid" value={validImportRows.length} />
+              <Metric label="Errors" value={invalidImportRows.length} />
+            </div>
+
+            {invalidImportRows.length ? (
+              <div className="rounded-lg border border-ui-border-error bg-ui-bg-base p-4">
+                <Text size="small" weight="plus" className="text-ui-fg-error">
+                  Rows with errors
+                </Text>
+                <div className="mt-3 grid gap-2">
+                  {invalidImportRows.slice(0, 8).map((row) => (
+                    <div key={row.rowNumber} className="rounded-md border p-3">
+                      <Text size="small" weight="plus">
+                        Row {row.rowNumber}: {row.raw.name || "Unnamed rule"}
+                      </Text>
+                      <Text size="small" className="text-ui-fg-subtle">
+                        {row.errors.join(", ")}
+                      </Text>
+                    </div>
+                  ))}
+                  {invalidImportRows.length > 8 ? (
+                    <Text size="small" className="text-ui-fg-subtle">
+                      {invalidImportRows.length - 8} more invalid rows hidden.
+                    </Text>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
+
+            <div className="rounded-lg border">
+              <Table>
+                <Table.Header>
+                  <Table.Row>
+                    <Table.HeaderCell>Row</Table.HeaderCell>
+                    <Table.HeaderCell>Name</Table.HeaderCell>
+                    <Table.HeaderCell>Target</Table.HeaderCell>
+                    <Table.HeaderCell>Context</Table.HeaderCell>
+                    <Table.HeaderCell>Effect</Table.HeaderCell>
+                  </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                  {validImportRows.length ? (
+                    validImportRows.slice(0, 10).map((row) => {
+                      const rule = row.catalogRule!;
+
+                      return (
+                        <Table.Row key={row.rowNumber}>
+                          <Table.Cell>{row.rowNumber}</Table.Cell>
+                          <Table.Cell>
+                            <Text size="small" weight="plus">
+                              {rule.name}
+                            </Text>
+                            <Text size="small" className="text-ui-fg-subtle">
+                              {rule.status} / {rule.rule_type}
+                            </Text>
+                          </Table.Cell>
+                          <Table.Cell>
+                            {rule.target_type}
+                            {rule.target_id ? `:${rule.target_id}` : ""}
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Text size="small" className="text-ui-fg-subtle">
+                              c:{compact(rule.company_id)} / r:
+                              {compact(rule.region_id)} / ch:
+                              {compact(rule.sales_channel_id)}
+                            </Text>
+                          </Table.Cell>
+                          <Table.Cell>{effectLabel(rule)}</Table.Cell>
+                        </Table.Row>
+                      );
+                    })
+                  ) : (
+                    <Table.Row>
+                      <Table.Cell colSpan={5}>
+                        <Text size="small" className="text-ui-fg-subtle">
+                          No valid catalog rules found in this CSV.
+                        </Text>
+                      </Table.Cell>
+                    </Table.Row>
+                  )}
+                </Table.Body>
+              </Table>
+              {validImportRows.length > 10 ? (
+                <div className="border-t px-4 py-3">
+                  <Text size="small" className="text-ui-fg-subtle">
+                    {validImportRows.length - 10} more valid rows will be
+                    imported.
+                  </Text>
+                </div>
+              ) : null}
+            </div>
+          </Drawer.Body>
+          <Drawer.Footer>
+            <div className="flex items-center justify-end gap-x-2">
+              <Drawer.Close asChild>
+                <Button
+                  size="small"
+                  variant="secondary"
+                  disabled={bulkUpsertCatalogRules.isPending}
+                >
+                  Cancel
+                </Button>
+              </Drawer.Close>
+              <Button
+                size="small"
+                onClick={handleConfirmImport}
+                disabled={!validImportRows.length}
+                isLoading={bulkUpsertCatalogRules.isPending}
+              >
+                Import valid rows
               </Button>
             </div>
           </Drawer.Footer>

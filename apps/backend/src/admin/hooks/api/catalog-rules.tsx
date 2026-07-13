@@ -46,7 +46,7 @@ export type AdminCatalogRule = {
   minimum_quantity: number;
   starts_at?: string | null;
   ends_at?: string | null;
-  metadata?: Record<string, unknown> | null;
+  metadata?: Record<string, unknown> | string | null;
 };
 
 export type CatalogRuleFilters = {
@@ -72,6 +72,10 @@ type AdminCatalogRulesResponse = {
 
 type AdminCatalogRuleResponse = {
   catalog_rule: AdminCatalogRule;
+};
+
+type AdminCatalogRulesMutationResponse = {
+  catalog_rules: AdminCatalogRule[];
 };
 
 export const catalogRulesQueryKeys = queryKeysFactory("catalog_rules");
@@ -145,6 +149,36 @@ export const useDeleteCatalogRule = (
       sdk.client.fetch<{ id: string }>(`/admin/catalog-rules/${id}`, {
         method: "DELETE",
       }),
+    onSuccess: (data, variables, context) => {
+      queryClient.invalidateQueries({
+        queryKey: catalogRulesQueryKeys.all,
+      });
+      options?.onSuccess?.(data, variables, context);
+    },
+    ...options,
+  });
+};
+
+export const useBulkUpsertCatalogRules = (
+  options?: UseMutationOptions<
+    AdminCatalogRulesMutationResponse,
+    FetchError,
+    AdminCatalogRule[]
+  >
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (catalogRules) =>
+      sdk.client.fetch<AdminCatalogRulesMutationResponse>(
+        "/admin/catalog-rules/bulk",
+        {
+          method: "POST",
+          body: {
+            catalog_rules: catalogRules,
+          },
+        }
+      ),
     onSuccess: (data, variables, context) => {
       queryClient.invalidateQueries({
         queryKey: catalogRulesQueryKeys.all,

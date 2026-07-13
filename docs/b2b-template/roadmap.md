@@ -128,6 +128,7 @@ Estado 2026-07-13:
 - Admin API inicial: `GET/POST /admin/catalog-rules`, `GET/DELETE /admin/catalog-rules/:id`.
 - Store API inicial: `GET /store/catalog-rules` devuelve reglas activas aplicables a producto/variante/categoria/coleccion + compania/grupo/region/canal/zona/moneda.
 - Admin UI inicial `Catalog rules` con listado, filtros y drawer para crear/editar/eliminar reglas.
+- Import/export CSV desde Admin con preview, validacion por fila y endpoint bulk.
 - Migracion `catalog_rule` generada con indices para estado, target, compania, grupo, region y canal.
 - Smoke remoto `pnpm smoke:catalog-rules` preparado.
 
@@ -136,7 +137,6 @@ Pendiente:
 - Aplicar reglas de precio contra price lists/pricing core de Medusa.
 - Aplicar visibilidad/surtidos en listados Storefront.
 - Simulador "ver catalogo como cliente/canal/region".
-- Import/export CSV con preview.
 
 Notas de arquitectura:
 

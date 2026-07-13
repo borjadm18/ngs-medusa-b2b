@@ -59,3 +59,11 @@ export const AdminUpsertCatalogRule = z
 export type AdminUpsertCatalogRuleType = z.infer<
   typeof AdminUpsertCatalogRule
 >;
+
+export const AdminBulkUpsertCatalogRules = z.object({
+  catalog_rules: z.array(AdminUpsertCatalogRule).min(1),
+});
+
+export type AdminBulkUpsertCatalogRulesType = z.infer<
+  typeof AdminBulkUpsertCatalogRules
+>;
