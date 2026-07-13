@@ -35,6 +35,7 @@ import {
   useBulkUpsertCatalogRules,
   useCatalogRules,
   useDeleteCatalogRule,
+  useSimulateCatalogRules,
   useSyncCatalogRulePriceList,
   useUpsertCatalogRule,
 } from "../../hooks/api/catalog-rules";
@@ -53,6 +54,19 @@ type CsvImportRow = {
 type CsvImportPreview = {
   filename: string;
   rows: CsvImportRow[];
+};
+
+type SimulationFormState = {
+  product_id: string;
+  variant_id: string;
+  category_id: string;
+  collection_id: string;
+  company_id: string;
+  customer_group_id: string;
+  region_id: string;
+  sales_channel_id: string;
+  zone_code: string;
+  currency_code: string;
 };
 
 const EMPTY_FORM: CatalogRuleFormState = {
@@ -77,6 +91,19 @@ const EMPTY_FORM: CatalogRuleFormState = {
   ends_at: "",
   metadata: null,
   metadataJson: "",
+};
+
+const EMPTY_SIMULATION: SimulationFormState = {
+  product_id: "",
+  variant_id: "",
+  category_id: "",
+  collection_id: "",
+  company_id: "",
+  customer_group_id: "",
+  region_id: "",
+  sales_channel_id: "",
+  zone_code: "",
+  currency_code: "eur",
 };
 
 const statusOptions: Array<CatalogRuleStatus | "all"> = [
@@ -472,6 +499,8 @@ const CatalogRulesPage = () => {
   const [importPreview, setImportPreview] = useState<CsvImportPreview | null>(
     null
   );
+  const [simulationForm, setSimulationForm] =
+    useState<SimulationFormState>(EMPTY_SIMULATION);
   const importInputRef = useRef<HTMLInputElement | null>(null);
 
   const { data, isPending } = useCatalogRules(filters);
@@ -508,6 +537,10 @@ const CatalogRulesPage = () => {
       toast.success(`Price list created: ${data.price_list.title}`),
     onError: (error) =>
       toast.error(error.message || "Could not sync price list"),
+  });
+  const simulateCatalogRules = useSimulateCatalogRules({
+    onError: (error) =>
+      toast.error(error.message || "Could not simulate catalog rules"),
   });
 
   const validImportRows = useMemo(
@@ -608,6 +641,24 @@ const CatalogRulesPage = () => {
     }
 
     bulkUpsertCatalogRules.mutate(catalogRulesToImport);
+  };
+
+  const updateSimulation = <TKey extends keyof SimulationFormState>(
+    field: TKey,
+    value: SimulationFormState[TKey]
+  ) => {
+    setSimulationForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  };
+
+  const handleSimulate = () => {
+    simulateCatalogRules.mutate(
+      Object.fromEntries(
+        Object.entries(simulationForm).filter(([, value]) => value.trim())
+      )
+    );
   };
 
   const handleSubmit = () => {
@@ -777,6 +828,132 @@ const CatalogRulesPage = () => {
             <Metric label="Total rules" value={data?.count || 0} />
             <Metric label="Active rules" value={activeRules} />
             <Metric label="Visible rows" value={catalogRules.length} />
+          </div>
+
+          <div className="grid gap-4 rounded-lg border bg-ui-bg-base p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <Text size="small" leading="compact" weight="plus">
+                  Rule simulator
+                </Text>
+                <Text
+                  size="small"
+                  leading="compact"
+                  className="text-ui-fg-subtle"
+                >
+                  Test which active rules apply for a product, customer context,
+                  region, channel and zone.
+                </Text>
+              </div>
+              <Button
+                size="small"
+                variant="secondary"
+                onClick={handleSimulate}
+                isLoading={simulateCatalogRules.isPending}
+              >
+                Simulate
+              </Button>
+            </div>
+
+            <div className="grid gap-3 medium:grid-cols-5">
+              <TextField
+                label="Product ID"
+                value={simulationForm.product_id}
+                onChange={(value) => updateSimulation("product_id", value)}
+              />
+              <TextField
+                label="Variant ID"
+                value={simulationForm.variant_id}
+                onChange={(value) => updateSimulation("variant_id", value)}
+              />
+              <TextField
+                label="Category ID"
+                value={simulationForm.category_id}
+                onChange={(value) => updateSimulation("category_id", value)}
+              />
+              <TextField
+                label="Company ID"
+                value={simulationForm.company_id}
+                onChange={(value) => updateSimulation("company_id", value)}
+              />
+              <TextField
+                label="Customer group"
+                value={simulationForm.customer_group_id}
+                onChange={(value) =>
+                  updateSimulation("customer_group_id", value)
+                }
+              />
+              <TextField
+                label="Region"
+                value={simulationForm.region_id}
+                onChange={(value) => updateSimulation("region_id", value)}
+              />
+              <TextField
+                label="Sales channel"
+                value={simulationForm.sales_channel_id}
+                onChange={(value) =>
+                  updateSimulation("sales_channel_id", value)
+                }
+              />
+              <TextField
+                label="Zone"
+                value={simulationForm.zone_code}
+                onChange={(value) => updateSimulation("zone_code", value)}
+              />
+              <TextField
+                label="Currency"
+                value={simulationForm.currency_code}
+                onChange={(value) => updateSimulation("currency_code", value)}
+              />
+              <TextField
+                label="Collection ID"
+                value={simulationForm.collection_id}
+                onChange={(value) => updateSimulation("collection_id", value)}
+              />
+            </div>
+
+            {simulateCatalogRules.data ? (
+              <div className="grid gap-2 rounded-lg border bg-ui-bg-subtle p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <Text size="small" leading="compact" weight="plus">
+                    Applicable rules
+                  </Text>
+                  <Badge size="small">
+                    {simulateCatalogRules.data.applicable_rules.length}
+                  </Badge>
+                </div>
+                {simulateCatalogRules.data.applicable_rules.length ? (
+                  <div className="grid gap-2">
+                    {simulateCatalogRules.data.applicable_rules.map((rule) => (
+                      <div
+                        key={rule.id || rule.name}
+                        className="grid gap-1 rounded-md border bg-ui-bg-base p-3"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <Text size="small" leading="compact" weight="plus">
+                            {rule.name}
+                          </Text>
+                          <Badge size="xsmall">{rule.effect_type}</Badge>
+                        </div>
+                        <Text
+                          size="small"
+                          leading="compact"
+                          className="text-ui-fg-subtle"
+                        >
+                          {rule.rule_type} / {rule.target_type}
+                          {rule.target_id ? `:${rule.target_id}` : ""} /
+                          priority {rule.priority} / {effectLabel(rule)}
+                        </Text>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <Text size="small" className="text-ui-fg-subtle">
+                    No active catalog rules match this context.
+                  </Text>
+                )}
+              </div>
+            ) : null}
           </div>
 
           {isPending ? (

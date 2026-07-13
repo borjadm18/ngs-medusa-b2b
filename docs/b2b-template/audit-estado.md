@@ -1,12 +1,12 @@
 # Auditoria De Estado - Medusa B2B Template
 
-Fecha: 2026-07-12
+Fecha: 2026-07-13
 
 ## Resumen Ejecutivo
 
-El proyecto ya no es solo una demo estatica: tiene backend Medusa real, storefront Next.js, Admin extendido y despliegue en Render/Vercel. La capa B2B principal funciona para companias, presupuestos, aprobaciones, packaging por variante, compra por caja/unidad, validacion de carrito y contenido de homepage desde backend.
+El proyecto ya no es solo una demo estatica: tiene backend Medusa real, storefront Next.js, Admin extendido y despliegue en Render/Vercel. La capa B2B principal funciona para companias, presupuestos, aprobaciones, packaging por variante, compra por caja/unidad, validacion de carrito, reglas iniciales de catalogo, contenido editable y perfiles cliente reutilizables.
 
-El siguiente salto es cerrar el backoffice no tecnico. La home, marca, navegacion, footer, SEO y fallbacks principales ya salen de JSON empaquetado; queda evitar duplicacion entre `profiles/*` y `apps/storefront/src/lib/client-profile/profiles/*`, y crear editores Admin para que no haya que tocar codigo.
+El siguiente salto es cerrar producto template: QA automatizado, storage persistente para assets, simulador de catalogo por cliente/canal/region y seeds/productos demo por vertical. La home, marca, navegacion, footer, SEO, fallbacks y packaging por perfil ya salen de fuentes sincronizables.
 
 ## Estado Por Area
 
@@ -18,12 +18,12 @@ El siguiente salto es cerrar el backoffice no tecnico. La home, marca, navegacio
 | Homepage editable      | Parcial alto              | Modulo backend, store API, fallback JSON y Admin page con editor estructurado existen. Assets page permite registrar rutas, subir imagenes locales y seleccionarlas desde el editor de Home. Falta storage externo persistente.                                             |
 | Client profile         | Parcial alto              | Marca/logo/nav/footer/SEO/home/categorias/store/checkout/PDP fallbacks salen de JSON o Brand profile runtime. `pnpm sync:client-profile` empaqueta perfiles y valida packaging CSV. Admin Brand profile existe con formularios por seccion, preview y modo JSON avanzado. |
 | Admin B2B              | Parcial alto              | Widget packaging con import/export, bulk basico, copia entre variantes y plantillas rapidas. Admin Home, Brand profile y Assets existen. Falta storage externo de assets y editores por perfil activo.                                                                     |
-| Presupuestos           | Base heredada + integrado | Flujo existe; falta enriquecer presupuesto con packaging/logistica completa.                                                                                                                                                                                              |
+| Presupuestos           | Integrado B2B             | Flujo existe; storefront exporta CSV/PDF desde carrito y Admin quote detail muestra packaging/logistica con export CSV.                                                                                                                                                  |
 | Aprobaciones           | Base heredada + integrado | Existe en cuenta/carrito/checkout; falta validacion UX y casos demo claros.                                                                                                                                                                                               |
-| Reglas catalogo/precio | Pendiente estrategico     | Falta capa para descuentos por cliente, zona, canal, segmento y visibilidad de catalogo por region/canal. Debe apoyarse en price lists, regions, customer groups y sales channels de Medusa antes de crear logica propia.                                                   |
+| Reglas catalogo/precio | Inicial implementado      | Modulo catalog rules, Admin CRUD/import/export, Store API y aplicacion inicial en storefront. Falta integracion profunda con price lists/pricing core y simulador por cliente/canal/region.                                                                               |
 | Multicanal/multiregion | Pendiente estrategico     | Falta modelar canales B2B, distribuidores, instaladores, regiones, monedas, impuestos y surtidos por mercado.                                                                                                                                                              |
-| Import/export          | Parcial                   | Packaging CSV y cart CSV. Falta import/export homepage, brand profile y presupuesto.                                                                                                                                                                                      |
-| Documentacion template | Iniciada                  | `docs/b2b-template`, `templates`, `profiles/ngs`.                                                                                                                                                                                                                         |
+| Import/export          | Parcial alto              | Packaging CSV con preview Admin, catalog rules CSV, cart CSV/PDF y Admin quote CSV. Falta import/export dedicado de homepage/brand profile.                                                                                                                               |
+| Documentacion template | Avanzada                  | `docs/b2b-template`, `templates`, `profiles/ngs`, `profiles/example-industrial`, launcher y vertical packs.                                                                                                                                                               |
 
 ## Funcionalidades Habladas E Implementadas
 
@@ -130,18 +130,28 @@ Parcial.
 
 - CSV packaging.
 - CSV carrito.
+- CSV catalog rules desde Admin.
+- CSV quote desde Admin.
+- PDF/print quote desde carrito.
 - Ejemplos en `templates`.
 
 Pendiente:
 
 - CSV/JSON homepage.
 - CSV/JSON brand profile.
-- Export de presupuesto con packaging/logistica.
+- Export PDF/CSV de quote persistente desde Admin.
 - Importadores CLI.
 
 ### Reglas de catalogo, precio y canal
 
-Pendiente estrategico.
+Inicial implementado, pendiente de profundizar.
+
+- Modulo `catalogRules`.
+- Admin CRUD, filtros, drawer e import/export CSV con preview.
+- Store API para reglas activas.
+- Aplicacion inicial de visibilidad/precio mostrado en listados y PDP.
+
+Pendiente:
 
 - Descuentos por cliente, compania, grupo, zona, region y canal.
 - Price lists demo por segmento/cuenta.
@@ -154,6 +164,22 @@ Principio:
 
 - Reutilizar primero capacidades core de Medusa: price lists, customer groups, regions, currencies, sales channels y pricing.
 - Crear modulo propio solo para reglas industriales no cubiertas por el core, como zona comercial, canal operativo, visibilidad avanzada o descuentos ligados a packaging/pallet.
+
+### Template launcher / vertical packs
+
+Implementado inicial.
+
+- `pnpm template:new`.
+- `--from template|ngs|example-industrial`.
+- `--vertical audio|packaging|hardware|electrical|spare-parts`.
+- Genera `client-profile.json`, `homepage-content.json`, `product-packaging.csv`, `README.md`, `.env.example`, `activation-checklist.md` y `assets/`.
+- Vertical packs generan copy, menu, categorias, fallbacks PDP y packaging CSV demo por sector.
+- `pnpm sync:client-profile` valida packaging CSV, copia perfiles al storefront y genera registry backend.
+
+Pendiente:
+
+- Modo interactivo con preguntas guiadas.
+- Vertical packs con productos/categorias/seeds demo completos.
 
 ### OpenWiki
 
@@ -215,7 +241,7 @@ Siguiente accion:
 - Render free tiene cold starts largos y redeploys lentos.
 - Algunas rutas Admin dependen de sesion real para QA.
 - El storefront mantiene NGS intencionadamente en `profiles/ngs` y en la pagina especifica `/ngs-poc`.
-- El perfil NGS esta duplicado en raiz y storefront hasta crear sincronizacion.
+- El perfil NGS esta duplicado como fuente y artefacto generado; hay que evitar editar artefactos generados directamente.
 - OpenWiki no puede ejecutarse sin credencial OpenAI disponible.
 - La validacion navegador de Admin packaging queda pendiente porque Render rechazo las credenciales dev documentadas.
 
@@ -245,6 +271,6 @@ Siguiente accion:
 
 1. Crear `.env.test`/Postgres local o CI con credenciales explicitas y convertir los checks live de packaging en Jest HTTP.
 2. Validar Admin packaging visualmente en navegador con credenciales reales.
-3. Extender `sync:client-profile` para importar packaging/seed backend.
-4. Empezar presupuesto enriquecido con packaging/logistica y export.
+3. Crear simulador Admin para catalog rules por cliente/canal/region.
+4. Extender vertical packs con productos/categorias/seeds demo.
 5. Migrar Assets a storage externo persistente.

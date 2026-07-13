@@ -93,6 +93,24 @@ type AdminCatalogRulePriceListSyncPayload = {
   description?: string;
 };
 
+export type CatalogRuleSimulationContext = {
+  product_id?: string;
+  variant_id?: string;
+  category_id?: string;
+  collection_id?: string;
+  company_id?: string;
+  customer_group_id?: string;
+  region_id?: string;
+  sales_channel_id?: string;
+  zone_code?: string;
+  currency_code?: string;
+};
+
+type CatalogRuleSimulationResponse = {
+  context: CatalogRuleSimulationContext;
+  applicable_rules: AdminCatalogRule[];
+};
+
 export const catalogRulesQueryKeys = queryKeysFactory("catalog_rules");
 
 const buildQuery = (filters?: CatalogRuleFilters) => {
@@ -228,6 +246,23 @@ export const useSyncCatalogRulePriceList = (
       });
       options?.onSuccess?.(data, variables, context);
     },
+    ...options,
+  });
+};
+
+export const useSimulateCatalogRules = (
+  options?: UseMutationOptions<
+    CatalogRuleSimulationResponse,
+    FetchError,
+    CatalogRuleSimulationContext
+  >
+) => {
+  return useMutation({
+    mutationFn: (context) =>
+      sdk.client.fetch<CatalogRuleSimulationResponse>("/store/catalog-rules", {
+        method: "GET",
+        query: buildQuery(context),
+      }),
     ...options,
   });
 };
