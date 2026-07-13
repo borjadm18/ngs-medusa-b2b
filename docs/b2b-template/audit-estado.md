@@ -73,14 +73,15 @@ Implementado parcialmente.
 - Edicion por variante.
 - Aplicar a todas las variantes.
 - Importar CSV.
+- Preview de CSV antes de aplicar.
+- Validacion de errores por fila.
+- Emparejamiento por `variant_id` o `sku`.
 - Exportar CSV.
 - Smoke test reproducible `pnpm smoke:admin-packaging` valida login admin, escritura `/admin/product-packaging` y lectura `/store/product-packaging`.
 
 Pendiente:
 
 - QA visual del widget en navegador real.
-- Preview antes de importar.
-- Validacion de errores por fila.
 - Copiar desde otra variante.
 - Plantilla por categoria.
 - Historial de cambios.
@@ -167,7 +168,7 @@ Siguiente accion:
 
 ### P2 - Backoffice No Tecnico
 
-1. Admin packaging con preview CSV, errores por fila y plantillas.
+1. Admin packaging con copiar desde otra variante y plantillas por categoria.
 2. Migrar upload local de imagenes a storage persistente/CDN.
 3. Selector de perfil activo para editar varios clientes desde el mismo Admin.
 4. Import/export JSON para homepage y brand profile.

@@ -128,3 +128,9 @@ Perfiles actuales:
 Admin > Assets permite registrar rutas existentes o subir imagenes desde el equipo. En esta fase, los archivos subidos se guardan en el filesystem del backend y se sirven desde `/asset-files/<filename>`.
 
 Esto es suficiente para demos y POCs. Para produccion real, el siguiente paso es sustituir esa capa por storage persistente tipo S3, R2 o equivalente, manteniendo el mismo contrato de Asset Library.
+
+## Packaging Desde Admin
+
+En Admin > Products > producto > Packaging B2B se pueden editar reglas por variante, aplicar una regla a todas las variantes, exportar CSV e importar CSV.
+
+La importacion no aplica cambios inmediatamente: primero abre un preview con filas validas, errores por fila y emparejamiento por `variant_id` o `sku`. Solo las filas validas se aplican al confirmar.

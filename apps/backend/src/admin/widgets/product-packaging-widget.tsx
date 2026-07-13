@@ -29,6 +29,19 @@ type ProductVariant = {
   sku?: string | null;
 };
 
+type CsvImportRow = {
+  rowNumber: number;
+  variant?: ProductVariant;
+  packaging?: AdminUpsertProductPackaging;
+  errors: string[];
+  raw: Record<string, string>;
+};
+
+type CsvImportPreview = {
+  filename: string;
+  rows: CsvImportRow[];
+};
+
 const DEFAULT_FORM: AdminUpsertProductPackaging = {
   variant_id: "",
   sales_unit: "unit",
@@ -49,12 +62,34 @@ const toNumberOrNull = (value: string) => {
   return Number.isFinite(numberValue) ? numberValue : null;
 };
 
+const normalizeHeader = (value: string) => value.trim().toLowerCase();
+
+const parsePositiveInteger = (value: string, fallback: number) => {
+  if (!value.trim()) {
+    return fallback;
+  }
+
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+};
+
+const parsePositiveNumberOrNull = (value: string) => {
+  if (!value.trim()) {
+    return null;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+};
+
 const ProductPackagingWidget = ({
   data,
 }: DetailWidgetProps<AdminProduct>) => {
   const [selectedVariant, setSelectedVariant] =
     useState<ProductVariant | null>(null);
   const [form, setForm] = useState<AdminUpsertProductPackaging>(DEFAULT_FORM);
+  const [importPreview, setImportPreview] =
+    useState<CsvImportPreview | null>(null);
   const importInputRef = useRef<HTMLInputElement | null>(null);
 
   const { data: productData, isLoading: isProductLoading } = useQuery({
@@ -101,6 +136,7 @@ const ProductPackagingWidget = ({
     onSuccess: () => {
       toast.success("Reglas de packaging actualizadas");
       setSelectedVariant(null);
+      setImportPreview(null);
     },
     onError: (error) => {
       toast.error(error.message || "No se pudo actualizar el packaging");
@@ -216,6 +252,122 @@ const ProductPackagingWidget = ({
     URL.revokeObjectURL(url);
   };
 
+  const buildImportPreview = (filename: string, text: string) => {
+    const trimmedText = text.trim();
+
+    if (!trimmedText) {
+      toast.error("El CSV esta vacio");
+      return;
+    }
+
+    const [headerLine, ...lines] = trimmedText.split(/\r?\n/);
+    const headers = parseCsvRow(headerLine).map(normalizeHeader);
+    const variantById = variants.reduce<Record<string, ProductVariant>>(
+      (acc, variant) => {
+        acc[variant.id] = variant;
+        return acc;
+      },
+      {}
+    );
+    const variantBySku = variants.reduce<Record<string, ProductVariant>>(
+      (acc, variant) => {
+        if (variant.sku) {
+          acc[variant.sku] = variant;
+        }
+        return acc;
+      },
+      {}
+    );
+
+    const rows = lines
+      .filter((line) => line.trim())
+      .map(parseCsvRow)
+      .map<CsvImportRow>((values, index) => {
+        const raw = headers.reduce<Record<string, string>>(
+          (acc, header, valueIndex) => {
+            acc[header] = values[valueIndex] || "";
+            return acc;
+          },
+          {}
+        );
+        const errors: string[] = [];
+        const variant =
+          variantById[raw.variant_id] ||
+          (raw.sku ? variantBySku[raw.sku] : undefined);
+
+        if (!variant) {
+          errors.push("No coincide con ninguna variante por variant_id o sku");
+        }
+
+        const salesUnit = raw.sales_unit === "box" ? "box" : "unit";
+        if (raw.sales_unit && !["unit", "box"].includes(raw.sales_unit)) {
+          errors.push("sales_unit debe ser unit o box");
+        }
+
+        const minimumOrderQuantity = parsePositiveInteger(
+          raw.minimum_order_quantity || raw.minimo,
+          1
+        );
+        const quantityIncrement = parsePositiveInteger(
+          raw.quantity_increment || raw.multiplo,
+          1
+        );
+        const unitsPerBox = parsePositiveInteger(
+          raw.units_per_box || raw.uds_caja,
+          1
+        );
+        const boxesPerPallet = parsePositiveInteger(
+          raw.boxes_per_pallet,
+          0
+        );
+        const packageWeight = parsePositiveNumberOrNull(raw.package_weight);
+
+        if (!minimumOrderQuantity) {
+          errors.push("minimum_order_quantity debe ser entero positivo");
+        }
+        if (!quantityIncrement) {
+          errors.push("quantity_increment debe ser entero positivo");
+        }
+        if (!unitsPerBox) {
+          errors.push("units_per_box debe ser entero positivo");
+        }
+        if (raw.boxes_per_pallet && boxesPerPallet === null) {
+          errors.push("boxes_per_pallet debe ser entero positivo");
+        }
+        if (raw.package_weight && packageWeight === null) {
+          errors.push("package_weight debe ser numero positivo");
+        }
+
+        return {
+          rowNumber: index + 2,
+          variant,
+          raw,
+          errors,
+          packaging:
+            variant &&
+            minimumOrderQuantity &&
+            quantityIncrement &&
+            unitsPerBox
+              ? {
+                  variant_id: variant.id,
+                  sales_unit: salesUnit,
+                  minimum_order_quantity: minimumOrderQuantity,
+                  quantity_increment: quantityIncrement,
+                  units_per_box: unitsPerBox,
+                  boxes_per_pallet: boxesPerPallet || null,
+                  package_weight: packageWeight,
+                  package_dimensions: raw.package_dimensions || null,
+                }
+              : undefined,
+        };
+      });
+
+    setImportPreview({
+      filename,
+      rows,
+    });
+  };
+
   const handleImportCsv = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
@@ -224,38 +376,35 @@ const ProductPackagingWidget = ({
     }
 
     const text = await file.text();
-    const [headerLine, ...lines] = text.trim().split(/\r?\n/);
-    const headers = parseCsvRow(headerLine);
-    const records = lines
-      .map(parseCsvRow)
-      .map((values) =>
-        headers.reduce<Record<string, string>>((acc, header, index) => {
-          acc[header] = values[index] || "";
-          return acc;
-        }, {})
-      )
-      .filter((record) => record.variant_id);
-
-    bulkUpsertPackaging.mutate(
-      records.map((record) => ({
-        variant_id: record.variant_id,
-        sales_unit: record.sales_unit === "box" ? "box" : "unit",
-        minimum_order_quantity:
-          Number(record.minimum_order_quantity || record.minimo) || 1,
-        quantity_increment:
-          Number(record.quantity_increment || record.multiplo) || 1,
-        units_per_box: Number(record.units_per_box || record.uds_caja) || 1,
-        boxes_per_pallet: record.boxes_per_pallet
-          ? Number(record.boxes_per_pallet)
-          : null,
-        package_weight: record.package_weight
-          ? Number(record.package_weight)
-          : null,
-        package_dimensions: record.package_dimensions || null,
-      }))
-    );
+    buildImportPreview(file.name, text);
 
     event.target.value = "";
+  };
+
+  const validImportRows = useMemo(
+    () =>
+      (importPreview?.rows || []).filter(
+        (row) => row.packaging && row.errors.length === 0
+      ),
+    [importPreview?.rows]
+  );
+
+  const invalidImportRows = useMemo(
+    () => (importPreview?.rows || []).filter((row) => row.errors.length > 0),
+    [importPreview?.rows]
+  );
+
+  const handleConfirmImport = () => {
+    const payload = validImportRows
+      .map((row) => row.packaging)
+      .filter(Boolean) as AdminUpsertProductPackaging[];
+
+    if (!payload.length) {
+      toast.error("No hay filas validas para importar");
+      return;
+    }
+
+    bulkUpsertPackaging.mutate(payload);
   };
 
   const isLoading = isProductLoading || isPackagingLoading;
@@ -481,9 +630,130 @@ const ProductPackagingWidget = ({
           </Drawer.Footer>
         </Drawer.Content>
       </Drawer>
+
+      <Drawer
+        open={!!importPreview}
+        onOpenChange={(open) => {
+          if (!open) {
+            setImportPreview(null);
+          }
+        }}
+      >
+        <Drawer.Content>
+          <Drawer.Header>
+            <Drawer.Title>
+              Preview import CSV: {importPreview?.filename || ""}
+            </Drawer.Title>
+          </Drawer.Header>
+          <Drawer.Body className="flex flex-1 flex-col gap-y-4 overflow-auto p-4">
+            <div className="grid gap-3 small:grid-cols-3">
+              <ImportSummaryCard label="Filas" value={importPreview?.rows.length || 0} />
+              <ImportSummaryCard label="Validas" value={validImportRows.length} />
+              <ImportSummaryCard label="Con errores" value={invalidImportRows.length} />
+            </div>
+
+            {invalidImportRows.length ? (
+              <div className="grid gap-2 rounded-lg border border-ui-border-error p-3">
+                <Text size="small" leading="compact" weight="plus">
+                  Errores detectados
+                </Text>
+                <div className="grid gap-2">
+                  {invalidImportRows.slice(0, 12).map((row) => (
+                    <div key={`error-${row.rowNumber}`}>
+                      <Text size="small" leading="compact" weight="plus">
+                        Fila {row.rowNumber}: {row.raw.sku || row.raw.variant_id || "sin identificador"}
+                      </Text>
+                      <Text size="small" className="text-ui-fg-subtle">
+                        {row.errors.join("; ")}
+                      </Text>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            <div className="grid gap-2">
+              <Text size="small" leading="compact" weight="plus">
+                Filas que se aplicaran
+              </Text>
+              {validImportRows.length ? (
+                <div className="overflow-hidden rounded-lg border">
+                  <div className="grid grid-cols-[1.2fr_1fr_1fr_1fr] border-b bg-ui-bg-subtle px-3 py-2">
+                    <Text size="small" weight="plus">Variante</Text>
+                    <Text size="small" weight="plus">Venta</Text>
+                    <Text size="small" weight="plus">Minimo</Text>
+                    <Text size="small" weight="plus">Caja</Text>
+                  </div>
+                  {validImportRows.slice(0, 20).map((row) => (
+                    <div
+                      key={`valid-${row.rowNumber}`}
+                      className="grid grid-cols-[1.2fr_1fr_1fr_1fr] border-b px-3 py-2 last:border-b-0"
+                    >
+                      <Text size="small" leading="compact">
+                        {row.variant?.sku || row.variant?.title || row.variant?.id}
+                      </Text>
+                      <Text size="small" leading="compact">
+                        {row.packaging?.sales_unit}
+                      </Text>
+                      <Text size="small" leading="compact">
+                        {row.packaging?.minimum_order_quantity}
+                      </Text>
+                      <Text size="small" leading="compact">
+                        {row.packaging?.units_per_box} uds
+                      </Text>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <Text size="small" className="text-ui-fg-subtle">
+                  No hay filas validas para aplicar.
+                </Text>
+              )}
+            </div>
+          </Drawer.Body>
+          <Drawer.Footer>
+            <div className="flex items-center justify-end gap-x-2">
+              <Drawer.Close asChild>
+                <Button
+                  size="small"
+                  variant="secondary"
+                  disabled={bulkUpsertPackaging.isPending}
+                >
+                  Cancelar
+                </Button>
+              </Drawer.Close>
+              <Button
+                size="small"
+                onClick={handleConfirmImport}
+                isLoading={bulkUpsertPackaging.isPending}
+                disabled={!validImportRows.length}
+              >
+                Aplicar {validImportRows.length} filas
+              </Button>
+            </div>
+          </Drawer.Footer>
+        </Drawer.Content>
+      </Drawer>
     </Container>
   );
 };
+
+const ImportSummaryCard = ({
+  label,
+  value,
+}: {
+  label: string;
+  value: number;
+}) => (
+  <div className="rounded-lg border bg-ui-bg-subtle p-3">
+    <Text size="small" leading="compact" className="text-ui-fg-subtle">
+      {label}
+    </Text>
+    <Text size="large" weight="plus">
+      {value}
+    </Text>
+  </div>
+);
 
 const parseCsvRow = (row: string) => {
   const result: string[] = [];
