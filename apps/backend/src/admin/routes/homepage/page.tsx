@@ -21,6 +21,7 @@ import {
   useHomepageContent,
   useUpdateHomepageContent,
 } from "../../hooks/api/homepage";
+import { useBrandProfileContent } from "../../hooks/api/brand-profile";
 import { AssetPickerField } from "../../components/assets/asset-picker-field";
 import { resolveAdminAssetPreviewUrl } from "../../lib/assets";
 
@@ -37,9 +38,11 @@ const toFormState = (content: HomepageContent): HomepageFormState => ({
 
 const Homepage = () => {
   const { data, isPending } = useHomepageContent();
+  const { data: brandProfileData } = useBrandProfileContent();
   const [form, setForm] = useState<HomepageFormState>(
     toFormState(DEFAULT_HOMEPAGE_CONTENT)
   );
+  const activeProfileId = brandProfileData?.brand_profile?.id || "ngs";
 
   const updateHomepage = useUpdateHomepageContent({
     onSuccess: () => toast.success("Homepage actualizada"),
@@ -243,6 +246,7 @@ const Homepage = () => {
               <AssetPickerField
                 label="Imagen hero"
                 value={form.heroImage}
+                profileId={activeProfileId}
                 preferredType="hero"
                 onChange={(value) => updateField("heroImage", value)}
               />
@@ -339,7 +343,7 @@ const Homepage = () => {
             <ImageBlockSection
               title="Banda superior"
               items={form.trustBlocks}
-              profileId="ngs"
+              profileId={activeProfileId}
               onAdd={() => addImageBlock("trustBlocks")}
               onRemove={(index) => removeImageBlock("trustBlocks", index)}
               onChange={(index, field, value) =>
@@ -350,7 +354,7 @@ const Homepage = () => {
             <ImageBlockSection
               title="Bloques comerciales"
               items={form.capabilityBlocks}
-              profileId="ngs"
+              profileId={activeProfileId}
               onAdd={() => addImageBlock("capabilityBlocks")}
               onRemove={(index) => removeImageBlock("capabilityBlocks", index)}
               onChange={(index, field, value) =>
@@ -361,7 +365,7 @@ const Homepage = () => {
             <ImageBlockSection
               title="Bloques visuales"
               items={form.detailBlocks}
-              profileId="ngs"
+              profileId={activeProfileId}
               onAdd={() => addImageBlock("detailBlocks")}
               onRemove={(index) => removeImageBlock("detailBlocks", index)}
               onChange={(index, field, value) =>
