@@ -3,6 +3,7 @@
 import { useCart } from "@/lib/context/cart-context"
 import { getCheckoutStep } from "@/lib/util/get-checkout-step"
 import CartLogisticsSummary from "@/modules/cart/components/cart-logistics-summary"
+import CartToPdfButton from "@/modules/cart/components/cart-to-pdf-button"
 import CartToCsvButton from "@/modules/cart/components/cart-to-csv-button"
 import CartTotals from "@/modules/cart/components/cart-totals"
 import PromotionCode from "@/modules/checkout/components/promotion-code"
@@ -92,6 +93,7 @@ const Summary = ({ customer, spendLimitExceeded }: SummaryProps) => {
         </RequestQuotePrompt>
       )}
       <CartToCsvButton cart={cart} />
+      <CartToPdfButton cart={cart} />
       <Button
         onClick={handleEmptyCart}
         className="w-full h-10 rounded-md shadow-borders-base"

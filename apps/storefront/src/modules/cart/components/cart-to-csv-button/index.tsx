@@ -24,7 +24,7 @@ const CartToCsvButton = ({ cart }: CartToCsvButtonProps) => {
     try {
       if (window.showSaveFilePicker) {
         const fileHandle = await window.showSaveFilePicker({
-          suggestedName: "cart.csv",
+          suggestedName: "presupuesto-b2b.csv",
           startIn: "downloads",
           types: [
             { description: "CSV File", accept: { "text/csv": [".csv"] } },
@@ -38,7 +38,7 @@ const CartToCsvButton = ({ cart }: CartToCsvButtonProps) => {
         const url = URL.createObjectURL(blob)
         const link = document.createElement("a")
         link.href = url
-        link.download = "cart.csv"
+        link.download = "presupuesto-b2b.csv"
         link.click()
         URL.revokeObjectURL(url)
       }
@@ -52,12 +52,12 @@ const CartToCsvButton = ({ cart }: CartToCsvButtonProps) => {
   return (
     <div className="flex flex-col gap-y-2 items-center">
       <Button
-        className="w-full h-10 rounded-full shadow-borders-base"
+        className="w-full h-10 rounded-md shadow-borders-base"
         variant="secondary"
         onClick={handleExportCart}
         isLoading={isExportingCart}
       >
-        Export Cart (.csv)
+        Exportar CSV
       </Button>
       {error && <Text className="text-red-500">{error}</Text>}
     </div>
