@@ -1,6 +1,7 @@
 import { defineRouteConfig } from "@medusajs/admin-sdk";
 import { Photo, Plus, Trash } from "@medusajs/icons";
 import {
+  Badge,
   Button,
   Container,
   Heading,
@@ -36,6 +37,17 @@ const assetTypes: Array<AssetType | "all"> = [
   "other",
 ];
 
+const assetTypeLabels: Record<AssetType | "all", string> = {
+  all: "Todos",
+  logo: "Logos",
+  hero: "Hero",
+  homepage: "Home",
+  product: "Producto",
+  category: "Categoria",
+  document: "Documentos",
+  other: "Otros",
+};
+
 const emptyAsset: AdminAsset = {
   label: "",
   url: "",
@@ -67,6 +79,7 @@ const AssetsPage = () => {
   const { data: brandProfileData } = useBrandProfileContent();
   const [profileId, setProfileId] = useState("ngs");
   const [type, setType] = useState<AssetType | "all">("all");
+  const [search, setSearch] = useState("");
   const [form, setForm] = useState<AdminAsset>(emptyAsset);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const activeProfileId = brandProfileData?.brand_profile?.id || "ngs";
@@ -92,13 +105,39 @@ const AssetsPage = () => {
   });
 
   const assets = data?.assets || [];
-  const sortedAssets = useMemo(
-    () =>
-      [...assets].sort(
-        (left, right) => (left.sort_order || 0) - (right.sort_order || 0)
-      ),
-    [assets]
-  );
+  const filteredAssets = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+
+    return [...assets]
+      .filter((asset) => {
+        if (!normalizedSearch) {
+          return true;
+        }
+
+        return [
+          asset.label,
+          asset.url,
+          asset.alt || "",
+          asset.tags || "",
+          asset.type,
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(normalizedSearch);
+      })
+      .sort((left, right) => (left.sort_order || 0) - (right.sort_order || 0));
+  }, [assets, search]);
+
+  const typeCounts = useMemo(() => {
+    return assetTypes.reduce<Record<string, number>>((acc, assetType) => {
+      acc[assetType] =
+        assetType === "all"
+          ? assets.length
+          : assets.filter((asset) => asset.type === assetType).length;
+
+      return acc;
+    }, {});
+  }, [assets]);
 
   const upsertAsset = useUpsertAsset({
     onSuccess: () => {
@@ -138,7 +177,13 @@ const AssetsPage = () => {
     }));
   };
 
+  const handleNewAsset = () => {
+    setSelectedFile(null);
+    setForm(createEmptyAsset(profileId));
+  };
+
   const handleEdit = (asset: AdminAsset) => {
+    setSelectedFile(null);
     setForm({
       ...emptyAsset,
       ...asset,
@@ -197,239 +242,314 @@ const AssetsPage = () => {
 
   return (
     <>
-      <Container className="flex flex-col p-0 overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b">
+      <Container className="flex flex-col overflow-hidden p-0">
+        <div className="flex items-center justify-between border-b px-6 py-4">
           <div>
-            <Heading className="font-sans font-medium h1-core">Assets</Heading>
+            <Heading className="font-sans font-medium h1-core">
+              Asset library
+            </Heading>
             <Text size="small" className="text-ui-fg-subtle">
-              Libreria de imagenes reutilizables para home, marca, categorias y
-              producto. Perfil activo: {activeProfileId}.
+              Mini DAM para logos, heroes, categorias, producto y documentos.
+              Perfil activo: {activeProfileId}.
             </Text>
           </div>
-          <Button
-            size="small"
-            variant="secondary"
-            onClick={() => setForm(createEmptyAsset(profileId))}
-          >
+          <Button size="small" variant="secondary" onClick={handleNewAsset}>
             <Plus />
             Nuevo asset
           </Button>
         </div>
 
-        <div className="grid gap-6 p-6 small:grid-cols-[minmax(0,1fr)_380px]">
-          <div className="grid gap-4">
-            <div className="grid gap-3 rounded-lg border p-4 small:grid-cols-[1fr_220px]">
-              <TextField
-                label="Perfil cliente"
-                value={profileId}
-                onChange={setProfileId}
-              />
-              <div className="grid gap-2">
-                <Label>Tipo</Label>
-                <Select
-                  value={type}
-                  onValueChange={(value) => setType(value as AssetType | "all")}
-                >
-                  <Select.Trigger>
-                    <Select.Value />
-                  </Select.Trigger>
-                  <Select.Content>
-                    {assetTypes.map((assetType) => (
-                      <Select.Item key={assetType} value={assetType}>
-                        {assetType === "all" ? "Todos" : assetType}
-                      </Select.Item>
-                    ))}
-                  </Select.Content>
-                </Select>
+        <div className="grid min-h-[calc(100vh-180px)] bg-ui-bg-subtle small:grid-cols-[minmax(0,1fr)_400px]">
+          <main className="grid content-start gap-4 p-6">
+            <div className="rounded-lg border bg-ui-bg-base p-4">
+              <div className="grid gap-3 medium:grid-cols-[1fr_220px]">
+                <TextField
+                  label="Buscar por nombre, URL, alt o tags"
+                  value={search}
+                  onChange={setSearch}
+                  placeholder="Buscar assets..."
+                />
+                <TextField
+                  label="Perfil cliente"
+                  value={profileId}
+                  onChange={setProfileId}
+                />
+              </div>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                {assetTypes.map((assetType) => (
+                  <button
+                    key={assetType}
+                    type="button"
+                    onClick={() => setType(assetType)}
+                    className={`rounded border px-3 py-1.5 text-xs font-medium transition ${
+                      type === assetType
+                        ? "border-ui-border-interactive bg-ui-bg-interactive text-ui-fg-on-color"
+                        : "border-ui-border-base bg-ui-bg-base text-ui-fg-subtle hover:bg-ui-bg-base-hover"
+                    }`}
+                  >
+                    {assetTypeLabels[assetType]} ({typeCounts[assetType] || 0})
+                  </button>
+                ))}
               </div>
             </div>
 
-            {isPending ? (
-              <Text size="small" className="text-ui-fg-subtle">
-                Cargando assets...
+            <div className="flex items-center justify-between">
+              <Text size="small" weight="plus">
+                {filteredAssets.length} assets
               </Text>
-            ) : (
-              <div className="grid gap-3 medium:grid-cols-2">
-                {sortedAssets.map((asset) => {
+              <Text size="small" className="text-ui-fg-subtle">
+                Filtrado por {assetTypeLabels[type].toLowerCase()}
+              </Text>
+            </div>
+
+            {isPending ? (
+              <div className="rounded-lg border bg-ui-bg-base p-8 text-center">
+                <Text size="small" className="text-ui-fg-subtle">
+                  Cargando assets...
+                </Text>
+              </div>
+            ) : filteredAssets.length ? (
+              <div className="grid gap-3 xsmall:grid-cols-2 large:grid-cols-3">
+                {filteredAssets.map((asset) => {
                   const isDefault = asset.id?.startsWith("default-");
+                  const isSelected =
+                    (!!form.id && form.id === asset.id) ||
+                    (!form.id && form.url === asset.url);
 
                   return (
                     <article
                       key={`${asset.id || asset.url}-${asset.label}`}
-                      className="overflow-hidden rounded-lg border bg-ui-bg-base"
+                      onClick={() => handleEdit(asset)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          handleEdit(asset);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      className={`group overflow-hidden rounded-lg border bg-ui-bg-base text-left transition hover:bg-ui-bg-base-hover ${
+                        isSelected
+                          ? "shadow-borders-interactive-with-focus"
+                          : "shadow-elevation-card-rest"
+                      }`}
                     >
-                      <div className="aspect-video bg-ui-bg-subtle">
+                      <div className="aspect-[4/3] bg-ui-bg-component">
                         {asset.url ? (
                           <img
                             src={resolveAdminAssetPreviewUrl(asset.url)}
                             alt={asset.alt || asset.label}
-                            className="h-full w-full object-cover"
+                            className="h-full w-full object-contain p-3"
                           />
-                        ) : null}
+                        ) : (
+                          <div className="flex h-full items-center justify-center">
+                            <Photo className="text-ui-fg-muted" />
+                          </div>
+                        )}
                       </div>
-                      <div className="grid gap-3 p-4">
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <Text size="small" weight="plus">
+                      <div className="grid gap-2 p-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <Text
+                              size="small"
+                              leading="compact"
+                              weight="plus"
+                              className="truncate"
+                            >
                               {asset.label}
                             </Text>
-                            <Text size="small" className="text-ui-fg-subtle">
-                              {asset.type} - {asset.client_profile_id}
+                            <Text
+                              size="xsmall"
+                              leading="compact"
+                              className="truncate text-ui-fg-subtle"
+                            >
+                              {asset.url}
                             </Text>
                           </div>
-                          <IconButton
-                            size="small"
-                            variant="transparent"
-                            disabled={isDefault || !asset.id}
-                            onClick={() =>
-                              asset.id && deleteAsset.mutate(asset.id)
-                            }
-                          >
-                            <Trash />
-                          </IconButton>
+                          <Badge size="xsmall">{asset.type}</Badge>
                         </div>
-                        <Text
-                          size="small"
-                          className="break-all font-mono text-ui-fg-subtle"
-                        >
-                          {asset.url}
-                        </Text>
-                        <div className="flex flex-wrap gap-2">
-                          <Button
-                            size="small"
-                            variant="secondary"
-                            onClick={() => handleEdit(asset)}
+
+                        <div className="flex items-center justify-between gap-2">
+                          <Text
+                            size="xsmall"
+                            leading="compact"
+                            className="text-ui-fg-subtle"
                           >
-                            Editar
-                          </Button>
-                          <Button
-                            size="small"
-                            variant="secondary"
-                            onClick={() => handleCopy(asset.url)}
-                          >
-                            Copiar ruta
-                          </Button>
+                            Orden {asset.sort_order || 0}
+                          </Text>
+                          <div className="flex gap-1 opacity-0 transition group-hover:opacity-100">
+                            <Button
+                              size="small"
+                              variant="secondary"
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handleCopy(asset.url);
+                              }}
+                            >
+                              Copiar
+                            </Button>
+                            <IconButton
+                              size="small"
+                              variant="transparent"
+                              type="button"
+                              disabled={isDefault || !asset.id}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                asset.id && deleteAsset.mutate(asset.id);
+                              }}
+                            >
+                              <Trash />
+                            </IconButton>
+                          </div>
                         </div>
                       </div>
                     </article>
                   );
                 })}
               </div>
-            )}
-          </div>
-
-          <div className="h-fit rounded-lg border bg-ui-bg-base p-4">
-            <Text size="small" weight="plus">
-              {form.id ? "Editar asset" : "Nuevo asset"}
-            </Text>
-            <Text size="small" className="mt-1 text-ui-fg-subtle">
-              Usa rutas internas como /images/ngs/home-hero.png o URLs
-              absolutas, o sube un archivo desde tu equipo.
-            </Text>
-
-            <div className="mt-4 grid gap-3">
-              <TextField
-                label="Nombre"
-                value={form.label}
-                onChange={(value) => updateField("label", value)}
-              />
-              <TextField
-                label="URL / ruta"
-                value={form.url}
-                onChange={(value) => updateField("url", value)}
-              />
-              <div className="grid gap-2 rounded-lg border bg-ui-bg-subtle p-3">
-                <Text size="small" leading="compact" weight="plus">
-                  Subir imagen
+            ) : (
+              <div className="rounded-lg border bg-ui-bg-base p-8 text-center">
+                <Photo className="mx-auto text-ui-fg-muted" />
+                <Text size="small" weight="plus" className="mt-3">
+                  No hay assets para este filtro
                 </Text>
-                <Input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
-                  onChange={(event) =>
-                    setSelectedFile(event.target.files?.[0] || null)
-                  }
-                />
-                {selectedFile ? (
-                  <Text size="small" className="text-ui-fg-subtle">
-                    {selectedFile.name} -{" "}
-                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                  </Text>
-                ) : null}
-                <Button
-                  size="small"
-                  variant="secondary"
-                  onClick={handleUpload}
-                  isLoading={uploadAsset.isPending}
-                  disabled={!selectedFile || !form.label}
-                >
-                  Subir y registrar asset
-                </Button>
+                <Text size="small" className="mt-1 text-ui-fg-subtle">
+                  Ajusta la busqueda, cambia el tipo o sube un nuevo asset.
+                </Text>
               </div>
-              <TextAreaField
-                label="Alt text"
-                value={form.alt || ""}
-                rows={2}
-                onChange={(value) => updateField("alt", value)}
-              />
-              <div className="grid gap-3 small:grid-cols-2">
-                <div className="grid gap-2">
-                  <Label>Tipo</Label>
-                  <Select
-                    value={form.type}
-                    onValueChange={(value) =>
-                      updateField("type", value as AssetType)
-                    }
-                  >
-                    <Select.Trigger>
-                      <Select.Value />
-                    </Select.Trigger>
-                    <Select.Content>
-                      {assetTypes
-                        .filter((assetType) => assetType !== "all")
-                        .map((assetType) => (
-                          <Select.Item key={assetType} value={assetType}>
-                            {assetType}
-                          </Select.Item>
-                        ))}
-                    </Select.Content>
-                  </Select>
+            )}
+          </main>
+
+          <aside className="border-l bg-ui-bg-base p-6">
+            <div className="sticky top-6 grid gap-4">
+              <div>
+                <Text size="small" weight="plus">
+                  {form.id ? "Editar asset" : "Nuevo asset"}
+                </Text>
+                <Text size="small" className="mt-1 text-ui-fg-subtle">
+                  Selecciona un asset del grid o sube uno nuevo desde tu equipo.
+                </Text>
+              </div>
+
+              {form.url ? (
+                <div className="aspect-video overflow-hidden rounded-lg border bg-ui-bg-subtle">
+                  <img
+                    src={resolveAdminAssetPreviewUrl(form.url)}
+                    alt={form.alt || form.label}
+                    className="h-full w-full object-contain p-3"
+                  />
                 </div>
+              ) : (
+                <div className="flex aspect-video items-center justify-center rounded-lg border bg-ui-bg-subtle">
+                  <Photo className="text-ui-fg-muted" />
+                </div>
+              )}
+
+              <div className="grid gap-3">
+                <TextField
+                  label="Nombre"
+                  value={form.label}
+                  onChange={(value) => updateField("label", value)}
+                />
+                <TextField
+                  label="URL / ruta"
+                  value={form.url}
+                  onChange={(value) => updateField("url", value)}
+                />
+
+                <div className="grid gap-2 rounded-lg border bg-ui-bg-subtle p-3">
+                  <Text size="small" leading="compact" weight="plus">
+                    Subir imagen
+                  </Text>
+                  <Input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif,image/svg+xml"
+                    onChange={(event) =>
+                      setSelectedFile(event.target.files?.[0] || null)
+                    }
+                  />
+                  {selectedFile ? (
+                    <Text size="small" className="text-ui-fg-subtle">
+                      {selectedFile.name} -{" "}
+                      {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                    </Text>
+                  ) : null}
+                  <Button
+                    size="small"
+                    variant="secondary"
+                    onClick={handleUpload}
+                    isLoading={uploadAsset.isPending}
+                    disabled={!selectedFile || !form.label}
+                  >
+                    Subir y registrar
+                  </Button>
+                </div>
+
+                <TextAreaField
+                  label="Alt text"
+                  value={form.alt || ""}
+                  rows={2}
+                  onChange={(value) => updateField("alt", value)}
+                />
+
+                <div className="grid gap-3 small:grid-cols-2">
+                  <div className="grid gap-2">
+                    <Label>Tipo</Label>
+                    <Select
+                      value={form.type}
+                      onValueChange={(value) =>
+                        updateField("type", value as AssetType)
+                      }
+                    >
+                      <Select.Trigger>
+                        <Select.Value />
+                      </Select.Trigger>
+                      <Select.Content>
+                        {assetTypes
+                          .filter((assetType) => assetType !== "all")
+                          .map((assetType) => (
+                            <Select.Item key={assetType} value={assetType}>
+                              {assetTypeLabels[assetType]}
+                            </Select.Item>
+                          ))}
+                      </Select.Content>
+                    </Select>
+                  </div>
+                  <NumberField
+                    label="Orden"
+                    value={Number(form.sort_order || 0)}
+                    onChange={(value) => updateField("sort_order", value)}
+                  />
+                </div>
+
                 <TextField
                   label="Perfil"
                   value={form.client_profile_id}
                   onChange={(value) => updateField("client_profile_id", value)}
                 />
-              </div>
-              <div className="grid gap-3 small:grid-cols-[1fr_120px]">
                 <TextField
                   label="Tags"
                   value={form.tags || ""}
                   onChange={(value) => updateField("tags", value)}
                 />
-                <NumberField
-                  label="Orden"
-                  value={Number(form.sort_order || 0)}
-                  onChange={(value) => updateField("sort_order", value)}
-                />
-              </div>
-              {form.url ? (
-                <div className="aspect-video overflow-hidden rounded-lg border bg-ui-bg-subtle">
-                  <img
-                    src={resolveAdminAssetPreviewUrl(form.url)}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
+
+                <div className="flex gap-2">
+                  <Button
+                    size="small"
+                    onClick={handleSubmit}
+                    isLoading={upsertAsset.isPending}
+                  >
+                    Guardar asset
+                  </Button>
+                  <Button size="small" variant="secondary" onClick={handleNewAsset}>
+                    Limpiar
+                  </Button>
                 </div>
-              ) : null}
-              <Button
-                size="small"
-                onClick={handleSubmit}
-                isLoading={upsertAsset.isPending}
-              >
-                Guardar asset
-              </Button>
+              </div>
             </div>
-          </div>
+          </aside>
         </div>
       </Container>
       <Toaster />
@@ -440,15 +560,21 @@ const AssetsPage = () => {
 const TextField = ({
   label,
   value,
+  placeholder,
   onChange,
 }: {
   label: string;
   value: string;
+  placeholder?: string;
   onChange: (value: string) => void;
 }) => (
   <div className="grid gap-2">
     <Label>{label}</Label>
-    <Input value={value} onChange={(event) => onChange(event.target.value)} />
+    <Input
+      value={value}
+      placeholder={placeholder}
+      onChange={(event) => onChange(event.target.value)}
+    />
   </div>
 );
 
