@@ -259,7 +259,7 @@ const AssetsPage = () => {
           </Button>
         </div>
 
-        <div className="grid min-h-[calc(100vh-180px)] bg-ui-bg-subtle small:grid-cols-[minmax(0,1fr)_400px]">
+        <div className="grid min-h-[calc(100vh-180px)] bg-ui-bg-subtle small:grid-cols-[minmax(0,1fr)_360px]">
           <main className="grid content-start gap-4 p-6">
             <div className="rounded-lg border bg-ui-bg-base p-4">
               <div className="grid gap-3 medium:grid-cols-[1fr_220px]">
@@ -310,7 +310,7 @@ const AssetsPage = () => {
                 </Text>
               </div>
             ) : filteredAssets.length ? (
-              <div className="grid gap-3 xsmall:grid-cols-2 large:grid-cols-3">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3">
                 {filteredAssets.map((asset) => {
                   const isDefault = asset.id?.startsWith("default-");
                   const isSelected =
@@ -335,12 +335,12 @@ const AssetsPage = () => {
                           : "shadow-elevation-card-rest"
                       }`}
                     >
-                      <div className="aspect-[4/3] bg-ui-bg-component">
+                      <div className="flex h-28 items-center justify-center border-b bg-ui-bg-component">
                         {asset.url ? (
                           <img
                             src={resolveAdminAssetPreviewUrl(asset.url)}
                             alt={asset.alt || asset.label}
-                            className="h-full w-full object-contain p-3"
+                            className="max-h-full max-w-full object-contain p-2"
                           />
                         ) : (
                           <div className="flex h-full items-center justify-center">
@@ -348,9 +348,9 @@ const AssetsPage = () => {
                           </div>
                         )}
                       </div>
-                      <div className="grid gap-2 p-3">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0">
+                      <div className="grid gap-2 p-2.5">
+                        <div className="grid gap-1">
+                          <div className="flex items-start justify-between gap-2">
                             <Text
                               size="small"
                               leading="compact"
@@ -359,18 +359,18 @@ const AssetsPage = () => {
                             >
                               {asset.label}
                             </Text>
-                            <Text
-                              size="xsmall"
-                              leading="compact"
-                              className="truncate text-ui-fg-subtle"
-                            >
-                              {asset.url}
-                            </Text>
+                            <Badge size="xsmall">{asset.type}</Badge>
                           </div>
-                          <Badge size="xsmall">{asset.type}</Badge>
+                          <Text
+                            size="xsmall"
+                            leading="compact"
+                            className="truncate text-ui-fg-subtle"
+                          >
+                            {asset.url}
+                          </Text>
                         </div>
 
-                        <div className="flex items-center justify-between gap-2">
+                        <div className="flex min-h-8 items-center justify-between gap-2">
                           <Text
                             size="xsmall"
                             leading="compact"
@@ -378,7 +378,7 @@ const AssetsPage = () => {
                           >
                             Orden {asset.sort_order || 0}
                           </Text>
-                          <div className="flex gap-1 opacity-0 transition group-hover:opacity-100">
+                          <div className="flex gap-1 opacity-100 transition large:opacity-0 large:group-hover:opacity-100">
                             <Button
                               size="small"
                               variant="secondary"
@@ -434,15 +434,15 @@ const AssetsPage = () => {
               </div>
 
               {form.url ? (
-                <div className="aspect-video overflow-hidden rounded-lg border bg-ui-bg-subtle">
+                <div className="flex h-36 items-center justify-center overflow-hidden rounded-lg border bg-ui-bg-subtle">
                   <img
                     src={resolveAdminAssetPreviewUrl(form.url)}
                     alt={form.alt || form.label}
-                    className="h-full w-full object-contain p-3"
+                    className="max-h-full max-w-full object-contain p-3"
                   />
                 </div>
               ) : (
-                <div className="flex aspect-video items-center justify-center rounded-lg border bg-ui-bg-subtle">
+                <div className="flex h-36 items-center justify-center rounded-lg border bg-ui-bg-subtle">
                   <Photo className="text-ui-fg-muted" />
                 </div>
               )}
