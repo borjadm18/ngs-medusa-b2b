@@ -119,22 +119,35 @@ Checklist minimo:
 
 Pasos:
 
-1. Crear carpeta `profiles/<cliente>`.
-2. Anadir `client-profile.json`, `homepage-content.json` y, si aplica, `product-packaging.csv`.
-3. Anadir assets en `profiles/<cliente>/assets`.
-4. Ejecutar:
+1. Crear el perfil base:
+
+```bash
+pnpm create:client-profile -- --id <cliente> --name "Nombre Cliente"
+```
+
+2. Revisar `profiles/<cliente>/client-profile.json`.
+3. Revisar `profiles/<cliente>/homepage-content.json`.
+4. Sustituir `profiles/<cliente>/product-packaging.csv` con SKUs reales.
+5. Anadir assets en `profiles/<cliente>/assets`.
+6. Ejecutar:
 
 ```bash
 pnpm sync:client-profile
 ```
 
-5. Activar en el storefront:
+7. Activar en el storefront:
 
 ```env
 NEXT_PUBLIC_B2B_CLIENT_PROFILE=<cliente>
 ```
 
-6. Validar:
+8. Activar en backend si se quieren sembrar reglas de packaging del perfil:
+
+```env
+B2B_CLIENT_PROFILE=<cliente>
+```
+
+9. Validar:
 
 ```bash
 pnpm --filter @b2b-starter/storefront build

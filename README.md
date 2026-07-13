@@ -62,6 +62,19 @@ This fork is evolving into a reusable Medusa B2B commerce template for industria
 - Packaging CSV example: `templates/product-packaging.example.csv`
 - First real client profile: `profiles/ngs/README.md`
 
+Create a new reusable client profile:
+
+```bash
+pnpm create:client-profile -- --id acme-industrial --name "ACME Industrial"
+```
+
+This creates `profiles/acme-industrial` with brand, homepage, packaging CSV and asset folders, then runs `pnpm sync:client-profile` to generate storefront/backend artifacts. Activate it with:
+
+```env
+NEXT_PUBLIC_B2B_CLIENT_PROFILE=acme-industrial
+B2B_CLIENT_PROFILE=acme-industrial
+```
+
 ## Getting Started
 
 ### Deploy with Medusa Cloud

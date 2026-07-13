@@ -23,7 +23,9 @@
   },
   "markets": {
     "defaultCountryCode": "es",
-    "languages": ["es"],
+    "languages": [
+      "es"
+    ],
     "currency": "EUR"
   },
   "navigation": {
@@ -101,10 +103,18 @@
   },
   "productPage": {
     "benefits": [
-      { "label": "Tarifas por cuenta y volumen" },
-      { "label": "Stock y embalaje por variante" },
-      { "label": "Soporte tecnico para compras" },
-      { "label": "Control de presupuesto y aprobaciones" }
+      {
+        "label": "Tarifas por cuenta y volumen"
+      },
+      {
+        "label": "Stock y embalaje por variante"
+      },
+      {
+        "label": "Soporte tecnico para compras"
+      },
+      {
+        "label": "Control de presupuesto y aprobaciones"
+      }
     ],
     "supportPanels": [
       {
