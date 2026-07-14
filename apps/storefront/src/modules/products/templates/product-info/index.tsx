@@ -98,8 +98,14 @@ const ProductInfo = ({
               ? `${priceRule.discount_percentage}% de descuento aplicado a este contexto`
               : priceRule?.effect_type === "fixed_price"
               ? `Precio fijo B2B aplicado`
-              : "Este producto requiere presupuesto"}
+              : "Compra mediante presupuesto comercial"}
           </p>
+          {catalogRuleSummary?.requiresQuote && (
+            <p className="mt-1 text-xs text-neutral-500">
+              Anade las cantidades al presupuesto para que el equipo comercial
+              confirme precio, disponibilidad y condiciones.
+            </p>
+          )}
           {priceRule?.minimum_quantity && priceRule.minimum_quantity > 1 && (
             <p className="mt-1 text-xs text-neutral-500">
               Pedido minimo para esta regla: {priceRule.minimum_quantity} uds.

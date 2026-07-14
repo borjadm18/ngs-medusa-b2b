@@ -57,6 +57,7 @@ Antes de seguir profundizando launcher/deploy multi-cliente, la prioridad vuelve
 - Busqueda por SKU/EAN/atributos tecnicos.
 
 Estado 2026-07-14: `Quick order` ya resuelve SKUs, valida packaging y anade en bulk al carrito. Se anade resumen operativo de unidades, cajas, peso estimado y ocupacion de pallet para acercarlo a una herramienta real de compras B2B. El detalle de presupuesto tambien muestra logistica B2B visible y mantiene export CSV/PDF con packaging.
+- Las reglas `requires_quote` ya cambian el comportamiento de PDP: la compra directa pasa a CTA de presupuesto, con copy comercial especifico y sin CTA duplicado.
 - Upload binario local desde Admin implementado y servido por backend para demos.
 - Admin packaging permite aplicar a todas, copiar desde otra variante, usar plantillas rapidas, importar CSV con preview y exportar CSV.
 - Pendiente: storage/CDN persistente, import/export dedicado y plantillas por cliente.

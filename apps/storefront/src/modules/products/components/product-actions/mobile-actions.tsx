@@ -1,5 +1,6 @@
 import { Dialog, Transition } from "@headlessui/react"
 import useToggleState from "@/lib/hooks/use-toggle-state"
+import { getCatalogRuleSummary } from "@/lib/util/catalog-rules"
 import { getProductPrice } from "@/lib/util/get-product-price"
 import { HttpTypes } from "@medusajs/types"
 import { clx } from "@medusajs/ui"
@@ -36,6 +37,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   canViewPrices = false,
 }) => {
   const { state, open, close } = useToggleState()
+  const requiresQuote = getCatalogRuleSummary(product)?.requiresQuote === true
 
   const price = getProductPrice({
     product: product,
@@ -128,6 +130,8 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                   ? "Select variant"
                   : !inStock
                   ? "Out of stock"
+                  : requiresQuote
+                  ? "Presupuesto"
                   : "Add to cart"}
               </Button>
             </div>

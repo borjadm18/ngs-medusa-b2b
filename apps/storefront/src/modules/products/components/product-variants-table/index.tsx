@@ -80,6 +80,7 @@ const ProductVariantsTable = ({
       : null
   const catalogRuleSummary = getCatalogRuleSummary(product)
   const priceRule = catalogRuleSummary?.priceRule
+  const requiresQuote = catalogRuleSummary?.requiresQuote === true
 
   const handleLineItemChange = (
     variantId: string,
@@ -224,6 +225,16 @@ const ProductVariantsTable = ({
               </div>
             </div>
           )}
+
+          {canViewPrices && requiresQuote && (
+            <div className="mt-3 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs leading-5 text-neutral-600">
+              <span className="font-semibold text-neutral-950">
+                Presupuesto requerido.
+              </span>{" "}
+              Anade las unidades al presupuesto y el equipo comercial validara
+              precio, disponibilidad y condiciones.
+            </div>
+          )}
         </div>
 
         <div className="divide-y divide-neutral-200">
@@ -320,30 +331,38 @@ const ProductVariantsTable = ({
         disabled={!canViewPrices || totalUnits === 0}
         data-testid="add-product-button"
       >
-        <ShoppingBag
-          className="text-white"
-          fill={totalUnits === 0 ? "none" : "#fff"}
-        />
+        {requiresQuote ? (
+          <FilePlus className="text-white" />
+        ) : (
+          <ShoppingBag
+            className="text-white"
+            fill={totalUnits === 0 ? "none" : "#fff"}
+          />
+        )}
         {!canViewPrices
-          ? "Inicia sesion para comprar"
+          ? "Inicia sesion"
           : totalUnits === 0
           ? "Selecciona cantidades"
+          : requiresQuote
+          ? `Anadir ${totalUnits} uds al presupuesto`
           : `Anadir ${formattedTotal} (${totalUnits} uds) al carrito`}
       </Button>
 
-      <Button
-        variant="secondary"
-        className="h-11 w-full rounded-lg text-sm"
-        disabled={!canViewPrices || totalUnits === 0}
-        onClick={handleAddToCart}
-      >
-        <FilePlus />
-        {!canViewPrices
-          ? "Inicia sesion para solicitar presupuesto"
-          : totalUnits === 0
-          ? "Solicitar presupuesto"
-          : "Anadir seleccion al presupuesto"}
-      </Button>
+      {!requiresQuote && (
+        <Button
+          variant="secondary"
+          className="h-11 w-full rounded-lg text-sm"
+          disabled={!canViewPrices || totalUnits === 0}
+          onClick={handleAddToCart}
+        >
+          <FilePlus />
+          {!canViewPrices
+            ? "Inicia sesion para solicitar presupuesto"
+            : totalUnits === 0
+            ? "Solicitar presupuesto"
+            : "Anadir seleccion al presupuesto"}
+        </Button>
+      )}
     </div>
   )
 }
