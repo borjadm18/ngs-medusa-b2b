@@ -4,8 +4,13 @@ import {
   ModuleRegistrationName,
   Modules,
 } from "@medusajs/framework/utils";
+import { createCartWorkflow } from "@medusajs/core-flows";
 import { CATALOG_RULES_MODULE } from "../modules/catalog-rules";
 import { COMPANY_MODULE } from "../modules/company";
+import { QUOTE_MODULE } from "../modules/quote";
+import { createQuoteMessageWorkflow } from "../workflows/quote/workflows/create-quote-message";
+import { createRequestForQuoteWorkflow } from "../workflows/quote/workflows/create-request-for-quote";
+import { merchantSendQuoteWorkflow } from "../workflows/quote/workflows/merchant-send-quote";
 
 type DemoCompany = {
   name: string;
@@ -101,6 +106,39 @@ const demoStockBySku: Record<
   },
 };
 
+const demoQuoteScenarios = [
+  {
+    companyEmail: "compras@iberia-pro-installers.demo",
+    sku: "NGS-WILD-BASH-COMPACT-BLK",
+    quantity: 24,
+    status: "pending_customer",
+    customerMessage:
+      "Necesitamos 24 unidades para instalaciones Horeca en Madrid. Confirmad disponibilidad 24/48h y precio por proyecto.",
+    merchantMessage:
+      "Oferta preparada con entrega en dos tandas y descuento demo de instalador aplicado.",
+  },
+  {
+    companyEmail: "pedidos@dnaudio.demo",
+    sku: "NGS-EVO-MOUSE-BLK",
+    quantity: 144,
+    status: "pending_customer",
+    customerMessage:
+      "Pedido recurrente para renovacion IT. Necesitamos precio por lote y condiciones para reposicion mensual.",
+    merchantMessage:
+      "Tarifa demo de distribuidor aplicada para lote de 144 uds. Pendiente aprobacion de compras.",
+  },
+  {
+    companyEmail: "it-procurement@retail-campus.demo",
+    sku: "NGS-XPRESSCAM-1080-BLK",
+    quantity: 40,
+    status: "pending_merchant",
+    customerMessage:
+      "Solicitud para equipar salas de reunion. Valorar alternativa con stock inmediato y plazo por campus.",
+    merchantMessage:
+      "Pendiente de revision comercial: validar stock reservado y condiciones logisticas.",
+  },
+];
+
 export default async function seed_b2b_demo_data({
   container,
 }: {
@@ -172,6 +210,14 @@ export default async function seed_b2b_demo_data({
     logger,
   });
   await seedPromotionsAndPriceLists(container, logger);
+  await seedDemoQuotes({
+    container,
+    products,
+    companies,
+    regionId: region?.id,
+    salesChannelId: salesChannel?.id,
+    logger,
+  });
 
   logger.info("Finished seeding extended B2B demo data.");
 }
@@ -528,4 +574,145 @@ async function tryCreatePriceList(container: MedusaContainer, logger: any) {
     .catch((error: Error) => {
       logger.warn(`Could not create demo B2B price list (${error.message}).`);
     });
+}
+
+async function seedDemoQuotes({
+  container,
+  products,
+  companies,
+  regionId,
+  salesChannelId,
+  logger,
+}: {
+  container: MedusaContainer;
+  products: any[];
+  companies: any[];
+  regionId?: string;
+  salesChannelId?: string;
+  logger: any;
+}) {
+  if (!regionId) {
+    logger.warn("Quote demo seed skipped; no EUR region found.");
+    return;
+  }
+
+  const customerModule = container.resolve<any>(Modules.CUSTOMER);
+  const quoteModule = container.resolve<any>(QUOTE_MODULE, {
+    allowUnregistered: true,
+  });
+
+  if (!quoteModule?.listQuotes) {
+    logger.warn("Quote module not available for demo seed; skipped.");
+    return;
+  }
+
+  const existingQuotes = await quoteModule.listQuotes({});
+  const customers = await customerModule.listCustomers({});
+  const customersByEmail = new Map<string, any>(
+    customers.map((customer: any) => [customer.email, customer])
+  );
+  const variantBySku = new Map<string, any>(
+    products
+      .flatMap((product) => product.variants || [])
+      .map((variant: any) => [variant.sku, variant])
+  );
+
+  for (const scenario of demoQuoteScenarios) {
+    const company = companies.find(
+      (item) => item.email === scenario.companyEmail
+    );
+    const customer = customersByEmail.get(
+      scenario.companyEmail.replace("@", "+buyer@")
+    );
+    const variant = variantBySku.get(scenario.sku);
+
+    if (!company || !customer || !variant) {
+      logger.warn(`Quote demo seed skipped for ${scenario.sku}; data missing.`);
+      continue;
+    }
+
+    if (
+      existingQuotes.some((quote: any) => quote.customer_id === customer.id)
+    ) {
+      continue;
+    }
+
+    try {
+      const { result: cart } = await createCartWorkflow(container).run({
+        input: {
+          region_id: regionId,
+          sales_channel_id: salesChannelId,
+          customer_id: customer.id,
+          email: customer.email,
+          currency_code: "eur",
+          shipping_address: {
+            first_name: company.name,
+            last_name: "Compras",
+            address_1: company.address || "Calle Demo 1",
+            city: company.city || "Madrid",
+            country_code: "es",
+            postal_code: "28001",
+            phone: company.phone,
+          },
+          billing_address: {
+            first_name: company.name,
+            last_name: "Compras",
+            address_1: company.address || "Calle Demo 1",
+            city: company.city || "Madrid",
+            country_code: "es",
+            postal_code: "28001",
+            phone: company.phone,
+          },
+          items: [
+            {
+              variant_id: variant.id,
+              quantity: scenario.quantity,
+            },
+          ],
+          metadata: {
+            demo_seed: true,
+            company_id: company.id,
+            quote_scenario: scenario.sku,
+          },
+        },
+      });
+
+      const {
+        result: { quote },
+      } = await createRequestForQuoteWorkflow(container).run({
+        input: {
+          cart_id: cart.id,
+          customer_id: customer.id,
+        },
+      });
+
+      await createQuoteMessageWorkflow(container).run({
+        input: {
+          quote_id: quote.id,
+          customer_id: customer.id,
+          text: scenario.customerMessage,
+        },
+      });
+
+      await createQuoteMessageWorkflow(container).run({
+        input: {
+          quote_id: quote.id,
+          admin_id: "demo-admin",
+          text: scenario.merchantMessage,
+        },
+      });
+
+      if (scenario.status === "pending_customer") {
+        await merchantSendQuoteWorkflow(container).run({
+          input: {
+            quote_id: quote.id,
+          },
+        });
+      }
+    } catch (error) {
+      logger.warn(
+        `Could not create demo quote for ${scenario.sku} (${(error as Error).message}).`
+      );
+    }
+  }
 }
