@@ -113,16 +113,13 @@ export async function signup(_currentState: unknown, formData: FormData) {
       customer_id: createdCustomer.id,
       is_admin: true,
       spending_limit: 0,
-    }).catch((err) => {
-      console.log("error creating employee", err)
-    })
+    }).catch(() => null)
 
     const cacheTag = await getCacheTag("customers")
     revalidateTag(cacheTag)
 
     await transferCart()
   } catch (error: any) {
-    console.log("error", error)
     return error.toString()
   }
 
