@@ -33,6 +33,13 @@ const B2BControl = () => {
       status: packagingCoverage < 90 ? "attention" : "ok",
     },
     {
+      label: "Quotes fuera de SLA",
+      value: summary?.quotes.stale || 0,
+      action: "Priorizar seguimiento",
+      href: "/quotes",
+      status: (summary?.quotes.stale || 0) > 0 ? "attention" : "ok",
+    },
+    {
       label: "Reglas comerciales activas",
       value: summary?.catalog_rules.active || 0,
       action: "Gestionar reglas",

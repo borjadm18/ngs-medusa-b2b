@@ -13,6 +13,7 @@ export type B2BControlSummary = {
     pending_merchant: number;
     pending_customer: number;
     accepted: number;
+    stale: number;
     value: number;
     units: number;
     boxes: number;

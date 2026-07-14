@@ -42,6 +42,7 @@ export const GET = async (
       fields: [
         "id",
         "status",
+        "created_at",
         "draft_order.total",
         "draft_order.items.quantity",
         "draft_order.items.metadata",
@@ -82,6 +83,17 @@ export const GET = async (
     .filter(Boolean);
   const packaging = [...storedPackaging, ...fallbackPackaging];
   const quoteStatusCounts = countByStatus(quotes);
+  const now = Date.now();
+  const pendingQuotes = quotes.filter((quote: any) =>
+    ["pending_merchant", "pending_customer"].includes(quote.status)
+  );
+  const staleQuotes = pendingQuotes.filter((quote: any) => {
+    const createdAt = quote.created_at
+      ? new Date(quote.created_at).getTime()
+      : now;
+
+    return now - createdAt > 1000 * 60 * 60 * 24 * 2;
+  });
   const quoteTotals = quotes.reduce(
     (acc: { value: number; units: number; boxes: number; weight: number }, quote: any) => {
       acc.value += Number(quote.draft_order?.total || 0);
@@ -131,6 +143,7 @@ export const GET = async (
         pending_merchant: quoteStatusCounts.pending_merchant || 0,
         pending_customer: quoteStatusCounts.pending_customer || 0,
         accepted: quoteStatusCounts.accepted || 0,
+        stale: staleQuotes.length,
         value: quoteTotals.value,
         units: quoteTotals.units,
         boxes: quoteTotals.boxes,
