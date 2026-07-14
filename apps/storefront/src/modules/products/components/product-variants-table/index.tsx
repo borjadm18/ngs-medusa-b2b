@@ -164,6 +164,8 @@ const ProductVariantsTable = ({
             boxes_per_pallet: boxesPerPallet,
             package_weight: packageWeight,
             package_dimensions: packageDimensions,
+            requires_quote: requiresQuote,
+            catalog_rule_requires_quote: requiresQuote,
           },
         })
       )

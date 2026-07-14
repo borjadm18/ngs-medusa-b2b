@@ -1,5 +1,6 @@
 import { listCartShippingMethods } from "@/lib/data/fulfillment"
 import { listCartPaymentMethods } from "@/lib/data/payment"
+import { getQuoteRequiredCartItems } from "@/lib/util/cart-quote-requirements"
 import ApprovalStatusBanner from "@/modules/cart/components/approval-status-banner"
 import SignInPrompt from "@/modules/cart/components/sign-in-prompt"
 import BillingAddress from "@/modules/checkout/components/billing-address"
@@ -29,9 +30,43 @@ export default async function CheckoutForm({
   const requiresApproval =
     cart.company?.approval_settings?.requires_admin_approval ||
     cart.company?.approval_settings?.requires_sales_manager_approval
+  const quoteRequiredItems = getQuoteRequiredCartItems(cart)
+  const requiresQuote = quoteRequiredItems.length > 0
 
   if (!shippingMethods || !paymentMethods) {
     return null
+  }
+
+  if (requiresQuote) {
+    return (
+      <div className="w-full grid grid-cols-1 gap-y-4">
+        <LocalizedClientLink
+          className="flex items-baseline gap-2 text-sm text-neutral-400 hover:text-neutral-500"
+          href="/cart"
+        >
+          <Button variant="secondary">
+            <UTurnArrowRight />
+            Back to shopping cart
+          </Button>
+        </LocalizedClientLink>
+
+        <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-5">
+          <p className="text-lg font-semibold text-neutral-950">
+            Este carrito requiere presupuesto
+          </p>
+          <p className="mt-2 text-sm leading-6 text-neutral-600">
+            {quoteRequiredItems.length} linea
+            {quoteRequiredItems.length === 1 ? "" : "s"} necesita
+            {quoteRequiredItems.length === 1 ? "" : "n"} validacion comercial
+            antes de finalizar compra. Vuelve al carrito y solicita el
+            presupuesto para que el equipo comercial confirme condiciones.
+          </p>
+          <LocalizedClientLink href="/cart" className="mt-4 inline-flex">
+            <Button>Volver al carrito</Button>
+          </LocalizedClientLink>
+        </div>
+      </div>
+    )
   }
 
   return (

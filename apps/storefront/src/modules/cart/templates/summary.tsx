@@ -1,6 +1,7 @@
 "use client"
 
 import { useCart } from "@/lib/context/cart-context"
+import { getQuoteRequiredCartItems } from "@/lib/util/cart-quote-requirements"
 import { getCheckoutStep } from "@/lib/util/get-checkout-step"
 import CartLogisticsSummary from "@/modules/cart/components/cart-logistics-summary"
 import CartToPdfButton from "@/modules/cart/components/cart-to-pdf-button"
@@ -37,6 +38,8 @@ const Summary = ({ customer, spendLimitExceeded }: SummaryProps) => {
   const isPendingApproval = cart?.approvals?.some(
     (approval) => approval?.status === ApprovalStatusType.PENDING
   )
+  const quoteRequiredItems = getQuoteRequiredCartItems(cart)
+  const requiresQuote = quoteRequiredItems.length > 0
 
   return (
     <Container className="flex flex-col gap-y-3">
@@ -67,29 +70,44 @@ const Summary = ({ customer, spendLimitExceeded }: SummaryProps) => {
           </p>
         </div>
       )}
-      <LocalizedClientLink
-        href={checkoutButtonLink}
-        data-testid="checkout-button"
-      >
-        <Button
-          className="w-full h-10 rounded-md shadow-none"
-          disabled={spendLimitExceeded}
+      {requiresQuote && (
+        <div className="rounded border border-neutral-200 bg-neutral-50 p-3 text-xs leading-5 text-neutral-700">
+          <p className="font-semibold text-neutral-950">
+            Este carrito requiere presupuesto
+          </p>
+          <p>
+            {quoteRequiredItems.length} linea
+            {quoteRequiredItems.length === 1 ? "" : "s"} necesita
+            {quoteRequiredItems.length === 1 ? "" : "n"} validacion comercial
+            antes de finalizar compra.
+          </p>
+        </div>
+      )}
+      {!requiresQuote && (
+        <LocalizedClientLink
+          href={checkoutButtonLink}
+          data-testid="checkout-button"
         >
-          {customer
-            ? spendLimitExceeded
-              ? "Limite de compra superado"
-              : "Finalizar compra"
-            : "Inicia sesion para comprar"}
-        </Button>
-      </LocalizedClientLink>
+          <Button
+            className="w-full h-10 rounded-md shadow-none"
+            disabled={spendLimitExceeded}
+          >
+            {customer
+              ? spendLimitExceeded
+                ? "Limite de compra superado"
+                : "Finalizar compra"
+              : "Inicia sesion para comprar"}
+          </Button>
+        </LocalizedClientLink>
+      )}
       {!!customer && (
         <RequestQuoteConfirmation>
           <Button
             className="w-full h-10 rounded-md shadow-borders-base"
-            variant="secondary"
+            variant={requiresQuote ? "primary" : "secondary"}
             disabled={isPendingApproval}
           >
-            Solicitar presupuesto
+            {requiresQuote ? "Solicitar presupuesto requerido" : "Solicitar presupuesto"}
           </Button>
         </RequestQuoteConfirmation>
       )}
