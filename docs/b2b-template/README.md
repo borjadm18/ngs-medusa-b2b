@@ -19,6 +19,7 @@ Crear una base repetible para clientes B2B que necesitan:
 
 - Auditoria de estado: `docs/b2b-template/audit-estado.md`
 - Onboarding de cliente: `docs/b2b-template/client-onboarding.md`
+- Nuevo cliente en 60 minutos: `docs/b2b-template/nuevo-cliente-60-minutos.md`
 - Catalogo de modulos: `docs/b2b-template/module-catalog.md`
 - Roadmap: `docs/b2b-template/roadmap.md`
 
@@ -142,6 +143,8 @@ pnpm template:new -- --id <cliente> --name "Nombre Cliente" --from example-indus
 12. Ejecuta `pnpm seed:product-catalog` para crear productos demo desde `product-catalog.csv`.
 13. Ejecuta `pnpm seed:product-packaging` para aplicar reglas de packaging por SKU.
 14. Ejecuta `pnpm --filter @b2b-starter/storefront build`.
+
+Para una activacion guiada con tiempos, entregables y demo script, usa `docs/b2b-template/nuevo-cliente-60-minutos.md`.
 
 Opciones utiles:
 

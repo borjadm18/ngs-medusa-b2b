@@ -215,6 +215,7 @@ Siguiente accion:
 4. Crear `profiles/example-industrial`.
    - Hecho: perfil generico con marca, home, menu, footer, catalogo y packaging demo.
 5. Crear guia "nuevo cliente en 60 minutos".
+   - Hecho: `docs/b2b-template/nuevo-cliente-60-minutos.md`.
 
 ### P2 - Backoffice No Tecnico
 
