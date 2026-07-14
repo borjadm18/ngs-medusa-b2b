@@ -259,16 +259,16 @@ const ProductVariantsTable = ({
               <article
                 key={variant.id}
                 className={clx(
-                  "grid gap-4 px-5 py-4 transition-colors small:grid-cols-[minmax(0,1fr)_auto] small:items-center",
+                  "grid gap-4 px-5 py-4 transition-colors medium:grid-cols-[minmax(0,1fr)_150px_126px] medium:items-center",
                   selectedLineItem?.quantity
                     ? "bg-neutral-50"
                     : "bg-white hover:bg-neutral-50"
                 )}
               >
                 <div className="min-w-0">
-                  <div className="flex min-w-0 items-center gap-2">
+                  <div className="grid min-w-0 grid-cols-[auto_minmax(52px,max-content)_minmax(0,1fr)_auto] items-center gap-2">
                     <VariantSwatches options={visibleOptions} />
-                    <p className="min-w-0 truncate text-sm font-semibold text-neutral-950">
+                    <p className="truncate text-sm font-semibold text-neutral-950">
                       {visibleOptions && visibleOptions.length > 0
                         ? visibleOptions
                             .map((option) => option.value)
@@ -276,7 +276,7 @@ const ProductVariantsTable = ({
                         : variant.title}
                     </p>
                     {variant.sku && (
-                      <span className="shrink-0 rounded border border-neutral-200 bg-white px-2 py-1 text-[11px] font-medium uppercase text-neutral-500">
+                      <span className="min-w-0 truncate rounded border border-neutral-200 bg-white px-2 py-1 text-[11px] font-medium uppercase text-neutral-500">
                         {variant.sku}
                       </span>
                     )}
@@ -294,31 +294,29 @@ const ProductVariantsTable = ({
                   )}
                 </div>
 
-                <div className="grid gap-3 xsmall:grid-cols-[150px_132px] xsmall:items-center small:grid-cols-[142px_126px]">
-                  <PurchaseUnitToggle
-                    value={selectedLineItem?.purchaseUnit ?? "unit"}
-                    onChange={(purchaseUnit) =>
-                      handleLineItemChange(
-                        variant.id,
-                        selectedLineItem?.packageQuantity ?? 0,
-                        purchaseUnit
-                      )
-                    }
-                  />
-                  <BulkTableQuantity
-                    variantId={variant.id}
-                    value={selectedLineItem?.packageQuantity ?? 0}
-                    compact
-                    label={
-                      selectedLineItem?.purchaseUnit === "box"
-                        ? "cajas"
-                        : "unidades"
-                    }
-                    onChange={(variantId, quantity) =>
-                      handleLineItemChange(variantId, quantity)
-                    }
-                  />
-                </div>
+                <PurchaseUnitToggle
+                  value={selectedLineItem?.purchaseUnit ?? "unit"}
+                  onChange={(purchaseUnit) =>
+                    handleLineItemChange(
+                      variant.id,
+                      selectedLineItem?.packageQuantity ?? 0,
+                      purchaseUnit
+                    )
+                  }
+                />
+                <BulkTableQuantity
+                  variantId={variant.id}
+                  value={selectedLineItem?.packageQuantity ?? 0}
+                  compact
+                  label={
+                    selectedLineItem?.purchaseUnit === "box"
+                      ? "cajas"
+                      : "unidades"
+                  }
+                  onChange={(variantId, quantity) =>
+                    handleLineItemChange(variantId, quantity)
+                  }
+                />
               </article>
             )
           })}
