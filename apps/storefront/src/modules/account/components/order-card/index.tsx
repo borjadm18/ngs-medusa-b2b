@@ -1,9 +1,10 @@
 import { convertToLocale } from "@/lib/util/money"
+import { addToCartEventBus } from "@/lib/data/cart-event-bus"
 import LocalizedClientLink from "@/modules/common/components/localized-client-link"
 import CalendarIcon from "@/modules/common/icons/calendar"
 import DocumentIcon from "@/modules/common/icons/document"
-import { HttpTypes } from "@medusajs/types"
-import { Button, clx, Container } from "@medusajs/ui"
+import { HttpTypes, StoreProduct, StoreProductVariant } from "@medusajs/types"
+import { Button, clx, Container, toast } from "@medusajs/ui"
 import Image from "next/image"
 import { useMemo } from "react"
 
@@ -20,6 +21,34 @@ const OrderCard = ({ order }: OrderCardProps) => {
       }, 0) ?? 0
     )
   }, [order])
+  const reorderableItems = useMemo(
+    () =>
+      (order.items || []).filter(
+        (item) => item.variant_id && item.variant && item.product
+      ),
+    [order.items]
+  )
+
+  const handleReorder = () => {
+    if (!reorderableItems.length) {
+      toast.error("No hay lineas disponibles para repetir")
+      return
+    }
+
+    addToCartEventBus.emitCartAdd({
+      regionId: order.region_id || "",
+      lineItems: reorderableItems.map((item) => ({
+        productVariant: {
+          ...(item.variant as StoreProductVariant),
+          product: item.product as StoreProduct,
+        },
+        quantity: item.quantity,
+        metadata: (item.metadata || {}) as Record<string, unknown>,
+      })),
+    })
+
+    toast.success(`${reorderableItems.length} lineas enviadas al carrito`)
+  }
 
   return (
     <>
@@ -96,13 +125,15 @@ const OrderCard = ({ order }: OrderCardProps) => {
           </div>
 
           <div className="flex items-center gap-x-2 pl-4">
-            {/* <Button
-              data-testid="card-details-link"
+            <Button
+              data-testid="card-reorder-button"
               variant="secondary"
               className="rounded-full text-xs"
+              disabled={!reorderableItems.length}
+              onClick={handleReorder}
             >
-              Export to PDF
-            </Button> */}
+              Reorder
+            </Button>
             <LocalizedClientLink href={`/account/orders/details/${order.id}`}>
               <Button
                 data-testid="card-details-link"
