@@ -13,12 +13,14 @@ export default function CollectionTemplate({
   page,
   countryCode,
   customer,
+  searchQuery,
 }: {
   sortBy?: SortOptions
   collection: HttpTypes.StoreCollection
   page?: string
   countryCode: string
   customer?: B2BCustomer | null
+  searchQuery?: string
 }) {
   const pageNumber = page ? parseInt(page) : 1
   const sort = sortBy || "created_at"
@@ -41,6 +43,7 @@ export default function CollectionTemplate({
                 collectionId={collection.id}
                 countryCode={countryCode}
                 customer={customer}
+                searchQuery={searchQuery}
               />
             </Suspense>
           </div>

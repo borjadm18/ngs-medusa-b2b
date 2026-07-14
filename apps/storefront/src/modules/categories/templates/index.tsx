@@ -19,6 +19,7 @@ export default function CategoryTemplate({
   page,
   countryCode,
   customer,
+  searchQuery,
 }: {
   categories: HttpTypes.StoreProductCategory[]
   currentCategory: HttpTypes.StoreProductCategory
@@ -26,6 +27,7 @@ export default function CategoryTemplate({
   page?: string
   countryCode: string
   customer?: B2BCustomer | null
+  searchQuery?: string
 }) {
   const pageNumber = page ? parseInt(page) : 1
   const sort = sortBy || "created_at"
@@ -81,6 +83,7 @@ export default function CategoryTemplate({
                   categoryId={currentCategory.id}
                   countryCode={countryCode}
                   customer={customer}
+                  searchQuery={searchQuery}
                 />
               </Suspense>
             )}

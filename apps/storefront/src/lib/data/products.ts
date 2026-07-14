@@ -129,7 +129,7 @@ export const listProducts = async ({
           offset,
           region_id: region.id,
           fields:
-            "*variants.calculated_price,*variants.options,+variants.inventory_quantity,+variants.manage_inventory,*categories,*collection",
+            "*variants.calculated_price,*variants.options,+variants.sku,+variants.title,+variants.inventory_quantity,+variants.manage_inventory,+metadata,*categories,*collection",
           ...queryParams,
         },
         headers,
@@ -172,6 +172,7 @@ export const listProductsWithSort = async ({
   sortBy = "created_at",
   countryCode,
   optionValueIds,
+  searchQuery,
 }: {
   page?: number
   queryParams?: HttpTypes.FindParams &
@@ -179,6 +180,7 @@ export const listProductsWithSort = async ({
   sortBy?: SortOptions
   countryCode: string
   optionValueIds?: string[]
+  searchQuery?: string
 }): Promise<{
   response: { products: HttpTypes.StoreProduct[]; count: number }
   nextPage: number | null
@@ -205,18 +207,19 @@ export const listProductsWithSort = async ({
   })
 
   const sortedProducts = sortProducts(products, sortBy)
+  const searchedProducts = filterProductsByB2BQuery(sortedProducts, searchQuery)
 
   // When filtering by option_value_id, the API's `count` may not reflect the
   // filtered set in client-side sort flows that pre-fetch a page of 100.
   // Recompute count from the actual returned list so pagination is correct.
-  const effectiveCount = sortedProducts.length
+  const effectiveCount = searchedProducts.length
 
   const pageParam = (page - 1) * limit
 
   const nextPage =
     effectiveCount > pageParam + limit ? pageParam + limit : null
 
-  const paginatedProducts = sortedProducts.slice(pageParam, pageParam + limit)
+  const paginatedProducts = searchedProducts.slice(pageParam, pageParam + limit)
 
   return {
     response: {
@@ -226,4 +229,49 @@ export const listProductsWithSort = async ({
     nextPage,
     queryParams,
   }
+}
+
+const filterProductsByB2BQuery = (
+  products: HttpTypes.StoreProduct[],
+  searchQuery?: string
+) => {
+  const query = searchQuery?.trim().toLowerCase()
+
+  if (!query) {
+    return products
+  }
+
+  return products.filter((product) =>
+    getProductSearchText(product).includes(query)
+  )
+}
+
+const getProductSearchText = (product: HttpTypes.StoreProduct) => {
+  const metadata = product.metadata || {}
+  const metadataValues = Object.entries(metadata)
+    .filter(([key]) =>
+      ["ean", "gtin", "barcode", "mpn", "reference", "referencia"].includes(
+        key.toLowerCase()
+      )
+    )
+    .map(([, value]) => String(value || ""))
+
+  const variantValues =
+    product.variants?.flatMap((variant) => [
+      variant.title,
+      variant.sku,
+      ...(variant.options?.map((option) => option.value) || []),
+    ]) || []
+
+  return [
+    product.title,
+    product.subtitle,
+    product.handle,
+    product.description,
+    ...metadataValues,
+    ...variantValues,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase()
 }

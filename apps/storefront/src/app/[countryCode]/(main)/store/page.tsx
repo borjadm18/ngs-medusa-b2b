@@ -26,6 +26,7 @@ type Params = {
   searchParams: Promise<{
     sortBy?: SortOptions
     page?: string
+    q?: string
     optionValueIds?: string | string[]
   }>
   params: Promise<{
@@ -36,7 +37,7 @@ type Params = {
 export default async function StorePage(props: Params) {
   const params = await props.params
   const searchParams = await props.searchParams
-  const { sortBy, page } = searchParams
+  const { sortBy, page, q } = searchParams
 
   const sort = sortBy || "created_at"
   const pageNumber = page ? parseInt(page) : 1
@@ -84,6 +85,7 @@ export default async function StorePage(props: Params) {
                 countryCode={params.countryCode}
                 customer={customer}
                 optionValueIds={optionValueIds}
+                searchQuery={q}
               />
             </Suspense>
           </div>

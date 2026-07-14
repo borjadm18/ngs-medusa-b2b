@@ -63,6 +63,7 @@ Estado 2026-07-14: `Quick order` ya resuelve SKUs, valida packaging y anade en b
 - Seed demo B2B ampliado con empresas, compradores, limites de gasto, metadata de stock operativo, reglas de catalogo, promocion demo y price list demo ejecutable con `pnpm seed:b2b-demo`.
 - Upload binario local desde Admin implementado y servido por backend para demos.
 - Admin packaging permite aplicar a todas, copiar desde otra variante, usar plantillas rapidas, importar CSV con preview y exportar CSV.
+- Busqueda de catalogo activada en PLP por texto, SKU, EAN/GTIN/barcode/MPN y opciones de variante, compartiendo `q` entre buscador global, filtros, categorias y colecciones.
 - Pendiente: storage/CDN persistente, import/export dedicado y plantillas por cliente.
 
 ## Fase 3. Validacion B2B Robusta
