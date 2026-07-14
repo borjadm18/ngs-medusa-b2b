@@ -7,7 +7,9 @@ import {
 import { createCartWorkflow } from "@medusajs/core-flows";
 import { CATALOG_RULES_MODULE } from "../modules/catalog-rules";
 import { COMPANY_MODULE } from "../modules/company";
+import { PRODUCT_PACKAGING_MODULE } from "../modules/product-packaging";
 import { QUOTE_MODULE } from "../modules/quote";
+import { buildNgsPackagingFallback } from "../utils/ngs-packaging-rules";
 import { createQuoteMessageWorkflow } from "../workflows/quote/workflows/create-quote-message";
 import { createRequestForQuoteWorkflow } from "../workflows/quote/workflows/create-request-for-quote";
 import { merchantSendQuoteWorkflow } from "../workflows/quote/workflows/merchant-send-quote";
@@ -597,6 +599,9 @@ async function seedDemoQuotes({
   }
 
   const customerModule = container.resolve<any>(Modules.CUSTOMER);
+  const productPackagingModule = container.resolve<any>(
+    PRODUCT_PACKAGING_MODULE
+  );
   const quoteModule = container.resolve<any>(QUOTE_MODULE, {
     allowUnregistered: true,
   });
@@ -616,6 +621,17 @@ async function seedDemoQuotes({
       .flatMap((product) => product.variants || [])
       .map((variant: any) => [variant.sku, variant])
   );
+  const variantIds = Array.from(variantBySku.values()).map(
+    (variant: any) => variant.id
+  );
+  const storedPackaging = variantIds.length
+    ? await productPackagingModule.listProductPackagings({
+        variant_id: variantIds,
+      })
+    : [];
+  const packagingByVariantId = new Map<string, any>(
+    storedPackaging.map((packaging: any) => [packaging.variant_id, packaging])
+  );
 
   for (const scenario of demoQuoteScenarios) {
     const company = companies.find(
@@ -625,6 +641,12 @@ async function seedDemoQuotes({
       scenario.companyEmail.replace("@", "+buyer@")
     );
     const variant = variantBySku.get(scenario.sku);
+    const packaging =
+      packagingByVariantId.get(variant?.id) ||
+      buildNgsPackagingFallback({
+        id: variant?.id,
+        sku: variant?.sku,
+      });
 
     if (!company || !customer || !variant) {
       logger.warn(`Quote demo seed skipped for ${scenario.sku}; data missing.`);
@@ -667,6 +689,10 @@ async function seedDemoQuotes({
             {
               variant_id: variant.id,
               quantity: scenario.quantity,
+              metadata: buildQuoteLinePackagingMetadata(
+                packaging,
+                scenario.quantity
+              ),
             },
           ],
           metadata: {
@@ -715,4 +741,27 @@ async function seedDemoQuotes({
       );
     }
   }
+}
+
+function buildQuoteLinePackagingMetadata(
+  packaging: any,
+  quantity: number
+): Record<string, unknown> {
+  if (!packaging?.units_per_box || packaging.sales_unit !== "box") {
+    return {
+      purchase_unit: "unit",
+    };
+  }
+
+  const unitsPerBox = Number(packaging.units_per_box);
+  const packageQuantity = Math.ceil(quantity / unitsPerBox);
+
+  return {
+    purchase_unit: "box",
+    package_quantity: packageQuantity,
+    units_per_box: unitsPerBox,
+    boxes_per_pallet: packaging.boxes_per_pallet,
+    package_weight: packaging.package_weight,
+    package_dimensions: packaging.package_dimensions,
+  };
 }
