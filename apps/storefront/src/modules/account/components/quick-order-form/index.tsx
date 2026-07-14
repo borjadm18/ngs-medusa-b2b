@@ -8,7 +8,7 @@ import { addToCartEventBus } from "@/lib/data/cart-event-bus"
 import Button from "@/modules/common/components/button"
 import { StoreProduct, StoreProductVariant } from "@medusajs/types"
 import { toast } from "@medusajs/ui"
-import { useMemo, useState, useTransition } from "react"
+import { ChangeEvent, useMemo, useState, useTransition } from "react"
 
 type PurchaseUnit = "unit" | "box"
 
@@ -16,6 +16,7 @@ type QuickOrderDraftLine = {
   sku: string
   quantity: number
   purchaseUnit: PurchaseUnit
+  sourceLine: number
   resolved?: QuickOrderResolvedItem
   error?: string
 }
@@ -24,26 +25,124 @@ type QuickOrderFormProps = {
   regionId: string
 }
 
-const exampleCsv = `NGS-WILD-BASH-COMPACT-BLK,2,box
+type ParsedQuickOrder = {
+  lines: QuickOrderDraftLine[]
+  errors: string[]
+}
+
+const templateCsv = `sku,quantity,purchase_unit
+NGS-WILD-BASH-COMPACT-BLK,2,box
 NGS-EVO-MOUSE-WHT,24,unit`
 
-const parseLines = (value: string): QuickOrderDraftLine[] => {
-  return value
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const [sku = "", quantity = "1", purchaseUnit = "unit"] = line
-        .split(/[,\t;]/)
-        .map((part) => part.trim())
+const exampleCsv = `sku,quantity,purchase_unit
+NGS-WILD-BASH-COMPACT-BLK,2,box
+NGS-EVO-MOUSE-WHT,24,unit`
 
-      return {
-        sku: sku.toUpperCase(),
-        quantity: Math.max(Number.parseInt(quantity, 10) || 1, 1),
-        purchaseUnit:
-          purchaseUnit.toLowerCase() === "box" ? "box" : ("unit" as const),
+const splitDelimitedLine = (line: string) => {
+  const delimiter = line.includes("\t")
+    ? "\t"
+    : line.split(";").length > line.split(",").length
+    ? ";"
+    : ","
+  const cells: string[] = []
+  let cell = ""
+  let quoted = false
+
+  for (let index = 0; index < line.length; index++) {
+    const char = line[index]
+    const nextChar = line[index + 1]
+
+    if (char === '"' && nextChar === '"') {
+      cell += '"'
+      index++
+      continue
+    }
+
+    if (char === '"') {
+      quoted = !quoted
+      continue
+    }
+
+    if (char === delimiter && !quoted) {
+      cells.push(cell.trim())
+      cell = ""
+      continue
+    }
+
+    cell += char
+  }
+
+  cells.push(cell.trim())
+
+  return cells
+}
+
+const normalizeHeader = (value: string) =>
+  value.trim().toLowerCase().replace(/[\s_-]/g, "")
+
+const looksLikeHeader = (cells: string[]) => {
+  const firstCell = normalizeHeader(cells[0] || "")
+  const quantityCell = normalizeHeader(cells[1] || "")
+
+  return (
+    ["sku", "ref", "referencia", "reference"].includes(firstCell) ||
+    ["quantity", "qty", "cantidad"].includes(quantityCell)
+  )
+}
+
+const parsePurchaseUnit = (value: string): PurchaseUnit => {
+  const normalized = normalizeHeader(value)
+
+  if (["box", "caja", "cajas", "case", "pack"].includes(normalized)) {
+    return "box"
+  }
+
+  return "unit"
+}
+
+const parseLines = (value: string): ParsedQuickOrder => {
+  const errors: string[] = []
+  const lines = value
+    .split(/\r?\n/)
+    .map((line, index) => ({
+      value: line.trim(),
+      sourceLine: index + 1,
+    }))
+    .filter((line) => line.value)
+    .reduce<QuickOrderDraftLine[]>((acc, line, index) => {
+      const [sku = "", quantity = "1", purchaseUnit = "unit"] =
+        splitDelimitedLine(line.value)
+
+      if (index === 0 && looksLikeHeader([sku, quantity, purchaseUnit])) {
+        return acc
       }
-    })
+
+      const normalizedSku = sku.trim().toUpperCase()
+      const parsedQuantity = Number.parseInt(quantity, 10)
+
+      if (!normalizedSku) {
+        errors.push(`Linea ${line.sourceLine}: falta SKU`)
+        return acc
+      }
+
+      if (!Number.isFinite(parsedQuantity) || parsedQuantity < 1) {
+        errors.push(`Linea ${line.sourceLine}: cantidad invalida`)
+      }
+
+      acc.push({
+        sku: normalizedSku,
+        quantity: Math.max(parsedQuantity || 1, 1),
+        purchaseUnit: parsePurchaseUnit(purchaseUnit),
+        sourceLine: line.sourceLine,
+      })
+
+      return acc
+    }, [])
+
+  return {
+    lines,
+    errors,
+  }
 }
 
 const validateLine = (line: QuickOrderDraftLine) => {
@@ -109,6 +208,7 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
   const [rawInput, setRawInput] = useState(exampleCsv)
   const [lines, setLines] = useState<QuickOrderDraftLine[]>([])
   const [missingSkus, setMissingSkus] = useState<string[]>([])
+  const [parseErrors, setParseErrors] = useState<string[]>([])
   const [isPending, startTransition] = useTransition()
   const [isAdding, setIsAdding] = useState(false)
 
@@ -120,9 +220,16 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
     () => validLines.reduce((acc, line) => acc + getTotalUnits(line), 0),
     [validLines]
   )
+  const errorLines = useMemo(
+    () => lines.filter((line) => line.error).length + parseErrors.length,
+    [lines, parseErrors]
+  )
 
   const handleResolve = () => {
-    const draftLines = parseLines(rawInput)
+    const parsed = parseLines(rawInput)
+    const draftLines = parsed.lines
+
+    setParseErrors(parsed.errors)
 
     if (!draftLines.length) {
       toast.error("Introduce al menos un SKU")
@@ -190,6 +297,44 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
     )
   }
 
+  const removeLine = (index: number) => {
+    setLines((current) => current.filter((_, lineIndex) => lineIndex !== index))
+  }
+
+  const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+
+    if (!file) {
+      return
+    }
+
+    if (file.name.toLowerCase().endsWith(".xlsx")) {
+      toast.error("Sube CSV/TSV o pega columnas desde Excel")
+      event.target.value = ""
+      return
+    }
+
+    const content = await file.text()
+    setRawInput(content)
+    setLines([])
+    setMissingSkus([])
+    setParseErrors([])
+    toast.success(`${file.name} cargado`)
+    event.target.value = ""
+  }
+
+  const downloadTemplate = () => {
+    const blob = new Blob([templateCsv], {
+      type: "text/csv;charset=utf-8",
+    })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = "quick-order-template.csv"
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
   const handleAddToCart = () => {
     if (!validLines.length) {
       toast.error("No hay lineas validas para anadir")
@@ -219,12 +364,37 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
     <div className="flex flex-col gap-5">
       <div className="rounded-lg border border-neutral-200 bg-white p-4">
         <label className="block text-sm font-semibold text-neutral-950">
-          Pegar SKUs
+          Pedido rapido por SKU
         </label>
         <p className="mt-1 text-xs text-neutral-500">
-          Formato: SKU, cantidad, unidad. Usa <span className="font-mono">unit</span>{" "}
-          o <span className="font-mono">box</span>.
+          Pega columnas desde Excel o sube CSV/TSV con SKU, cantidad y unidad de
+          compra.
         </p>
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+          <label className="inline-flex cursor-pointer items-center rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 font-medium text-neutral-800 transition hover:border-neutral-950">
+            Subir CSV/TSV
+            <input
+              type="file"
+              accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values"
+              className="sr-only"
+              onChange={handleFileUpload}
+            />
+          </label>
+          <button
+            type="button"
+            onClick={downloadTemplate}
+            className="rounded-md border border-neutral-200 px-3 py-2 font-medium text-neutral-800 transition hover:border-neutral-950"
+          >
+            Descargar plantilla
+          </button>
+          <button
+            type="button"
+            onClick={() => setRawInput(exampleCsv)}
+            className="rounded-md border border-neutral-200 px-3 py-2 font-medium text-neutral-800 transition hover:border-neutral-950"
+          >
+            Cargar ejemplo
+          </button>
+        </div>
         <textarea
           value={rawInput}
           onChange={(event) => setRawInput(event.target.value)}
@@ -241,12 +411,24 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
               setRawInput("")
               setLines([])
               setMissingSkus([])
+              setParseErrors([])
             }}
           >
             Limpiar
           </Button>
         </div>
       </div>
+
+      {parseErrors.length ? (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+          <p className="font-semibold">Errores de formato</p>
+          <ul className="mt-1 list-disc pl-5">
+            {parseErrors.map((error) => (
+              <li key={error}>{error}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       {missingSkus.length ? (
         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
@@ -262,7 +444,8 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
                 Pedido rapido
               </p>
               <p className="text-xs text-neutral-500">
-                {validLines.length} lineas validas / {totalUnits} unidades
+                {validLines.length} validas / {errorLines} con revision /{" "}
+                {totalUnits} unidades
               </p>
             </div>
             <Button
@@ -282,6 +465,8 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
                   <th className="px-4 py-3">Cantidad</th>
                   <th className="px-4 py-3">Total uds</th>
                   <th className="px-4 py-3">Regla</th>
+                  <th className="px-4 py-3">Estado</th>
+                  <th className="px-4 py-3"></th>
                 </tr>
               </thead>
               <tbody>
@@ -294,11 +479,9 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
                     >
                       <td className="px-4 py-3 font-mono text-xs">
                         {line.sku}
-                        {line.error ? (
-                          <p className="mt-1 text-xs text-red-600">
-                            {line.error}
-                          </p>
-                        ) : null}
+                        <p className="mt-1 text-[11px] text-neutral-400">
+                          Linea {line.sourceLine}
+                        </p>
                       </td>
                       <td className="px-4 py-3">
                         <p className="font-medium text-neutral-950">
@@ -342,6 +525,26 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
                         {packaging
                           ? `Caja ${packaging.units_per_box} uds / min. ${packaging.minimum_order_quantity} / multiplo ${packaging.quantity_increment}`
                           : "Sin regla"}
+                      </td>
+                      <td className="px-4 py-3">
+                        {line.error ? (
+                          <span className="inline-flex rounded-md border border-red-200 bg-red-50 px-2 py-1 text-xs font-medium text-red-700">
+                            {line.error}
+                          </span>
+                        ) : (
+                          <span className="inline-flex rounded-md border border-green-200 bg-green-50 px-2 py-1 text-xs font-medium text-green-700">
+                            Listo
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <button
+                          type="button"
+                          onClick={() => removeLine(index)}
+                          className="text-xs font-medium text-neutral-500 underline hover:text-neutral-950"
+                        >
+                          Quitar
+                        </button>
                       </td>
                     </tr>
                   )
