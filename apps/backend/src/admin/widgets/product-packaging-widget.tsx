@@ -69,7 +69,8 @@ const toNumberOrNull = (value: string) => {
   return Number.isFinite(numberValue) ? numberValue : null;
 };
 
-const normalizeHeader = (value: string) => value.trim().toLowerCase();
+const normalizeHeader = (value: string) =>
+  value.trim().toLowerCase().replace(/[\s-]/g, "_");
 
 const parsePositiveInteger = (value: string, fallback: number) => {
   if (!value.trim()) {
@@ -408,7 +409,8 @@ const ProductPackagingWidget = ({
     }
 
     const [headerLine, ...lines] = trimmedText.split(/\r?\n/);
-    const headers = parseCsvRow(headerLine).map(normalizeHeader);
+    const delimiter = detectCsvDelimiter(headerLine);
+    const headers = parseCsvRow(headerLine, delimiter).map(normalizeHeader);
     const variantById = variants.reduce<Record<string, ProductVariant>>(
       (acc, variant) => {
         acc[variant.id] = variant;
@@ -419,7 +421,7 @@ const ProductPackagingWidget = ({
     const variantBySku = variants.reduce<Record<string, ProductVariant>>(
       (acc, variant) => {
         if (variant.sku) {
-          acc[variant.sku] = variant;
+          acc[variant.sku.toUpperCase()] = variant;
         }
         return acc;
       },
@@ -428,7 +430,7 @@ const ProductPackagingWidget = ({
 
     const rows = lines
       .filter((line) => line.trim())
-      .map(parseCsvRow)
+      .map((line) => parseCsvRow(line, delimiter))
       .map<CsvImportRow>((values, index) => {
         const raw = headers.reduce<Record<string, string>>(
           (acc, header, valueIndex) => {
@@ -438,36 +440,83 @@ const ProductPackagingWidget = ({
           {}
         );
         const errors: string[] = [];
+        const sku = getCsvValue(raw, "sku", "referencia", "ref", "codigo");
         const variant =
-          variantById[raw.variant_id] ||
-          (raw.sku ? variantBySku[raw.sku] : undefined);
+          variantById[getCsvValue(raw, "variant_id", "variant")] ||
+          (sku ? variantBySku[sku.toUpperCase()] : undefined);
 
         if (!variant) {
           errors.push("No coincide con ninguna variante por variant_id o sku");
         }
 
-        const salesUnit = raw.sales_unit === "box" ? "box" : "unit";
-        if (raw.sales_unit && !["unit", "box"].includes(raw.sales_unit)) {
-          errors.push("sales_unit debe ser unit o box");
+        const salesUnitValue = getCsvValue(
+          raw,
+          "sales_unit",
+          "unidad_venta",
+          "unidad_de_venta",
+          "compra"
+        ).toLowerCase();
+        const salesUnit =
+          ["box", "caja", "cajas", "case"].includes(salesUnitValue)
+            ? "box"
+            : "unit";
+        if (
+          salesUnitValue &&
+          !["unit", "unidad", "uds", "box", "caja", "cajas", "case"].includes(
+            salesUnitValue
+          )
+        ) {
+          errors.push("sales_unit debe ser unit/unidad o box/caja");
         }
 
         const minimumOrderQuantity = parsePositiveInteger(
-          raw.minimum_order_quantity || raw.minimo,
+          getCsvValue(
+            raw,
+            "minimum_order_quantity",
+            "minimo",
+            "pedido_minimo",
+            "min"
+          ),
           1
         );
         const quantityIncrement = parsePositiveInteger(
-          raw.quantity_increment || raw.multiplo,
+          getCsvValue(
+            raw,
+            "quantity_increment",
+            "multiplo",
+            "incremento",
+            "multiple"
+          ),
           1
         );
         const unitsPerBox = parsePositiveInteger(
-          raw.units_per_box || raw.uds_caja,
+          getCsvValue(
+            raw,
+            "units_per_box",
+            "uds_caja",
+            "unidades_caja",
+            "unidades_por_caja"
+          ),
           1
         );
         const boxesPerPallet = parsePositiveInteger(
-          raw.boxes_per_pallet,
+          getCsvValue(
+            raw,
+            "boxes_per_pallet",
+            "cajas_pallet",
+            "cajas_por_pallet"
+          ),
           0
         );
-        const packageWeight = parsePositiveNumberOrNull(raw.package_weight);
+        const packageWeight = parsePositiveNumberOrNull(
+          getCsvValue(raw, "package_weight", "peso", "peso_embalado")
+        );
+        const packageDimensions = getCsvValue(
+          raw,
+          "package_dimensions",
+          "dimensiones",
+          "dimensiones_embalaje"
+        );
 
         if (!minimumOrderQuantity) {
           errors.push("minimum_order_quantity debe ser entero positivo");
@@ -478,10 +527,16 @@ const ProductPackagingWidget = ({
         if (!unitsPerBox) {
           errors.push("units_per_box debe ser entero positivo");
         }
-        if (raw.boxes_per_pallet && boxesPerPallet === null) {
+        if (
+          getCsvValue(raw, "boxes_per_pallet", "cajas_pallet") &&
+          boxesPerPallet === null
+        ) {
           errors.push("boxes_per_pallet debe ser entero positivo");
         }
-        if (raw.package_weight && packageWeight === null) {
+        if (
+          getCsvValue(raw, "package_weight", "peso", "peso_embalado") &&
+          packageWeight === null
+        ) {
           errors.push("package_weight debe ser numero positivo");
         }
 
@@ -503,7 +558,7 @@ const ProductPackagingWidget = ({
                   units_per_box: unitsPerBox,
                   boxes_per_pallet: boxesPerPallet || null,
                   package_weight: packageWeight,
-                  package_dimensions: raw.package_dimensions || null,
+                  package_dimensions: packageDimensions || null,
                 }
               : undefined,
         };
@@ -572,7 +627,7 @@ const ProductPackagingWidget = ({
             ref={importInputRef}
             className="hidden"
             type="file"
-            accept=".csv,text/csv"
+            accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values"
             onChange={handleImportCsv}
           />
           <Button
@@ -976,7 +1031,34 @@ const ImportSummaryCard = ({
   </div>
 );
 
-const parseCsvRow = (row: string) => {
+const detectCsvDelimiter = (row: string) => {
+  const tabCount = row.split("\t").length;
+  const semicolonCount = row.split(";").length;
+  const commaCount = row.split(",").length;
+
+  if (tabCount >= semicolonCount && tabCount >= commaCount) {
+    return "\t";
+  }
+
+  if (semicolonCount > commaCount) {
+    return ";";
+  }
+
+  return ",";
+};
+
+const getCsvValue = (row: Record<string, string>, ...keys: string[]) => {
+  for (const key of keys) {
+    const normalizedKey = normalizeHeader(key);
+    if (row[normalizedKey] !== undefined) {
+      return row[normalizedKey].trim();
+    }
+  }
+
+  return "";
+};
+
+const parseCsvRow = (row: string, delimiter = ",") => {
   const result: string[] = [];
   let current = "";
   let quoted = false;
@@ -996,7 +1078,7 @@ const parseCsvRow = (row: string) => {
       continue;
     }
 
-    if (character === "," && !quoted) {
+    if (character === delimiter && !quoted) {
       result.push(current);
       current = "";
       continue;
