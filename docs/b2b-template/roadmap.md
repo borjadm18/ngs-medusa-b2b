@@ -60,6 +60,7 @@ Estado 2026-07-14: `Quick order` ya resuelve SKUs, valida packaging y anade en b
 - Las reglas `requires_quote` ya cambian el comportamiento de PDP: la compra directa pasa a CTA de presupuesto, con copy comercial especifico y sin CTA duplicado.
 - El carrito y el checkout detectan lineas `requires_quote`: ocultan el camino de compra directa y dirigen a solicitud de presupuesto.
 - `Quick order` por SKU evalua reglas `requires_quote` por producto/variante/categoria/coleccion y transmite la condicion al carrito.
+- Seed demo B2B ampliado con empresas, compradores, limites de gasto, metadata de stock operativo, reglas de catalogo, promocion demo y price list demo ejecutable con `pnpm seed:b2b-demo`.
 - Upload binario local desde Admin implementado y servido por backend para demos.
 - Admin packaging permite aplicar a todas, copiar desde otra variante, usar plantillas rapidas, importar CSV con preview y exportar CSV.
 - Pendiente: storage/CDN persistente, import/export dedicado y plantillas por cliente.

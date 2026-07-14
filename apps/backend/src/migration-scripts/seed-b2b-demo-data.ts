@@ -1,0 +1,531 @@
+import { MedusaContainer } from "@medusajs/framework";
+import {
+  ContainerRegistrationKeys,
+  ModuleRegistrationName,
+  Modules,
+} from "@medusajs/framework/utils";
+import { CATALOG_RULES_MODULE } from "../modules/catalog-rules";
+import { COMPANY_MODULE } from "../modules/company";
+
+type DemoCompany = {
+  name: string;
+  email: string;
+  phone: string;
+  city: string;
+  country: string;
+  segment: string;
+  spendingLimit: number;
+};
+
+const demoCompanies: DemoCompany[] = [
+  {
+    name: "Iberia Pro Installers",
+    email: "compras@iberia-pro-installers.demo",
+    phone: "+34 910 000 101",
+    city: "Madrid",
+    country: "ES",
+    segment: "instalador",
+    spendingLimit: 25000,
+  },
+  {
+    name: "Distribuciones Norte Audio",
+    email: "pedidos@dnaudio.demo",
+    phone: "+34 944 000 202",
+    city: "Bilbao",
+    country: "ES",
+    segment: "distribuidor",
+    spendingLimit: 60000,
+  },
+  {
+    name: "Retail Campus Group",
+    email: "it-procurement@retail-campus.demo",
+    phone: "+34 933 000 303",
+    city: "Barcelona",
+    country: "ES",
+    segment: "cuenta_key",
+    spendingLimit: 12000,
+  },
+];
+
+const demoStockBySku: Record<
+  string,
+  {
+    free: number;
+    reserved: number;
+    eta: string;
+    ean: string;
+    tariffCode: string;
+  }
+> = {
+  "NGS-WILD-BASH-COMPACT-BLK": {
+    free: 126,
+    reserved: 48,
+    eta: "24/48h",
+    ean: "8435430621018",
+    tariffCode: "85182100",
+  },
+  "NGS-WILD-BASH-COMPACT-WHT": {
+    free: 34,
+    reserved: 18,
+    eta: "72h",
+    ean: "8435430621025",
+    tariffCode: "85182100",
+  },
+  "NGS-EVO-MOUSE-BLK": {
+    free: 1840,
+    reserved: 420,
+    eta: "stock inmediato",
+    ean: "8435430622015",
+    tariffCode: "84716070",
+  },
+  "NGS-EVO-MOUSE-WHT": {
+    free: 960,
+    reserved: 240,
+    eta: "stock inmediato",
+    ean: "8435430622022",
+    tariffCode: "84716070",
+  },
+  "NGS-XPRESSCAM-1080-BLK": {
+    free: 310,
+    reserved: 90,
+    eta: "24/48h",
+    ean: "8435430623012",
+    tariffCode: "85258900",
+  },
+  "NGS-GHX-600-BLK": {
+    free: 72,
+    reserved: 110,
+    eta: "reposicion 7 dias",
+    ean: "8435430624019",
+    tariffCode: "85183000",
+  },
+};
+
+export default async function seed_b2b_demo_data({
+  container,
+}: {
+  container: MedusaContainer;
+}) {
+  const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
+  const query = container.resolve(ContainerRegistrationKeys.QUERY);
+  const link = container.resolve(ContainerRegistrationKeys.LINK);
+  const companyModule = container.resolve<any>(COMPANY_MODULE);
+  const catalogRulesModule = container.resolve<any>(CATALOG_RULES_MODULE);
+  const productModule = container.resolve<any>(Modules.PRODUCT);
+
+  logger.info("Seeding extended B2B demo data...");
+
+  const { data: products } = await query.graph({
+    entity: "product",
+    fields: [
+      "id",
+      "title",
+      "handle",
+      "metadata",
+      "categories.id",
+      "categories.name",
+      "collection.id",
+      "variants.id",
+      "variants.sku",
+      "variants.title",
+    ],
+    pagination: {
+      take: 100,
+      skip: 0,
+    },
+  });
+
+  if (!products.length) {
+    logger.warn("B2B demo seed skipped; no products found.");
+    return;
+  }
+
+  const { data: regions } = await query.graph({
+    entity: "region",
+    fields: ["id", "name", "currency_code"],
+    pagination: {
+      take: 10,
+      skip: 0,
+    },
+  });
+  const region = regions.find((item: any) => item.currency_code === "eur");
+
+  const { data: salesChannels } = await query.graph({
+    entity: "sales_channel",
+    fields: ["id", "name"],
+    pagination: {
+      take: 10,
+      skip: 0,
+    },
+  });
+  const salesChannel = salesChannels[0];
+
+  const companies = await seedCompanies(companyModule, demoCompanies);
+  await seedDemoCustomers(container, link, companies, logger);
+  await seedOperationalStock(productModule, products, logger);
+  await seedCatalogRules({
+    catalogRulesModule,
+    products,
+    companies,
+    regionId: region?.id,
+    salesChannelId: salesChannel?.id,
+    logger,
+  });
+  await seedPromotionsAndPriceLists(container, logger);
+
+  logger.info("Finished seeding extended B2B demo data.");
+}
+
+async function seedCompanies(companyModule: any, companies: DemoCompany[]) {
+  const existingCompanies = await companyModule.listCompanies({});
+  const existingByEmail = new Map(
+    existingCompanies.map((company: any) => [company.email, company])
+  );
+  const createdOrExisting: any[] = [];
+
+  for (const company of companies) {
+    const existing = existingByEmail.get(company.email);
+
+    if (existing) {
+      createdOrExisting.push(existing);
+      continue;
+    }
+
+    const created = await companyModule.createCompanies({
+      name: company.name,
+      email: company.email,
+      phone: company.phone,
+      address: "Calle Demo 1",
+      city: company.city,
+      country: company.country,
+      currency_code: "eur",
+      spending_limit_reset_frequency: "monthly",
+    });
+
+    await companyModule.createEmployees({
+      company_id: created.id,
+      spending_limit: company.spendingLimit,
+      is_admin: true,
+    });
+
+    await companyModule.createEmployees({
+      company_id: created.id,
+      spending_limit: Math.round(company.spendingLimit / 4),
+      is_admin: false,
+    });
+
+    createdOrExisting.push(created);
+  }
+
+  return createdOrExisting;
+}
+
+async function seedDemoCustomers(
+  container: MedusaContainer,
+  link: any,
+  companies: any[],
+  logger: any
+) {
+  const customerModule = container.resolve<any>(Modules.CUSTOMER);
+  const companyModule = container.resolve<any>(COMPANY_MODULE);
+  const existingCustomers = await customerModule.listCustomers({});
+  const existingByEmail = new Map(
+    existingCustomers.map((customer: any) => [customer.email, customer])
+  );
+
+  for (const company of companies) {
+    const employees = await companyModule.listEmployees({
+      company_id: company.id,
+    });
+    const employee = employees[0];
+
+    if (!employee) {
+      continue;
+    }
+
+    const email = company.email.replace("@", "+buyer@");
+    const existing = existingByEmail.get(email);
+    const customer =
+      existing ||
+      (await customerModule.createCustomers({
+        email,
+        first_name: company.name.split(" ")[0],
+        last_name: "Buyer",
+        metadata: {
+          demo_seed: true,
+          company_name: company.name,
+          b2b_role: employee.is_admin ? "admin_compras" : "comprador",
+        },
+      }));
+
+    if (!existing) {
+      await link
+        .create({
+          [COMPANY_MODULE]: {
+            employee_id: employee.id,
+          },
+          [Modules.CUSTOMER]: {
+            customer_id: customer.id,
+          },
+        })
+        .catch(() => {
+          logger.warn(`Could not link demo customer ${email} to employee.`);
+        });
+    }
+  }
+}
+
+async function seedOperationalStock(
+  productModule: any,
+  products: any[],
+  logger: any
+) {
+  for (const product of products) {
+    const variants = product.variants || [];
+    const matchedStock = variants
+      .map((variant: any) => demoStockBySku[variant.sku])
+      .filter(Boolean);
+
+    if (!matchedStock.length) {
+      continue;
+    }
+
+    const free = matchedStock.reduce((acc: number, item: any) => acc + item.free, 0);
+    const reserved = matchedStock.reduce(
+      (acc: number, item: any) => acc + item.reserved,
+      0
+    );
+    const eta = matchedStock.some((item: any) => item.eta.includes("7"))
+      ? "reposicion 7 dias"
+      : matchedStock.some((item: any) => item.eta.includes("72"))
+      ? "72h"
+      : "24/48h";
+
+    await productModule
+      .updateProducts({
+        id: product.id,
+        metadata: {
+          ...(product.metadata || {}),
+          demo_seed: true,
+          stock_free: free,
+          stock_reserved: reserved,
+          stock_eta: eta,
+          b2b_stock_status:
+            free > 250 ? "alto" : free > 50 ? "medio" : "bajo",
+          b2b_logistics_note: "Stock operativo demo para portal B2B",
+        },
+      })
+      .catch(() => {
+        logger.warn(`Could not update stock metadata for ${product.title}.`);
+      });
+  }
+}
+
+async function seedCatalogRules({
+  catalogRulesModule,
+  products,
+  companies,
+  regionId,
+  salesChannelId,
+  logger,
+}: {
+  catalogRulesModule: any;
+  products: any[];
+  companies: any[];
+  regionId?: string;
+  salesChannelId?: string;
+  logger: any;
+}) {
+  const existingRules = await catalogRulesModule.listCatalogRules({}).catch(
+    (error: Error) => {
+      logger.warn(
+        `Catalog rules demo seed skipped; module table is not ready (${error.message}).`
+      );
+      return null;
+    }
+  );
+
+  if (!existingRules) {
+    return;
+  }
+
+  const existingNames = new Set(existingRules.map((rule: any) => rule.name));
+  const productByHandle = new Map(products.map((product) => [product.handle, product]));
+  const audioCategory = products
+    .flatMap((product) => product.categories || [])
+    .find((category) => category.name === "Audio");
+  const mouseVariant = products
+    .flatMap((product) => product.variants || [])
+    .find((variant) => variant.sku === "NGS-EVO-MOUSE-BLK");
+  const bashProduct = productByHandle.get("ngs-wild-bash-compact");
+  const installerCompany = companies.find((company) =>
+    String(company.email).includes("iberia-pro-installers")
+  );
+
+  const rules = [
+    {
+      name: "Demo - Audio requiere presupuesto por proyecto",
+      description:
+        "Productos de audio profesional pasan por presupuesto para validar proyecto, disponibilidad y condiciones.",
+      status: "active",
+      priority: 10,
+      rule_type: "quote",
+      target_type: "category",
+      target_id: audioCategory?.id,
+      effect_type: "requires_quote",
+      region_id: regionId,
+      sales_channel_id: salesChannelId,
+      metadata: {
+        demo_seed: true,
+        scenario: "quote_required_by_category",
+      },
+    },
+    {
+      name: "Demo - Instaladores 12% dto audio",
+      description:
+        "Descuento comercial para instaladores sobre la categoria Audio.",
+      status: "active",
+      priority: 20,
+      rule_type: "price",
+      target_type: "category",
+      target_id: audioCategory?.id,
+      company_id: installerCompany?.id,
+      effect_type: "discount_percentage",
+      discount_percentage: 12,
+      minimum_quantity: 6,
+      region_id: regionId,
+      metadata: {
+        demo_seed: true,
+        scenario: "company_discount",
+      },
+    },
+    {
+      name: "Demo - EVO Mouse precio fijo lote",
+      description: "Precio fijo por volumen para renovacion de puestos IT.",
+      status: "active",
+      priority: 30,
+      rule_type: "price",
+      target_type: "variant",
+      target_id: mouseVariant?.id,
+      effect_type: "fixed_price",
+      fixed_price: 8.6,
+      minimum_quantity: 96,
+      region_id: regionId,
+      metadata: {
+        demo_seed: true,
+        scenario: "fixed_price_by_variant",
+      },
+    },
+    {
+      name: "Demo - WILD BASH surtido premium",
+      description:
+        "Producto demo para mostrar surtidos controlados en canal premium.",
+      status: "active",
+      priority: 40,
+      rule_type: "assortment",
+      target_type: "product",
+      target_id: bashProduct?.id,
+      effect_type: "show_only",
+      region_id: regionId,
+      metadata: {
+        demo_seed: true,
+        scenario: "assortment_visibility",
+      },
+    },
+  ].filter((rule) => rule.target_id);
+
+  for (const rule of rules) {
+    if (existingNames.has(rule.name)) {
+      continue;
+    }
+
+    await catalogRulesModule.createCatalogRules(rule).catch(() => {
+      logger.warn(`Could not create catalog rule ${rule.name}.`);
+    });
+  }
+}
+
+async function seedPromotionsAndPriceLists(
+  container: MedusaContainer,
+  logger: any
+) {
+  await tryCreatePromotion(container, logger);
+  await tryCreatePriceList(container, logger);
+}
+
+async function tryCreatePromotion(container: MedusaContainer, logger: any) {
+  const promotionModuleName = (Modules as any).PROMOTION || "promotion";
+  const promotionModule = container.resolve<any>(promotionModuleName, {
+    allowUnregistered: true,
+  });
+
+  if (!promotionModule?.createPromotions) {
+    logger.warn("Promotion module not available for demo seed; skipped.");
+    return;
+  }
+
+  const existing = await promotionModule.listPromotions({ code: "B2BDEMO10" });
+
+  if (existing.length) {
+    return;
+  }
+
+  await promotionModule
+    .createPromotions({
+      code: "B2BDEMO10",
+      campaign_id: null,
+      is_automatic: false,
+      type: "standard",
+      status: "active",
+      application_method: {
+        type: "percentage",
+        target_type: "items",
+        allocation: "each",
+        value: 10,
+        max_quantity: 9999,
+        currency_code: "eur",
+      },
+      metadata: {
+        demo_seed: true,
+        description: "10% demo para pedido B2B validado",
+      },
+    })
+    .catch((error: Error) => {
+      logger.warn(`Could not create B2BDEMO10 promotion (${error.message}).`);
+    });
+}
+
+async function tryCreatePriceList(container: MedusaContainer, logger: any) {
+  const pricingModule = container.resolve<any>(ModuleRegistrationName.PRICING, {
+    allowUnregistered: true,
+  });
+
+  if (!pricingModule?.createPriceLists) {
+    logger.warn("Pricing module not available for demo seed; skipped.");
+    return;
+  }
+
+  const existing = await pricingModule.listPriceLists({
+    title: "Demo tarifa distribuidor B2B",
+  });
+
+  if (existing.length) {
+    return;
+  }
+
+  await pricingModule
+    .createPriceLists([
+      {
+        title: "Demo tarifa distribuidor B2B",
+        description:
+          "Tarifa simulada para distribuidores, complementaria a catalog rules.",
+        status: "active",
+        type: "sale",
+        rules: {},
+        prices: [],
+      },
+    ])
+    .catch((error: Error) => {
+      logger.warn(`Could not create demo B2B price list (${error.message}).`);
+    });
+}
