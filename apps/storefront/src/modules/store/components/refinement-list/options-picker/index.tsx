@@ -13,10 +13,88 @@ type OptionsPickerProps = {
   options: HttpTypes.StoreProductOption[]
 }
 
+type GroupedOptionValue = {
+  id: string
+  value: string
+  valueIds: string[]
+}
+
+type GroupedOption = {
+  id: string
+  title: string
+  values: GroupedOptionValue[]
+}
+
+const normalizeOptionTitle = (title?: string) => {
+  const normalized = title?.trim() || "Option"
+
+  if (/^colou?r\b/i.test(normalized)) {
+    return "Color"
+  }
+
+  return normalized
+}
+
+const normalizeKey = (value?: string) =>
+  (value || "").trim().toLowerCase().replace(/\s+/g, "-")
+
 const OptionsPicker = ({ options }: OptionsPickerProps) => {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+
+  const groupedOptions = useMemo<GroupedOption[]>(() => {
+    const optionMap = new Map<string, GroupedOption>()
+
+    options.forEach((option) => {
+      const title = normalizeOptionTitle(option.title)
+      const optionKey = normalizeKey(title)
+      const existingOption =
+        optionMap.get(optionKey) ||
+        ({
+          id: optionKey,
+          title,
+          values: [],
+        } satisfies GroupedOption)
+
+      const valueMap = new Map(
+        existingOption.values.map((value) => [
+          normalizeKey(value.value),
+          value,
+        ])
+      )
+
+      option.values?.forEach((value) => {
+        const valueKey = normalizeKey(value.value)
+        if (!valueKey) {
+          return
+        }
+
+        const existingValue = valueMap.get(valueKey)
+        if (existingValue) {
+          existingValue.valueIds = Array.from(
+            new Set([...existingValue.valueIds, value.id])
+          )
+          return
+        }
+
+        valueMap.set(valueKey, {
+          id: `${optionKey}-${valueKey}`,
+          value: value.value,
+          valueIds: [value.id],
+        })
+      })
+
+      existingOption.values = Array.from(valueMap.values()).sort((a, b) =>
+        a.value.localeCompare(b.value)
+      )
+      optionMap.set(optionKey, existingOption)
+    })
+
+    return Array.from(optionMap.values())
+      .filter((option) => option.values.length > 0)
+      .sort((a, b) => a.title.localeCompare(b.title))
+  }, [options])
 
   const selectedIds = useMemo(() => {
     const all = searchParams.getAll(OPTION_VALUE_QUERY_KEY)
@@ -29,17 +107,19 @@ const OptionsPicker = ({ options }: OptionsPickerProps) => {
     return new Set(expanded)
   }, [searchParams])
 
-  const toggleValue = useCallback(
-    (valueId: string) => {
+  const toggleValueIds = useCallback(
+    (valueIds: string[]) => {
       const params = new URLSearchParams(searchParams.toString())
       params.delete(OPTION_VALUE_QUERY_KEY)
       params.delete("page")
 
       const next = new Set(selectedIds)
-      if (next.has(valueId)) {
-        next.delete(valueId)
+      const isActive = valueIds.some((valueId) => next.has(valueId))
+
+      if (isActive) {
+        valueIds.forEach((valueId) => next.delete(valueId))
       } else {
-        next.add(valueId)
+        valueIds.forEach((valueId) => next.add(valueId))
       }
       next.forEach((id) => params.append(OPTION_VALUE_QUERY_KEY, id))
 
@@ -53,16 +133,16 @@ const OptionsPicker = ({ options }: OptionsPickerProps) => {
     [pathname, router, searchParams, selectedIds]
   )
 
-  if (!options.length) return null
+  if (!groupedOptions.length) return null
 
   return (
     <Container className="p-0">
       <AccordionPrimitive.Root
         type="multiple"
-        defaultValue={options.map((o) => o.id)}
+        defaultValue={groupedOptions.map((o) => o.id)}
         className="divide-y divide-neutral-200"
       >
-        {options.map((option) => (
+        {groupedOptions.map((option) => (
           <AccordionPrimitive.Item
             key={option.id}
             value={option.id}
@@ -81,13 +161,15 @@ const OptionsPicker = ({ options }: OptionsPickerProps) => {
             </AccordionPrimitive.Header>
             <AccordionPrimitive.Content className="radix-state-closed:animate-accordion-close radix-state-open:animate-accordion-open pt-3">
               <div className="flex flex-wrap gap-2">
-                {option.values?.map((value) => {
-                  const active = selectedIds.has(value.id)
+                {option.values.map((value) => {
+                  const active = value.valueIds.some((valueId) =>
+                    selectedIds.has(valueId)
+                  )
                   return (
                     <button
                       key={value.id}
                       type="button"
-                      onClick={() => toggleValue(value.id)}
+                      onClick={() => toggleValueIds(value.valueIds)}
                       className={clx(
                         "px-3 py-1 text-xs rounded-full border transition-colors",
                         active
