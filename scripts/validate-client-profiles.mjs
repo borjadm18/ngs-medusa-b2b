@@ -207,6 +207,17 @@ const validateClientProfile = (profileId, profile, reporter) => {
 
   validateLinks(profile.navigation?.main, "navigation.main", reporter)
 
+  if (profileId !== "ngs") {
+    const demoOnlyLinks = collectStringValues(
+      profile.navigation?.main,
+      (value) => value === "/ngs-poc"
+    )
+
+    if (demoOnlyLinks.length) {
+      reporter.error('Only profiles/ngs may link to the demo-only route "/ngs-poc"')
+    }
+  }
+
   if (!Array.isArray(profile.footer?.columns) || !profile.footer.columns.length) {
     reporter.error("footer.columns must contain at least one column")
   } else {

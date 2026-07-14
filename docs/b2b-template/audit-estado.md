@@ -208,6 +208,7 @@ Siguiente accion:
 ### P1 - Convertir En Template Real
 
 1. Eliminar restos NGS hardcodeados en `/ngs-poc` o moverlos a un pack demo aislado.
+   - Avanzado: `/ngs-poc` queda protegido para `profiles/ngs`; perfiles genericos no pueden enlazarlo y el launcher lo normaliza a `/store`.
 2. Extraer productos/categorias demo completos a perfiles o seeds parametrizables.
    - Avanzado: `profiles/example-industrial` ya incluye `product-catalog.csv` con 8 productos y `product-packaging.csv` alineado por SKU.
 3. Ampliar `sync-client-profile` para preparar assets, packaging y seeds de backend.

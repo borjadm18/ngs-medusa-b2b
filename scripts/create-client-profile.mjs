@@ -509,6 +509,20 @@ const applyVerticalPack = ({ profile, homepage, brandName, vertical }) => {
   )
 }
 
+const stripDemoOnlyLinks = (links) => {
+  if (!Array.isArray(links)) {
+    return
+  }
+
+  links.forEach((link) => {
+    if (link.href === "/ngs-poc") {
+      link.href = "/store"
+    }
+
+    stripDemoOnlyLinks(link.children)
+  })
+}
+
 const buildActivationChecklist = ({
   id,
   brandName,
@@ -629,6 +643,8 @@ const createProfile = ({
   profile.markets.defaultCountryCode = country || profile.markets.defaultCountryCode
   profile.markets.currency = currency || profile.markets.currency
   profile.footer.description = `Soluciones profesionales ${brandName} para empresas que necesitan comprar con precision, control y disponibilidad.`
+  stripDemoOnlyLinks(profile.navigation.main)
+  profile.footer.columns?.forEach((column) => stripDemoOnlyLinks(column.links))
 
   const homepageTemplate = readJson(source.homepagePath)
   const homepage = mapDeep(homepageTemplate, (value) =>

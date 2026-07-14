@@ -1,4 +1,6 @@
 import Link from "next/link"
+import { notFound } from "next/navigation"
+import { clientProfile } from "@/lib/client-profile"
 
 const catalogue = [
   {
@@ -68,6 +70,10 @@ const quickOrderRows = [
 export default async function NgsPocPage(props: {
   params: Promise<{ countryCode: string }>
 }) {
+  if (clientProfile.id !== "ngs") {
+    notFound()
+  }
+
   const { countryCode } = await props.params
 
   return (
