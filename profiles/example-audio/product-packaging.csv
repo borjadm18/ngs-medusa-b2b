@@ -1,0 +1,5 @@
+sku,variant_id,sales_unit,minimum_order_quantity,quantity_increment,units_per_box,boxes_per_pallet,package_weight,package_dimensions
+SKU-AUDIO-ACTIVO-12-BLK,,box,6,6,6,32,8.2,560 x 380 x 360 mm
+SKU-AUDIO-SUB-18-BLK,,box,2,2,2,12,28.5,720 x 560 x 520 mm
+SKU-AUDIO-COLUMN-10-BLK,,unit,1,1,1,18,14.8,1040 x 260 x 240 mm
+SKU-AUDIO-CABLE-XLR-5M,,box,24,24,24,80,4.2,430 x 300 x 250 mm

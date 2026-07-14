@@ -26,6 +26,7 @@ Usar este checklist antes de clonar el template para un cliente nuevo.
 - [ ] Categorias importadas.
 - [ ] Productos importados.
 - [ ] Variantes con SKU.
+- [ ] `product-catalog.csv` validado por `pnpm sync:client-profile`.
 - [ ] Imagenes cargadas.
 - [ ] Price lists configuradas.
 - [ ] Packaging CSV importado.

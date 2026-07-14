@@ -366,6 +366,58 @@ const packagingHeaders = [
   "package_dimensions",
 ]
 
+const productCatalogHeaders = [
+  "handle",
+  "title",
+  "category",
+  "description",
+  "sku",
+  "variant_title",
+  "color",
+  "price_eur",
+  "image_url",
+]
+
+const productCatalogSamples = {
+  industrial: [
+    ["consumible-industrial-pro", "Consumible industrial PRO", "Consumibles", "Producto de reposicion profesional para compras recurrentes.", "SKU-IND-CONS-PRO", "Caja estandar", "Black", 19.9, ""],
+    ["repuesto-mantenimiento-24", "Repuesto mantenimiento 24", "Repuestos", "Repuesto critico para equipos de mantenimiento y operaciones.", "SKU-IND-REP-24", "Pack profesional", "Grey", 49.9, ""],
+    ["herramienta-servicio-plus", "Herramienta servicio PLUS", "Herramientas", "Herramienta para equipos tecnicos con compra por volumen.", "SKU-IND-TOOL-PLUS", "Unidad", "Black", 89.9, ""],
+    ["proteccion-operario-lite", "Proteccion operario LITE", "Proteccion", "Producto de proteccion para operaciones con alta rotacion.", "SKU-IND-PPE-LITE", "Caja", "White", 12.9, ""],
+  ],
+  audio: [
+    ["altavoz-activo-12", "Altavoz activo 12 pulgadas", "Altavoces activos", "Altavoz profesional para instalaciones, eventos y retail.", "SKU-AUDIO-ACTIVO-12-BLK", "Black", "Black", 549, ""],
+    ["subwoofer-activo-18", "Subwoofer activo 18 pulgadas", "Subwoofers", "Subwoofer profesional para refuerzo de graves en proyectos.", "SKU-AUDIO-SUB-18-BLK", "Black", "Black", 749, ""],
+    ["columna-line-array-10", "Columna line array 10", "Columnas", "Sistema compacto para eventos, hosteleria y salas.", "SKU-AUDIO-COLUMN-10-BLK", "Black", "Black", 899, ""],
+    ["cable-xlr-5m", "Cable XLR profesional 5m", "Accesorios", "Accesorio de alta rotacion para venta por caja.", "SKU-AUDIO-CABLE-XLR-5M", "Caja 24 uds", "Black", 9.9, ""],
+  ],
+  packaging: [
+    ["caja-kraft-300", "Caja kraft 300", "Cajas", "Caja de carton para ecommerce y logistica B2B.", "SKU-BOX-KRAFT-300", "Caja 100 uds", "Kraft", 42.5, ""],
+    ["sobre-mailer-250", "Sobre mailer 250", "Sobres", "Sobre profesional para envios ecommerce por volumen.", "SKU-MAILER-BAG-250", "Caja 250 uds", "Kraft", 52.95, ""],
+    ["rollo-burbuja-50m", "Rollo burbuja 50m", "Proteccion", "Proteccion para embalaje y expediciones recurrentes.", "SKU-BUBBLE-ROLL-50M", "Rollo", "Transparent", 18.5, ""],
+    ["etiqueta-a6-1000", "Etiqueta A6 1000", "Etiquetas", "Etiqueta termica para almacenes y ecommerce.", "SKU-LABEL-A6-1000", "Caja 1000 uds", "White", 24.95, ""],
+    ["precinto-48mm-36", "Precinto 48mm caja 36", "Precintos", "Precinto profesional para operativa diaria de almacen.", "SKU-TAPE-48MM-36", "Caja 36 uds", "Transparent", 31.2, ""],
+  ],
+  hardware: [
+    ["anclaje-m8-100", "Anclaje M8 caja 100", "Fijaciones", "Fijacion profesional para obra, instalacion y mantenimiento.", "SKU-ANCHOR-M8-100", "Caja 100 uds", "Steel", 16.9, ""],
+    ["guante-nitrilo-l", "Guante nitrilo talla L", "EPIs", "Guante profesional para consumo recurrente.", "SKU-GLOVE-NITRILE-L", "Caja 10 packs", "Blue", 12.4, ""],
+    ["set-brocas-industrial", "Set brocas industrial", "Herramientas", "Set para taller y equipos de mantenimiento.", "SKU-DRILL-BIT-SET", "Caja 6 sets", "Black", 34.9, ""],
+    ["adhesivo-290ml", "Adhesivo profesional 290ml", "Adhesivos", "Consumible industrial para aplicaciones recurrentes.", "SKU-ADHESIVE-290ML", "Caja 12 uds", "White", 7.8, ""],
+  ],
+  electrical: [
+    ["cable-3g25-100m", "Cable 3G2.5 rollo 100m", "Cableado", "Cable electrico para instaladores y proyectos.", "SKU-CABLE-3G25-100M", "Rollo", "Black", 129, ""],
+    ["magnetotermico-c16-12", "Magnetotermico C16 caja 12", "Proteccion", "Proteccion electrica para instalacion profesional.", "SKU-BREAKER-C16-12", "Caja 12 uds", "White", 8.9, ""],
+    ["interruptor-blanco-24", "Interruptor blanco caja 24", "Mecanismos", "Mecanismo para instaladores y reposicion.", "SKU-SWITCH-WHITE-24", "Caja 24 uds", "White", 5.4, ""],
+    ["panel-led-60x60", "Panel LED 60x60", "Iluminacion", "Panel para proyectos, oficinas y retail.", "SKU-LED-PANEL-60X60", "Caja 4 uds", "White", 39.9, ""],
+  ],
+  "spare-parts": [
+    ["rodamiento-6205-20", "Rodamiento 6205 caja 20", "Rodamientos", "Repuesto recurrente para mantenimiento industrial.", "SKU-BEARING-6205-20", "Caja 20 uds", "Steel", 6.9, ""],
+    ["filtro-hidraulico-12", "Filtro hidraulico caja 12", "Filtros", "Filtro para mantenimiento preventivo y reposicion.", "SKU-FILTER-HYD-12", "Caja 12 uds", "White", 18.9, ""],
+    ["correa-a42-10", "Correa A42 caja 10", "Repuestos", "Correa industrial para equipos y maquinaria.", "SKU-BELT-A42-10", "Caja 10 uds", "Black", 11.5, ""],
+    ["sensor-proximidad-5", "Sensor proximidad caja 5", "Accesorios", "Sensor para recambios tecnicos y proyectos.", "SKU-SENSOR-PROX-5", "Caja 5 uds", "Black", 24.5, ""],
+  ],
+}
+
 const escapeCsvValue = (value) => {
   const stringValue = String(value ?? "")
 
@@ -390,6 +442,25 @@ const buildVerticalPackagingCsv = (vertical) => {
   return [
     packagingHeaders.join(","),
     ...rows.map((row) => row.map(escapeCsvValue).join(",")),
+  ].join("\n") + "\n"
+}
+
+const buildVerticalProductCatalogCsv = (vertical, brandName) => {
+  const rows = productCatalogSamples[vertical]
+
+  if (!rows?.length) {
+    return null
+  }
+
+  return [
+    productCatalogHeaders.join(","),
+    ...rows.map((row) =>
+      row
+        .map((value, index) =>
+          escapeCsvValue(index === 1 ? `${brandName} ${value}` : value)
+        )
+        .join(",")
+    ),
   ].join("\n") + "\n"
 }
 
@@ -452,6 +523,7 @@ Checklist para convertir este perfil en una demo B2B funcional.
 
 - [ ] \`client-profile.json\`: marca, SEO, colores, logo, menu, footer y fallbacks.
 - [ ] \`homepage-content.json\`: hero, categorias, bloques visuales, CTAs y productos destacados.
+- [ ] \`product-catalog.csv\`: productos, categorias, variantes, precios base e imagenes.
 - [ ] \`product-packaging.csv\`: SKUs reales, unidades/caja, minimos, multiplos, pallets y peso.
 - [ ] \`assets/\`: logos e imagenes con rutas \`/images/${id}/...\`.
 
@@ -598,6 +670,20 @@ const createProfile = ({
     )
   }
 
+  const verticalProductCatalogCsv = buildVerticalProductCatalogCsv(
+    vertical,
+    brandName
+  )
+
+  if (verticalProductCatalogCsv) {
+    writeTextMaybe(
+      path.join(targetDir, "product-catalog.csv"),
+      verticalProductCatalogCsv,
+      force,
+      dryRun
+    )
+  }
+
   if (source.assetsDir && fs.existsSync(source.assetsDir)) {
     if (dryRun) {
       console.log(
@@ -619,6 +705,7 @@ Perfil generado para activar una demo B2B industrial sobre el template Medusa.
 
 - \`client-profile.json\`: marca, SEO, navegacion, footer y fallbacks.
 - \`homepage-content.json\`: hero, bloques comerciales, categorias y productos destacados.
+- \`product-catalog.csv\`: productos, categorias, variantes, precios e imagenes base para seed/import.
 - \`product-packaging.csv\`: reglas demo de packaging por SKU.
 - \`assets/\`: logos e imagenes que se publicaran como \`/images/${id}/...\`.
 

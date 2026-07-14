@@ -1,0 +1,3 @@
+handle,title,category,description,sku,variant_title,color,price_eur,image_url
+producto-industrial-demo,Producto industrial demo,Consumibles,Producto base para validar un catalogo B2B industrial.,SKU-DEMO-001,Unidad,Black,19.9,
+producto-caja-demo,Producto caja demo,Repuestos,Producto base para validar compra por caja y packaging.,SKU-DEMO-BOX-001,Caja,White,49.9,
