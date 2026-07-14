@@ -16,7 +16,7 @@ Resultado esperado:
 
 - El mismo codigo puede renderizar NGS o un cliente nuevo cambiando configuracion empaquetada.
 
-Estado 2026-07-12: avanzado. `pnpm sync:client-profile` sincroniza perfiles fuente con el storefront, valida `product-packaging.csv` y genera registry backend para seeds. Home, SEO, store, checkout y PDP consumen perfil runtime o fallback empaquetado. Falta extenderlo a productos/categorias completos y eliminar la pagina demo especifica `/ngs-poc` del core.
+Estado 2026-07-14: avanzado. `pnpm sync:client-profile` sincroniza perfiles fuente con el storefront, valida `product-packaging.csv`, valida `product-catalog.csv` y genera registries backend para seeds. Home, SEO, store, checkout y PDP consumen perfil runtime o fallback empaquetado. `profiles/example-industrial` ya permite activar una demo generica con catalogo y packaging sin depender de NGS. Falta eliminar o aislar la pagina demo especifica `/ngs-poc` del core.
 
 ## Fase 2. Backoffice Operativo
 

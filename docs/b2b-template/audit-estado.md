@@ -209,8 +209,11 @@ Siguiente accion:
 
 1. Eliminar restos NGS hardcodeados en `/ngs-poc` o moverlos a un pack demo aislado.
 2. Extraer productos/categorias demo completos a perfiles o seeds parametrizables.
+   - Avanzado: `profiles/example-industrial` ya incluye `product-catalog.csv` con 8 productos y `product-packaging.csv` alineado por SKU.
 3. Ampliar `sync-client-profile` para preparar assets, packaging y seeds de backend.
+   - Avanzado: genera registries backend para packaging y catalogo por perfil.
 4. Crear `profiles/example-industrial`.
+   - Hecho: perfil generico con marca, home, menu, footer, catalogo y packaging demo.
 5. Crear guia "nuevo cliente en 60 minutos".
 
 ### P2 - Backoffice No Tecnico
