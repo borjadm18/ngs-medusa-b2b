@@ -150,6 +150,8 @@ Inicial implementado, pendiente de profundizar.
 - Admin CRUD, filtros, drawer e import/export CSV con preview.
 - Store API para reglas activas.
 - Aplicacion inicial de visibilidad/precio mostrado en listados y PDP.
+- Simulador Admin para comprobar reglas aplicables por producto, variante, cliente, grupo, region, canal, zona y moneda.
+- Test HTTP local para creacion, listado y evaluacion de reglas activas por contexto.
 
 Pendiente:
 
@@ -157,8 +159,8 @@ Pendiente:
 - Price lists demo por segmento/cuenta.
 - Visibilidad de productos y categorias por canal o segmento.
 - Surtidos por region y mercado.
-- Simulador en Admin para ver el catalogo como un cliente/canal/region.
-- Import/export CSV de reglas comerciales.
+- Profundizar simulador con preview de surtido/precio final por cuenta real.
+- Import/export CSV de reglas comerciales ya existe; falta validacion operativa con ficheros reales de cliente.
 
 Principio:
 
@@ -200,7 +202,7 @@ Siguiente accion:
 1. QA visual de home, catalogo, PDP y carrito en desktop/mobile.
 2. Corregir cualquier layout roto tras el cambio a `client-profile`.
 3. Validar en navegador Admin: editar packaging y comprobar PDP.
-4. Crear tests HTTP para packaging en carrito.
+4. Crear tests HTTP para packaging en carrito y reglas de catalogo.
 5. Revisar cold start Render y evitar despliegues backend por cambios solo de storefront/docs.
 
 ### P1 - Convertir En Template Real

@@ -132,12 +132,14 @@ Estado 2026-07-13:
 - Storefront lee reglas activas y aplica visibilidad/precio mostrado en listados y PDP.
 - Migracion `catalog_rule` generada con indices para estado, target, compania, grupo, region y canal.
 - Smoke remoto `pnpm smoke:catalog-rules` preparado.
+- Simulador Admin implementado para evaluar reglas por producto, variante, compania, grupo, region, canal, zona y moneda.
+- Test HTTP local anadido para creacion/listado y evaluacion de reglas aplicables por contexto B2B.
 
 Pendiente:
 
 - Aplicar reglas de precio contra price lists/pricing core de Medusa.
-- Profundizar visibilidad/surtidos con simulador y reglas por cuenta real.
-- Simulador "ver catalogo como cliente/canal/region".
+- Profundizar visibilidad/surtidos con preview de catalogo final por cuenta real.
+- Validar tests HTTP en entorno con PostgreSQL local de test configurado.
 
 Notas de arquitectura:
 
