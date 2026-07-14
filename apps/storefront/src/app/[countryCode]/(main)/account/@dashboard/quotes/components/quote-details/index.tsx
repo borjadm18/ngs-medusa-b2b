@@ -13,6 +13,7 @@ import { Container, Heading, Text, toast } from "@medusajs/ui"
 import { useRouter } from "next/navigation"
 import React, { useMemo, useState } from "react"
 import QuoteMessages from "../quote-messages"
+import QuoteExportButtons from "../quote-export-buttons"
 import QuoteStatusBadge from "../quote-status-badge"
 import { QuoteTableItem } from "../quote-table"
 
@@ -161,6 +162,13 @@ const QuoteDetails: React.FC<QuoteDetailsProps> = ({
             </div>
 
             <QuoteStatusBadge status={quote.status} />
+          </Container>
+
+          <Container>
+            <Heading level="h3" className="mb-3">
+              Exportar presupuesto
+            </Heading>
+            <QuoteExportButtons quote={quote} preview={preview} />
           </Container>
 
           <Container>
