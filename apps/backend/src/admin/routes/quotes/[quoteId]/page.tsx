@@ -28,7 +28,6 @@ import {
 import { QuoteMessages } from "../components/quote-messages";
 import {
   getQuotePackagingSummary,
-  quoteItemsToCsv,
 } from "../utils/b2b-packaging";
 
 const QuoteDetails = () => {
@@ -115,17 +114,13 @@ const QuoteDetails = () => {
   };
 
   const handleExportCsv = () => {
-    const csv = quoteItemsToCsv(quote.draft_order?.items || []);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
 
-    link.href = url;
+    link.href = `/admin/quotes/${quote.id}/export`;
     link.download = `presupuesto-${quote.id}.csv`;
     document.body.appendChild(link);
     link.click();
     link.remove();
-    URL.revokeObjectURL(url);
   };
 
   if (isLoading || !quote) {
