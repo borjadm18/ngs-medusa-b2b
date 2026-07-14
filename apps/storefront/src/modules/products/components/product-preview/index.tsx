@@ -1,5 +1,6 @@
 import { getCatalogRuleSummary } from "@/lib/util/catalog-rules"
 import { getProductPrice } from "@/lib/util/get-product-price"
+import { getInventorySummary } from "@/lib/util/product-technical-profile"
 import { HttpTypes } from "@medusajs/types"
 import { Text, clx } from "@medusajs/ui"
 import LocalizedClientLink from "@/modules/common/components/localized-client-link"
@@ -27,9 +28,7 @@ export default async function ProductPreview({
     product,
   })
 
-  const inventoryQuantity = product.variants?.reduce((acc, variant) => {
-    return acc + (variant?.inventory_quantity || 0)
-  }, 0)
+  const inventory = getInventorySummary(product)
   const catalogRuleSummary = getCatalogRuleSummary(product)
   const priceRule = catalogRuleSummary?.priceRule
 
@@ -81,18 +80,16 @@ export default async function ProductPreview({
           <div className="flex flex-row gap-1 items-center">
             <span
               className={clx({
-                "text-green-500": inventoryQuantity && inventoryQuantity > 50,
+                "text-green-500": inventory.tone === "green",
                 "text-orange-500":
-                  inventoryQuantity &&
-                  inventoryQuantity <= 50 &&
-                  inventoryQuantity > 0,
-                "text-red-500": inventoryQuantity === 0,
+                  inventory.tone === "amber",
+                "text-red-500": inventory.tone === "red",
               })}
             >
               •
             </span>
             <Text className="text-neutral-600 text-xs">
-              {inventoryQuantity} left
+              {inventory.label}
             </Text>
           </div>
           {canViewPrices && <PreviewAddToCart product={product} region={region} />}
