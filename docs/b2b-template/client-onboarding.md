@@ -134,8 +134,11 @@ pnpm create:client-profile -- --id <cliente> --name "Nombre Cliente"
 8. Ejecutar:
 
 ```bash
+pnpm validate:client-profiles -- --id <cliente>
 pnpm sync:client-profile
 ```
+
+Usa `pnpm validate:client-profiles -- --id <cliente> --strict-assets` cuando quieras bloquear la activacion si falta cualquier imagen referenciada como `/images/<cliente>/...`.
 
 9. Activar en el storefront:
 
@@ -152,6 +155,7 @@ B2B_CLIENT_PROFILE=<cliente>
 11. Validar:
 
 ```bash
+pnpm validate:client-profiles -- --id <cliente>
 pnpm --filter @b2b-starter/storefront build
 ```
 

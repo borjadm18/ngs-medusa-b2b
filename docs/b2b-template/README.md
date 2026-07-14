@@ -103,8 +103,11 @@ profiles/<cliente>/assets
 Vercel solo despliega `apps/storefront`, asi que antes de construir se empaquetan los perfiles con:
 
 ```bash
+pnpm validate:client-profiles
 pnpm sync:client-profile
 ```
+
+`validate:client-profiles` no escribe artefactos. Revisa estructura de `client-profile.json`, home, menu, footer, CSV de packaging, CSV de productos y referencias a assets. Por defecto los assets faltantes son warnings para no bloquear demos tempranas; usa `--strict-assets` para convertirlos en error.
 
 El comando:
 
@@ -132,9 +135,10 @@ pnpm template:new -- --id <cliente> --name "Nombre Cliente" --from example-indus
 5. Revisa `profiles/<cliente>/homepage-content.json`.
 6. Sustituye `profiles/<cliente>/product-packaging.csv` con SKUs reales.
 7. Deja assets en `profiles/<cliente>/assets` y referencia rutas `/images/<cliente>/...`.
-8. Ejecuta `pnpm sync:client-profile` si usaste `--no-sync` o editaste archivos manualmente.
-9. Define `NEXT_PUBLIC_B2B_CLIENT_PROFILE=<cliente>`.
-10. Ejecuta `pnpm --filter @b2b-starter/storefront build`.
+8. Ejecuta `pnpm validate:client-profiles -- --id <cliente>`.
+9. Ejecuta `pnpm sync:client-profile` si usaste `--no-sync` o editaste archivos manualmente.
+10. Define `NEXT_PUBLIC_B2B_CLIENT_PROFILE=<cliente>`.
+11. Ejecuta `pnpm --filter @b2b-starter/storefront build`.
 
 Opciones utiles:
 
@@ -143,6 +147,7 @@ pnpm template:new -- --id acme-industrial --name "ACME Industrial" --from ngs --
 pnpm template:new -- --id embalajes-demo --name "Embalajes Demo" --vertical packaging
 pnpm template:new -- --id acme-industrial --name "ACME Industrial" --dry-run
 pnpm template:new -- --id acme-industrial --name "ACME Industrial" --no-sync
+pnpm validate:client-profiles -- --id acme-industrial --strict-assets
 ```
 
 Cada perfil generado incluye `README.md`, `activation-checklist.md`, `.env.example`, `client-profile.json`, `homepage-content.json`, `product-packaging.csv` y carpeta `assets/`. Si usas `--vertical`, el CSV de packaging se genera con SKUs demo y reglas acordes al sector.

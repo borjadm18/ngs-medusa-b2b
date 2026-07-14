@@ -10,6 +10,7 @@
     "lint": "turbo run lint",
     "create:client-profile": "node scripts/create-client-profile.mjs",
     "template:new": "node scripts/create-client-profile.mjs",
+    "validate:client-profiles": "node scripts/validate-client-profiles.mjs",
     "sync:client-profile": "node scripts/sync-client-profile.mjs",
     "smoke:admin-packaging": "node scripts/smoke-admin-packaging.mjs",
     "smoke:catalog-rules": "node scripts/smoke-catalog-rules.mjs",
