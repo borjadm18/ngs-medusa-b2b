@@ -56,7 +56,7 @@ Antes de seguir profundizando launcher/deploy multi-cliente, la prioridad vuelve
 - Flujos de empresa: roles, limites, aprobaciones y compradores.
 - Busqueda por SKU/EAN/atributos tecnicos.
 
-Estado 2026-07-14: `Quick order` ya resuelve SKUs, valida packaging y anade en bulk al carrito. Se anade resumen operativo de unidades, cajas, peso estimado y ocupacion de pallet para acercarlo a una herramienta real de compras B2B.
+Estado 2026-07-14: `Quick order` ya resuelve SKUs, valida packaging y anade en bulk al carrito. Se anade resumen operativo de unidades, cajas, peso estimado y ocupacion de pallet para acercarlo a una herramienta real de compras B2B. El detalle de presupuesto tambien muestra logistica B2B visible y mantiene export CSV/PDF con packaging.
 - Upload binario local desde Admin implementado y servido por backend para demos.
 - Admin packaging permite aplicar a todas, copiar desde otra variante, usar plantillas rapidas, importar CSV con preview y exportar CSV.
 - Pendiente: storage/CDN persistente, import/export dedicado y plantillas por cliente.

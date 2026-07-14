@@ -1,6 +1,7 @@
 "use client"
 
 import { acceptQuote, rejectQuote } from "@/lib/data/quotes"
+import { getQuoteExportPackagingSummary } from "@/lib/util/convert-quote-to-export"
 import { formatAmount } from "@/modules/common/components/amount-cell"
 import Button from "@/modules/common/components/button"
 import LocalizedClientLink from "@/modules/common/components/localized-client-link"
@@ -31,6 +32,10 @@ const QuoteDetails: React.FC<QuoteDetailsProps> = ({
   countryCode,
 }) => {
   const order = quote.draft_order
+  const logisticsSummary = useMemo(
+    () => getQuoteExportPackagingSummary(quote, preview),
+    [quote, preview]
+  )
   const originalItemsMap = useMemo(() => {
     return new Map<string, AdminOrderLineItem>(
       order.items?.map((item: AdminOrderLineItem) => [item.id, item])
@@ -172,6 +177,38 @@ const QuoteDetails: React.FC<QuoteDetailsProps> = ({
           </Container>
 
           <Container>
+            <Heading level="h3" className="mb-3">
+              Logistica B2B
+            </Heading>
+            <div className="grid gap-2 text-sm text-ui-fg-subtle">
+              <QuoteLogisticsRow
+                label="Bultos"
+                value={`${logisticsSummary.boxes} cajas`}
+              />
+              <QuoteLogisticsRow
+                label="Unidades totales"
+                value={`${logisticsSummary.totalUnits} uds`}
+              />
+              <QuoteLogisticsRow
+                label="Unidades sueltas"
+                value={`${logisticsSummary.looseUnits} uds`}
+              />
+              <QuoteLogisticsRow
+                label="Peso estimado"
+                value={`${logisticsSummary.estimatedWeight.toFixed(1)} kg`}
+              />
+              <QuoteLogisticsRow
+                label="Ocupacion pallet"
+                value={`${logisticsSummary.palletShare.toFixed(2)} pallets`}
+              />
+            </div>
+            <Text className="mt-3 text-xs text-ui-fg-muted">
+              Estimacion calculada desde las reglas de packaging guardadas en
+              las lineas del presupuesto.
+            </Text>
+          </Container>
+
+          <Container>
             <Heading level="h3" className="mb-2">
               Customer
             </Heading>
@@ -218,5 +255,18 @@ const QuoteDetails: React.FC<QuoteDetailsProps> = ({
     </div>
   )
 }
+
+const QuoteLogisticsRow = ({
+  label,
+  value,
+}: {
+  label: string
+  value: string
+}) => (
+  <div className="flex items-center justify-between gap-3 rounded-md border border-ui-border-base bg-ui-bg-subtle px-3 py-2">
+    <Text className="text-xs text-ui-fg-subtle">{label}</Text>
+    <Text className="text-xs font-semibold text-ui-fg-base">{value}</Text>
+  </div>
+)
 
 export default QuoteDetails
