@@ -138,7 +138,10 @@ pnpm template:new -- --id <cliente> --name "Nombre Cliente" --from example-indus
 8. Ejecuta `pnpm validate:client-profiles -- --id <cliente>`.
 9. Ejecuta `pnpm sync:client-profile` si usaste `--no-sync` o editaste archivos manualmente.
 10. Define `NEXT_PUBLIC_B2B_CLIENT_PROFILE=<cliente>`.
-11. Ejecuta `pnpm --filter @b2b-starter/storefront build`.
+11. Define `B2B_CLIENT_PROFILE=<cliente>` en backend si vas a sembrar datos.
+12. Ejecuta `pnpm seed:product-catalog` para crear productos demo desde `product-catalog.csv`.
+13. Ejecuta `pnpm seed:product-packaging` para aplicar reglas de packaging por SKU.
+14. Ejecuta `pnpm --filter @b2b-starter/storefront build`.
 
 Opciones utiles:
 
@@ -171,3 +174,16 @@ Esto es suficiente para demos y POCs. Para produccion real, el siguiente paso es
 En Admin > Products > producto > Packaging B2B se pueden editar reglas por variante, aplicar una regla a todas las variantes, copiar reglas desde otra variante, usar plantillas rapidas, exportar CSV e importar CSV.
 
 La importacion no aplica cambios inmediatamente: primero abre un preview con filas validas, errores por fila y emparejamiento por `variant_id` o `sku`. Solo las filas validas se aplican al confirmar.
+
+## Catalogo Desde Perfil
+
+Cada perfil puede incluir `product-catalog.csv` con una fila por variante:
+
+```csv
+handle,title,category,description,sku,variant_title,color,price_eur,image_url
+altavoz-activo-12,ACME Altavoz activo 12,Audio,Altavoz profesional,ACME-AUDIO-12-BLK,Black,Black,549,/images/acme/product-1.png
+```
+
+Despues de `pnpm sync:client-profile`, el backend genera un JSON de catalogo por perfil. El comando `pnpm seed:product-catalog` lee `B2B_CLIENT_PROFILE` o `NEXT_PUBLIC_B2B_CLIENT_PROFILE`, crea categorias faltantes y crea productos que no existan por `handle`.
+
+El seed es idempotente a nivel de producto: si un `handle` ya existe, lo salta para no duplicar catalogo en entornos de demo.

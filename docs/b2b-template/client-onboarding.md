@@ -32,7 +32,8 @@ Datos necesarios:
 
 Entregable:
 
-- Seed de productos o importacion desde ERP/PIM.
+- `profiles/<cliente>/product-catalog.csv` compatible con el seed del template.
+- Seed de productos desde perfil o importacion desde ERP/PIM.
 - Taxonomia para menu, PLP y PDP.
 
 ## 3. Packaging B2B
@@ -152,7 +153,16 @@ NEXT_PUBLIC_B2B_CLIENT_PROFILE=<cliente>
 B2B_CLIENT_PROFILE=<cliente>
 ```
 
-11. Validar:
+11. Sembrar catalogo y packaging si el backend ya tiene region/canal base:
+
+```bash
+pnpm seed:product-catalog
+pnpm seed:product-packaging
+```
+
+`seed-product-catalog.ts` lee `profiles/<cliente>/product-catalog.csv` ya sincronizado, crea categorias faltantes, crea productos que no existan por `handle`, variantes por SKU y precios EUR. Es idempotente por `handle`: si el producto ya existe, lo salta.
+
+12. Validar:
 
 ```bash
 pnpm validate:client-profiles -- --id <cliente>
@@ -169,3 +179,12 @@ apps/backend/src/migration-scripts/generated-client-profiles/product-packaging-r
 ```
 
 El seed `seed-product-packaging.ts` usa `B2B_CLIENT_PROFILE` o `NEXT_PUBLIC_B2B_CLIENT_PROFILE` para escoger las reglas activas.
+
+Si el perfil incluye `product-catalog.csv`, el sync tambien genera:
+
+```txt
+apps/backend/src/migration-scripts/generated-client-profiles/<cliente>-product-catalog.json
+apps/backend/src/migration-scripts/generated-client-profiles/product-catalog-registry.ts
+```
+
+El seed `seed-product-catalog.ts` usa el mismo perfil activo para escoger el catalogo a crear.
