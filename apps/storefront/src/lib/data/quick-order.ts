@@ -29,6 +29,9 @@ export type QuickOrderResolvedItem = {
     options?: { option?: { title?: string }; value?: string }[]
   }
   packaging: QuickOrderPackaging | null
+  catalog_rule_summary?: {
+    requires_quote?: boolean
+  }
 }
 
 export type QuickOrderResolveResponse = {
@@ -36,7 +39,10 @@ export type QuickOrderResolveResponse = {
   missing_skus: string[]
 }
 
-export const resolveQuickOrderSkus = async (skus: string[]) => {
+export const resolveQuickOrderSkus = async (
+  skus: string[],
+  regionId?: string
+) => {
   const headers = {
     ...(await getAuthHeaders()),
   }
@@ -48,6 +54,7 @@ export const resolveQuickOrderSkus = async (skus: string[]) => {
       headers,
       body: {
         skus,
+        region_id: regionId,
       },
     }
   )

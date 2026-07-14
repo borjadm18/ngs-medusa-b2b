@@ -213,14 +213,20 @@ const getPalletShare = (line: QuickOrderDraftLine) => {
   return packageQuantity / packaging.boxes_per_pallet
 }
 
+const lineRequiresQuote = (line: QuickOrderDraftLine) =>
+  line.resolved?.catalog_rule_summary?.requires_quote === true
+
 const buildMetadata = (line: QuickOrderDraftLine) => {
   const packaging = line.resolved?.packaging
   const totalUnits = getTotalUnits(line)
+  const requiresQuote = lineRequiresQuote(line)
 
   if (!packaging) {
     return {
       purchase_unit: line.purchaseUnit,
       unit_quantity: totalUnits,
+      requires_quote: requiresQuote,
+      catalog_rule_requires_quote: requiresQuote,
     }
   }
 
@@ -234,6 +240,8 @@ const buildMetadata = (line: QuickOrderDraftLine) => {
     boxes_per_pallet: packaging.boxes_per_pallet,
     package_weight: packaging.package_weight,
     package_dimensions: packaging.package_dimensions,
+    requires_quote: requiresQuote,
+    catalog_rule_requires_quote: requiresQuote,
   }
 }
 
@@ -263,6 +271,7 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
           summary.looseUnits += line.purchaseUnit === "unit" ? line.quantity : 0
           summary.estimatedWeight += getEstimatedWeight(line)
           summary.palletShare += getPalletShare(line)
+          summary.quoteRequiredLines += lineRequiresQuote(line) ? 1 : 0
 
           return summary
         },
@@ -271,6 +280,7 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
           looseUnits: 0,
           estimatedWeight: 0,
           palletShare: 0,
+          quoteRequiredLines: 0,
         }
       ),
     [validLines]
@@ -293,7 +303,8 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
 
     startTransition(async () => {
       const result = await resolveQuickOrderSkus(
-        draftLines.map((line) => line.sku)
+        draftLines.map((line) => line.sku),
+        regionId
       ).catch((error) => {
         toast.error(error.message || "No se pudo resolver el pedido rapido")
         return null
@@ -510,7 +521,7 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
               {isAdding ? "Anadiendo..." : "Anadir al carrito"}
             </Button>
           </div>
-          <div className="grid gap-3 border-b border-neutral-200 bg-neutral-50 px-4 py-4 small:grid-cols-5">
+          <div className="grid gap-3 border-b border-neutral-200 bg-neutral-50 px-4 py-4 small:grid-cols-6">
             <QuickOrderMetric label="Lineas validas" value={validLines.length} />
             <QuickOrderMetric label="Unidades" value={totalUnits} />
             <QuickOrderMetric label="Cajas" value={quickOrderSummary.boxes} />
@@ -527,8 +538,12 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
               value={
                 quickOrderSummary.palletShare
                   ? `${quickOrderSummary.palletShare.toFixed(2)}`
-                  : "-"
+                : "-"
               }
+            />
+            <QuickOrderMetric
+              label="Presupuesto"
+              value={quickOrderSummary.quoteRequiredLines}
             />
           </div>
           <div className="overflow-x-auto">
@@ -610,6 +625,11 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
                             {line.quantity} cajas x {packaging.units_per_box}{" "}
                             uds = {getTotalUnits(line)} uds
                           </p>
+                        ) : null}
+                        {lineRequiresQuote(line) ? (
+                          <span className="mt-2 inline-flex rounded-md border border-neutral-200 bg-neutral-50 px-2 py-1 text-[11px] font-semibold text-neutral-700">
+                            Requiere presupuesto
+                          </span>
                         ) : null}
                       </td>
                       <td className="px-4 py-3">
