@@ -9,9 +9,10 @@ import { useActionState } from "react"
 
 type Props = {
   setCurrentView: (view: LOGIN_VIEW) => void
+  countryCode: string
 }
 
-const Login = ({ setCurrentView }: Props) => {
+const Login = ({ setCurrentView, countryCode }: Props) => {
   const [message, formAction] = useActionState(login, null)
 
   return (
@@ -25,6 +26,7 @@ const Login = ({ setCurrentView }: Props) => {
         checkout.
       </Text>
       <form className="w-full" action={formAction}>
+        <input type="hidden" name="redirect_country_code" value={countryCode} />
         <div className="flex flex-col w-full gap-y-2">
           <Input
             label="Email"
@@ -57,6 +59,7 @@ const Login = ({ setCurrentView }: Props) => {
             Log in
           </SubmitButton>
           <Button
+            type="button"
             variant="secondary"
             onClick={() => setCurrentView(LOGIN_VIEW.REGISTER)}
             className="w-full h-10"

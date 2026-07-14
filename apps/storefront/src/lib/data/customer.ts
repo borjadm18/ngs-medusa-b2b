@@ -63,6 +63,8 @@ export const updateCustomer = async (body: HttpTypes.StoreUpdateCustomer) => {
 
 export async function signup(_currentState: unknown, formData: FormData) {
   const password = formData.get("password") as string
+  const redirectCountryCode =
+    (formData.get("redirect_country_code") as string) || "es"
   const customerForm = {
     email: formData.get("email") as string,
     first_name: formData.get("first_name") as string,
@@ -106,7 +108,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
 
     const createdCompany = await createCompany(companyForm)
 
-    const createdEmployee = await createEmployee({
+    await createEmployee({
       company_id: createdCompany?.id as string,
       customer_id: createdCustomer.id,
       is_admin: true,
@@ -119,21 +121,19 @@ export async function signup(_currentState: unknown, formData: FormData) {
     revalidateTag(cacheTag)
 
     await transferCart()
-
-    return {
-      customer: createdCustomer,
-      company: createdCompany,
-      employee: createdEmployee,
-    }
   } catch (error: any) {
     console.log("error", error)
     return error.toString()
   }
+
+  redirect(`/${redirectCountryCode}/account`)
 }
 
 export async function login(_currentState: unknown, formData: FormData) {
   const email = formData.get("email") as string
   const password = formData.get("password") as string
+  const redirectCountryCode =
+    (formData.get("redirect_country_code") as string) || "es"
 
   try {
     await sdk.auth
@@ -175,6 +175,8 @@ export async function login(_currentState: unknown, formData: FormData) {
   } catch (error: any) {
     return error.toString()
   }
+
+  redirect(`/${redirectCountryCode}/account`)
 }
 
 export async function signout(countryCode: string, customerId: string) {

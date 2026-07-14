@@ -13,6 +13,7 @@ import { ChangeEvent, useActionState, useState } from "react"
 type Props = {
   setCurrentView: (view: LOGIN_VIEW) => void
   regions: HttpTypes.StoreRegion[]
+  countryCode: string
 }
 
 interface FormData {
@@ -58,7 +59,7 @@ const placeholder = ({
   )
 }
 
-const Register = ({ setCurrentView, regions }: Props) => {
+const Register = ({ setCurrentView, regions, countryCode }: Props) => {
   const [message, formAction] = useActionState(signup, null)
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [formData, setFormData] = useState<FormData>(initialFormData)
@@ -112,6 +113,7 @@ const Register = ({ setCurrentView, regions }: Props) => {
         company account.
       </Text>
       <form className="w-full flex flex-col" action={formAction}>
+        <input type="hidden" name="redirect_country_code" value={countryCode} />
         <div className="flex flex-col w-full gap-y-4">
           <Input
             label="Email"
@@ -283,6 +285,7 @@ const Register = ({ setCurrentView, regions }: Props) => {
       <span className="text-center text-ui-fg-base text-small-regular mt-6">
         Already a member?{" "}
         <button
+          type="button"
           onClick={() => setCurrentView(LOGIN_VIEW.LOG_IN)}
           className="underline"
         >
