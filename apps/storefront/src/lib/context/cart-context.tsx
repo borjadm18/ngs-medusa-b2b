@@ -186,7 +186,7 @@ export function CartProvider({
         })
       })
     },
-    [setOptimisticCart]
+    [cart?.approvals, countryCode, setOptimisticCart, startTransition]
   )
 
   useEffect(() => {

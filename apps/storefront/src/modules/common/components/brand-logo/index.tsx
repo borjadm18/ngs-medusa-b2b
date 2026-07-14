@@ -1,5 +1,6 @@
 import { clx } from "@medusajs/ui"
 import { clientProfile } from "@/lib/client-profile"
+import Image from "next/image"
 
 type BrandLogoProps = {
   className?: string
@@ -17,14 +18,17 @@ const BrandLogo = ({
   return (
     <span
       className={clx(
-        "inline-flex items-center justify-center overflow-hidden rounded bg-transparent text-current",
+        "relative inline-flex items-center justify-center overflow-hidden rounded bg-transparent text-current",
         className
       )}
     >
       {logoUrl ? (
-        <img
+        <Image
           src={logoUrl}
           alt={name}
+          fill
+          sizes="188px"
+          unoptimized
           className={clx("h-full w-full object-contain", imageClassName)}
         />
       ) : (
