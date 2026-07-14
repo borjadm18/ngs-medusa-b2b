@@ -8,6 +8,7 @@ import { addToCartEventBus } from "@/lib/data/cart-event-bus"
 import Button from "@/modules/common/components/button"
 import { StoreProduct, StoreProductVariant } from "@medusajs/types"
 import { toast } from "@medusajs/ui"
+import Link from "next/link"
 import { ChangeEvent, useMemo, useState, useTransition } from "react"
 
 type PurchaseUnit = "unit" | "box"
@@ -180,6 +181,38 @@ const getTotalUnits = (line: QuickOrderDraftLine) => {
   return line.quantity
 }
 
+const getPackageQuantity = (line: QuickOrderDraftLine) => {
+  const packaging = line.resolved?.packaging
+
+  if (!packaging || line.purchaseUnit !== "box") {
+    return 0
+  }
+
+  return line.quantity
+}
+
+const getEstimatedWeight = (line: QuickOrderDraftLine) => {
+  const packaging = line.resolved?.packaging
+  const packageQuantity = getPackageQuantity(line)
+
+  if (!packaging?.package_weight || !packageQuantity) {
+    return 0
+  }
+
+  return packaging.package_weight * packageQuantity
+}
+
+const getPalletShare = (line: QuickOrderDraftLine) => {
+  const packaging = line.resolved?.packaging
+  const packageQuantity = getPackageQuantity(line)
+
+  if (!packaging?.boxes_per_pallet || !packageQuantity) {
+    return 0
+  }
+
+  return packageQuantity / packaging.boxes_per_pallet
+}
+
 const buildMetadata = (line: QuickOrderDraftLine) => {
   const packaging = line.resolved?.packaging
   const totalUnits = getTotalUnits(line)
@@ -218,6 +251,28 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
   )
   const totalUnits = useMemo(
     () => validLines.reduce((acc, line) => acc + getTotalUnits(line), 0),
+    [validLines]
+  )
+  const quickOrderSummary = useMemo(
+    () =>
+      validLines.reduce(
+        (summary, line) => {
+          const boxes = getPackageQuantity(line)
+
+          summary.boxes += boxes
+          summary.looseUnits += line.purchaseUnit === "unit" ? line.quantity : 0
+          summary.estimatedWeight += getEstimatedWeight(line)
+          summary.palletShare += getPalletShare(line)
+
+          return summary
+        },
+        {
+          boxes: 0,
+          looseUnits: 0,
+          estimatedWeight: 0,
+          palletShare: 0,
+        }
+      ),
     [validLines]
   )
   const errorLines = useMemo(
@@ -455,6 +510,27 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
               {isAdding ? "Anadiendo..." : "Anadir al carrito"}
             </Button>
           </div>
+          <div className="grid gap-3 border-b border-neutral-200 bg-neutral-50 px-4 py-4 small:grid-cols-5">
+            <QuickOrderMetric label="Lineas validas" value={validLines.length} />
+            <QuickOrderMetric label="Unidades" value={totalUnits} />
+            <QuickOrderMetric label="Cajas" value={quickOrderSummary.boxes} />
+            <QuickOrderMetric
+              label="Peso estimado"
+              value={
+                quickOrderSummary.estimatedWeight
+                  ? `${quickOrderSummary.estimatedWeight.toFixed(1)} kg`
+                  : "-"
+              }
+            />
+            <QuickOrderMetric
+              label="Ocupacion pallet"
+              value={
+                quickOrderSummary.palletShare
+                  ? `${quickOrderSummary.palletShare.toFixed(2)}`
+                  : "-"
+              }
+            />
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-left text-sm">
               <thead className="bg-neutral-50 text-xs uppercase text-neutral-500">
@@ -523,8 +599,18 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
                       </td>
                       <td className="px-4 py-3 text-xs text-neutral-500">
                         {packaging
-                          ? `Caja ${packaging.units_per_box} uds / min. ${packaging.minimum_order_quantity} / multiplo ${packaging.quantity_increment}`
+                          ? `Caja ${packaging.units_per_box} uds / min. ${packaging.minimum_order_quantity} / multiplo ${packaging.quantity_increment}${
+                              packaging.boxes_per_pallet
+                                ? ` / pallet ${packaging.boxes_per_pallet} cajas`
+                                : ""
+                            }`
                           : "Sin regla"}
+                        {line.purchaseUnit === "box" && packaging ? (
+                          <p className="mt-1 text-[11px] text-neutral-400">
+                            {line.quantity} cajas x {packaging.units_per_box}{" "}
+                            uds = {getTotalUnits(line)} uds
+                          </p>
+                        ) : null}
                       </td>
                       <td className="px-4 py-3">
                         {line.error ? (
@@ -552,10 +638,35 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
               </tbody>
             </table>
           </div>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 px-4 py-3">
+            <p className="text-xs text-neutral-500">
+              El carrito conservara unidades, cajas, peso y ocupacion de pallet
+              para presupuesto y validacion de checkout.
+            </p>
+            <Link
+              href="/cart"
+              className="text-xs font-semibold text-neutral-950 underline"
+            >
+              Revisar carrito y presupuesto
+            </Link>
+          </div>
         </div>
       ) : null}
     </div>
   )
 }
+
+const QuickOrderMetric = ({
+  label,
+  value,
+}: {
+  label: string
+  value: string | number
+}) => (
+  <div className="rounded-md border border-neutral-200 bg-white px-3 py-2">
+    <p className="text-[11px] uppercase text-neutral-500">{label}</p>
+    <p className="mt-1 text-sm font-semibold text-neutral-950">{value}</p>
+  </div>
+)
 
 export default QuickOrderForm

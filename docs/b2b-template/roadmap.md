@@ -43,6 +43,20 @@ Estado 2026-07-12:
 - Storefront nav/footer, home metadata, store, checkout y PDP leen Brand profile desde Store API con fallback empaquetado.
 - Assets page implementada como libreria operativa de URLs/rutas con preview, filtros, copia de ruta y CRUD Admin.
 - Selector de assets embebido en los editores de Homepage y Brand profile para elegir hero, bloques visuales y logos sin copiar rutas a mano.
+
+## Foco Inmediato: Ecommerce B2B
+
+Antes de seguir profundizando launcher/deploy multi-cliente, la prioridad vuelve a ser funcionalidad B2B vendible:
+
+- Pedido rapido por SKU/CSV con resumen logistico.
+- Presupuesto con packaging, peso, cajas, pallets y export.
+- Reglas comerciales por cliente, zona, region y canal.
+- Catalogo privado y visibilidad por cuenta.
+- Price lists reales conectadas con core Medusa.
+- Flujos de empresa: roles, limites, aprobaciones y compradores.
+- Busqueda por SKU/EAN/atributos tecnicos.
+
+Estado 2026-07-14: `Quick order` ya resuelve SKUs, valida packaging y anade en bulk al carrito. Se anade resumen operativo de unidades, cajas, peso estimado y ocupacion de pallet para acercarlo a una herramienta real de compras B2B.
 - Upload binario local desde Admin implementado y servido por backend para demos.
 - Admin packaging permite aplicar a todas, copiar desde otra variante, usar plantillas rapidas, importar CSV con preview y exportar CSV.
 - Pendiente: storage/CDN persistente, import/export dedicado y plantillas por cliente.
