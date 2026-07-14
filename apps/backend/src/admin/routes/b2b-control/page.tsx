@@ -1,54 +1,15 @@
 import { defineRouteConfig } from "@medusajs/admin-sdk";
 import { BuildingStorefront } from "@medusajs/icons";
 import { Badge, Button, Container, Heading, Text } from "@medusajs/ui";
-import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { useCatalogRules } from "../../hooks/api/catalog-rules";
-import { useCompanies } from "../../hooks/api/companies";
-import { useProductPackaging } from "../../hooks/api/product-packaging";
-import { useQuotes } from "../../hooks/api/quotes";
-import { sdk } from "../../lib/client";
+import { useB2BControlSummary } from "../../hooks/api/b2b-control";
 
 const B2BControl = () => {
-  const companies = useCompanies({ limit: 100 });
-  const quotes = useQuotes({ limit: 100 });
-  const catalogRules = useCatalogRules({ limit: 100 });
-  const products = useQuery({
-    queryKey: ["b2b-control-products"],
-    queryFn: () =>
-      (sdk.admin as any).product.list({
-        limit: 100,
-        fields: "id,title,variants.id,variants.sku",
-      }),
-  });
-
-  const variants = ((products.data as any)?.products || []).flatMap(
-    (product: any) => product.variants || []
-  );
-  const variantIds = variants.map((variant: any) => variant.id);
-  const packaging = useProductPackaging(variantIds, {
-    enabled: variantIds.length > 0,
-  });
-  const quoteRows = quotes.quotes || [];
-  const companyRows = companies.data?.companies || [];
-  const ruleRows = catalogRules.data?.catalog_rules || [];
-  const packagingRows = packaging.data?.packaging || [];
-  const activeRules = ruleRows.filter((rule) => rule.status === "active");
-  const quotePendingMerchant = quoteRows.filter(
-    (quote: any) => quote.status === "pending_merchant"
-  ).length;
-  const quotePendingCustomer = quoteRows.filter(
-    (quote: any) => quote.status === "pending_customer"
-  ).length;
-  const packagingCoverage = variantIds.length
-    ? Math.round((packagingRows.length / variantIds.length) * 100)
-    : 0;
-  const isLoading =
-    companies.isLoading ||
-    quotes.isLoading ||
-    catalogRules.isLoading ||
-    products.isLoading ||
-    packaging.isLoading;
+  const { data, isLoading } = useB2BControlSummary();
+  const summary = data?.summary;
+  const quotePendingMerchant = summary?.quotes.pending_merchant || 0;
+  const quotePendingCustomer = summary?.quotes.pending_customer || 0;
+  const packagingCoverage = summary?.packaging.coverage || 0;
   const risks = [
     {
       label: "Presupuestos pendientes de comercial",
@@ -73,10 +34,10 @@ const B2BControl = () => {
     },
     {
       label: "Reglas comerciales activas",
-      value: activeRules.length,
+      value: summary?.catalog_rules.active || 0,
       action: "Gestionar reglas",
       href: "/catalog-rules",
-      status: activeRules.length === 0 ? "attention" : "ok",
+      status: (summary?.catalog_rules.active || 0) === 0 ? "attention" : "ok",
     },
   ];
 
@@ -122,10 +83,26 @@ const B2BControl = () => {
       ) : (
         <>
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-            <Metric label="Empresas B2B" value={companyRows.length} />
-            <Metric label="Presupuestos" value={quoteRows.length} />
-            <Metric label="Reglas activas" value={activeRules.length} />
+            <Metric label="Empresas B2B" value={summary?.companies.total || 0} />
+            <Metric label="Presupuestos" value={summary?.quotes.total || 0} />
+            <Metric
+              label="Reglas activas"
+              value={summary?.catalog_rules.active || 0}
+            />
             <Metric label="Packaging" value={`${packagingCoverage}%`} />
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <Metric
+              label="Valor quotes"
+              value={formatCurrency(summary?.quotes.value || 0)}
+            />
+            <Metric label="Unidades" value={summary?.quotes.units || 0} />
+            <Metric label="Cajas" value={summary?.quotes.boxes || 0} />
+            <Metric
+              label="Peso estimado"
+              value={`${summary?.quotes.estimated_weight || 0} kg`}
+            />
           </div>
 
           <Container className="divide-y p-0">
@@ -192,6 +169,13 @@ const Metric = ({ label, value }: { label: string; value: string | number }) => 
     </div>
   </Container>
 );
+
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat("es-ES", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(value);
 
 export const config = defineRouteConfig({
   label: "B2B Control",
