@@ -108,9 +108,9 @@ const Register = ({ setCurrentView, regions, countryCode }: Props) => {
       data-testid="register-page"
     >
       <Text className="text-4xl text-neutral-950 text-left mb-4">
-        Create your
+        Crea tu cuenta
         <br />
-        company account.
+        de empresa.
       </Text>
       <form className="w-full flex flex-col" action={formAction}>
         <input type="hidden" name="redirect_country_code" value={countryCode} />
@@ -127,7 +127,7 @@ const Register = ({ setCurrentView, regions, countryCode }: Props) => {
             onChange={handleChange}
           />
           <Input
-            label="First name"
+            label="Nombre"
             name="first_name"
             required
             autoComplete="given-name"
@@ -137,7 +137,7 @@ const Register = ({ setCurrentView, regions, countryCode }: Props) => {
             onChange={handleChange}
           />
           <Input
-            label="Last name"
+            label="Apellidos"
             name="last_name"
             required
             autoComplete="family-name"
@@ -147,7 +147,7 @@ const Register = ({ setCurrentView, regions, countryCode }: Props) => {
             onChange={handleChange}
           />
           <Input
-            label="Company name"
+            label="Empresa"
             name="company_name"
             required
             autoComplete="organization"
@@ -157,7 +157,7 @@ const Register = ({ setCurrentView, regions, countryCode }: Props) => {
             onChange={handleChange}
           />
           <Input
-            label="Password"
+            label="Contrasena"
             name="password"
             required
             type="password"
@@ -168,7 +168,7 @@ const Register = ({ setCurrentView, regions, countryCode }: Props) => {
             onChange={handleChange}
           />
           <Input
-            label="Company address"
+            label="Direccion de empresa"
             name="company_address"
             required
             autoComplete="address"
@@ -178,7 +178,7 @@ const Register = ({ setCurrentView, regions, countryCode }: Props) => {
             onChange={handleChange}
           />
           <Input
-            label="Company city"
+            label="Ciudad"
             name="company_city"
             required
             autoComplete="city"
@@ -188,7 +188,7 @@ const Register = ({ setCurrentView, regions, countryCode }: Props) => {
             onChange={handleChange}
           />
           <Input
-            label="Company state"
+            label="Provincia"
             name="company_state"
             autoComplete="state"
             data-testid="company-state-input"
@@ -197,7 +197,7 @@ const Register = ({ setCurrentView, regions, countryCode }: Props) => {
             onChange={handleChange}
           />
           <Input
-            label="Company zip"
+            label="Codigo postal"
             name="company_zip"
             required
             autoComplete="postal-code"
@@ -217,7 +217,7 @@ const Register = ({ setCurrentView, regions, countryCode }: Props) => {
             <Select.Trigger className="rounded-full h-10 px-4">
               <Select.Value
                 placeholder={placeholder({
-                  placeholder: "Select a country",
+                  placeholder: "Selecciona un pais",
                   required: true,
                 })}
               />
@@ -241,7 +241,7 @@ const Register = ({ setCurrentView, regions, countryCode }: Props) => {
             <Select.Trigger className="rounded-full h-10 px-4">
               <Select.Value
                 placeholder={placeholder({
-                  placeholder: "Select a currency",
+                  placeholder: "Selecciona moneda",
                   required: true,
                 })}
               />
@@ -271,7 +271,7 @@ const Register = ({ setCurrentView, regions, countryCode }: Props) => {
             htmlFor="terms-checkbox"
             data-testid="terms-label"
           >
-            I agree to the terms and conditions.
+            Acepto los terminos y condiciones.
           </Label>
         </div>
         <SubmitButton
@@ -279,17 +279,17 @@ const Register = ({ setCurrentView, regions, countryCode }: Props) => {
           data-testid="register-button"
           disabled={!isValid}
         >
-          Register
+          Crear cuenta
         </SubmitButton>
       </form>
       <span className="text-center text-ui-fg-base text-small-regular mt-6">
-        Already a member?{" "}
+        Ya tienes cuenta?{" "}
         <button
           type="button"
           onClick={() => setCurrentView(LOGIN_VIEW.LOG_IN)}
           className="underline"
         >
-          Log in
+          Iniciar sesion
         </button>
         .
       </span>

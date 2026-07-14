@@ -183,7 +183,7 @@ const Employee = ({
         }}
       >
         <div className="flex flex-col gap-y-2">
-          <Text className=" text-neutral-950 font-medium">Spending Limit</Text>
+          <Text className=" text-neutral-950 font-medium">Limite de gasto</Text>
           <CurrencyInput
             symbol={currencySymbolMap[company.currency_code!]}
             code={company.currency_code!}

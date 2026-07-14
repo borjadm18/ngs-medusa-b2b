@@ -197,7 +197,7 @@ const CartDrawer = ({
                         className="w-full"
                         size="large"
                       >
-                        View Cart
+                        Ver carrito
                       </Button>
                     </LocalizedClientLink>
                     <LocalizedClientLink href={checkoutPath}>
@@ -209,17 +209,17 @@ const CartDrawer = ({
                         <LockClosedSolidMini />
                         {customer
                           ? spendLimitExceeded
-                            ? "Spending Limit Exceeded"
-                            : "Secure Checkout"
-                          : "Log in to checkout"}
+                            ? "Limite de gasto superado"
+                            : "Finalizar compra"
+                          : "Inicia sesion para comprar"}
                       </Button>
                     </LocalizedClientLink>
                     {spendLimitExceeded && (
                       <div className="flex items-center gap-x-2 bg-neutral-100 p-3 rounded-md shadow-borders-base">
                         <ExclamationCircle className="text-orange-500 w-fit overflow-visible" />
                         <p className="text-neutral-950 text-xs">
-                          This order exceeds your spending limit. Please contact
-                          your manager for approval.
+                          Este pedido supera tu limite de gasto. Contacta con
+                          tu responsable para aprobarlo.
                         </p>
                       </div>
                     )}

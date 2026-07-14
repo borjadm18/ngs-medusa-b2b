@@ -48,7 +48,7 @@ export default async function ProductPreview({
         </div>
         <div className="flex flex-col txt-compact-medium">
           <div className="flex flex-wrap items-center gap-2">
-            <Text className="text-neutral-600 text-xs">BRAND</Text>
+            <Text className="text-neutral-600 text-xs">MARCA</Text>
             {canViewPrices && priceRule && (
               <span className="rounded border border-neutral-950 bg-neutral-950 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-white">
                 {priceRule.effect_type === "discount_percentage"
@@ -70,7 +70,7 @@ export default async function ProductPreview({
           {canViewPrices && cheapestPrice ? (
             <>
               <PreviewPrice price={cheapestPrice} />
-              <Text className="text-neutral-600 text-[0.6rem]">Excl. VAT</Text>
+              <Text className="text-neutral-600 text-[0.6rem]">Sin IVA</Text>
             </>
           ) : (
             <PriceLoginGate compact />

@@ -15,7 +15,7 @@ export default async function AccountButton({
       >
         <User className="h-5 w-5" />
         <span className="hidden text-sm font-semibold small:inline-block">
-          {customer ? customer.first_name : "Log in"}
+          {customer ? customer.first_name : "Iniciar sesion"}
         </span>
       </button>
     </LocalizedClientLink>

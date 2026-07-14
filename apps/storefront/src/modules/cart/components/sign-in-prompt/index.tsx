@@ -38,9 +38,9 @@ const SignInPrompt = () => {
       <BackgroundImage />
       <div className="absolute inset-0 z-1 flex justify-between items-center text-center p-4">
         <Text className="small:text-4xl text-lg text-white text-left">
-          Log in for
+          Accede para
           <br />
-          faster checkout.
+          comprar mas rapido.
         </Text>
         <div className="flex small:flex-row flex-col small:gap-4 gap-2">
           <LocalizedClientLink href="/account?view=register">
@@ -49,7 +49,7 @@ const SignInPrompt = () => {
               className="small:h-10 h-8 small:min-w-36 min-w-24 rounded-full"
               data-testid="sign-in-button"
             >
-              Register
+              Crear cuenta
             </Button>
           </LocalizedClientLink>
           <LocalizedClientLink href="/account?view=log-in">
@@ -58,7 +58,7 @@ const SignInPrompt = () => {
               className="small:h-10 h-8 small:min-w-36 min-w-24 rounded-full"
               data-testid="sign-in-button"
             >
-              Log in
+              Iniciar sesion
             </Button>
           </LocalizedClientLink>
         </div>

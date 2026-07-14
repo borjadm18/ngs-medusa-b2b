@@ -304,13 +304,13 @@ const PayPalPaymentButton = ({
       ?.authorize()
       .then((authorization) => {
         if (authorization.status !== "COMPLETED") {
-          setErrorMessage(`An error occurred, status: ${authorization.status}`)
+          setErrorMessage(`Ha ocurrido un error, estado: ${authorization.status}`)
           return
         }
         onPaymentCompleted()
       })
       .catch(() => {
-        setErrorMessage(`An unknown error occurred, please try again.`)
+        setErrorMessage(`Ha ocurrido un error desconocido, intentalo de nuevo.`)
         setSubmitting(false)
       })
   }

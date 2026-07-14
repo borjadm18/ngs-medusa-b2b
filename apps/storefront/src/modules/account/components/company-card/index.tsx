@@ -180,7 +180,7 @@ const CompanyCard = ({
           </div>
           <div className="flex flex-col gap-y-2">
             <Text className="font-medium text-neutral-950">
-              Spending Limit Reset Frequency
+              Frecuencia de reinicio del limite
             </Text>
             <Select
               name="spending_limit_reset_frequency"
@@ -213,7 +213,7 @@ const CompanyCard = ({
           )}
         >
           <div className="flex flex-col gap-y-2">
-            <Text className="font-medium text-neutral-950">Company Name</Text>
+            <Text className="font-medium text-neutral-950">Empresa</Text>
             <Text className=" text-neutral-500">{company.name}</Text>
           </div>
           <div className="flex flex-col gap-y-2">
@@ -221,18 +221,18 @@ const CompanyCard = ({
             <Text className=" text-neutral-500">{company.email}</Text>
           </div>
           <div className="flex flex-col gap-y-2">
-            <Text className="font-medium text-neutral-950">Phone</Text>
+            <Text className="font-medium text-neutral-950">Telefono</Text>
             <Text className=" text-neutral-500">{company.phone}</Text>
           </div>
           <div className="flex flex-col gap-y-2">
-            <Text className="font-medium text-neutral-950">Address</Text>
+            <Text className="font-medium text-neutral-950">Direccion</Text>
             <Text className=" text-neutral-500">
               {company.address}, {company.city}, {company.state}, {company.zip},{" "}
               {company.country?.toUpperCase()}
             </Text>
           </div>
           <div className="flex flex-col gap-y-2">
-            <Text className="font-medium text-neutral-950">Currency</Text>
+            <Text className="font-medium text-neutral-950">Moneda</Text>
             <Text className=" text-neutral-500">
               {company.currency_code?.toUpperCase()} (
               {currencySymbolMap[company.currency_code!]})
@@ -240,7 +240,7 @@ const CompanyCard = ({
           </div>
           <div className="flex flex-col gap-y-2">
             <Text className="font-medium text-neutral-950">
-              Spending Limit Reset Frequency
+              Frecuencia de reinicio del limite
             </Text>
             <Text className=" text-neutral-500">
               {company.spending_limit_reset_frequency?.charAt(0).toUpperCase() +

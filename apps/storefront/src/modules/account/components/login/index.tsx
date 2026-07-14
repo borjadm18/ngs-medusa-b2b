@@ -21,9 +21,9 @@ const Login = ({ setCurrentView, countryCode }: Props) => {
       data-testid="login-page"
     >
       <Text className="text-4xl text-neutral-950 text-left">
-        Log in for faster
+        Accede para comprar
         <br />
-        checkout.
+        mas rapido.
       </Text>
       <form className="w-full" action={formAction}>
         <input type="hidden" name="redirect_country_code" value={countryCode} />
@@ -38,7 +38,7 @@ const Login = ({ setCurrentView, countryCode }: Props) => {
             data-testid="email-input"
           />
           <Input
-            label="Password"
+            label="Contrasena"
             name="password"
             type="password"
             autoComplete="current-password"
@@ -49,14 +49,14 @@ const Login = ({ setCurrentView, countryCode }: Props) => {
           <div className="flex items-center gap-2">
             <Checkbox name="remember_me" data-testid="remember-me-checkbox" />
             <Text className="text-neutral-950 text-base-regular">
-              Remember me
+              Recordarme
             </Text>
           </div>
         </div>
         <ErrorMessage error={message} data-testid="login-error-message" />
         <div className="flex flex-col gap-2">
           <SubmitButton data-testid="sign-in-button" className="w-full mt-6">
-            Log in
+            Iniciar sesion
           </SubmitButton>
           <Button
             type="button"
@@ -65,7 +65,7 @@ const Login = ({ setCurrentView, countryCode }: Props) => {
             className="w-full h-10"
             data-testid="register-button"
           >
-            Register
+            Crear cuenta
           </Button>
         </div>
       </form>

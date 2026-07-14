@@ -7,7 +7,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const profile = await retrieveBrandProfile()
 
   return {
-    title: "Log in",
+    title: "Iniciar sesion",
     description: `Accede a tu cuenta B2B ${profile.brand.name}.`,
   }
 }
