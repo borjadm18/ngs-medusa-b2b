@@ -32,9 +32,9 @@ export const GET = async (
     Modules.ORDER
   );
 
-  const preview = await orderModuleService.previewOrderChange(
-    quote.draft_order_id
-  );
+  const preview = await orderModuleService
+    .previewOrderChange(quote.draft_order_id)
+    .catch(() => (quote as any).draft_order);
 
   res.status(200).json({
     quote: {

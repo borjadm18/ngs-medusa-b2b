@@ -9,11 +9,21 @@ type Props = {
 export default async function QuoteDetailsPage(props: Props) {
   const params = await props.params
   const { quote } = await fetchQuote(params.id, {})
-  const {
-    quote: { order_preview: quotePreview },
-  } = await fetchQuotePreview(params.id, {})
 
-  if (!quote || !quotePreview) {
+  if (!quote) {
+    notFound()
+  }
+
+  const shouldPreviewOrderChange = ["pending_merchant", "pending_customer"].includes(
+    quote.status
+  )
+  const quotePreview = shouldPreviewOrderChange
+    ? (
+        await fetchQuotePreview(params.id, {})
+      ).quote.order_preview
+    : quote.draft_order
+
+  if (!quotePreview) {
     notFound()
   }
 
