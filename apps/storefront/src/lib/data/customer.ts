@@ -104,6 +104,19 @@ export async function signup(_currentState: unknown, formData: FormData) {
       zip: formData.get("company_zip") as string,
       country: formData.get("company_country") as string,
       currency_code: formData.get("currency_code") as string,
+      tax_id: formData.get("company_tax_id") as string,
+      sector: formData.get("company_sector") as string,
+      onboarding_status: "pending" as any,
+      payment_terms: "bank_transfer" as any,
+      default_payment_method: "transferencia_bancaria",
+      saved_payment_methods: [
+        {
+          id: "pm_pending_transfer",
+          type: "bank_transfer",
+          label: "Transferencia bancaria",
+          is_default: true,
+        },
+      ],
     }
 
     const createdCompany = await createCompany(companyForm)
@@ -112,6 +125,8 @@ export async function signup(_currentState: unknown, formData: FormData) {
       company_id: createdCompany?.id as string,
       customer_id: createdCustomer.id,
       is_admin: true,
+      role: "company_admin" as any,
+      status: "active" as any,
       spending_limit: 0,
     }).catch(() => null)
 

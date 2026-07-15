@@ -19,6 +19,15 @@ export const StoreCreateCompany = z
     zip: z.string().optional().nullable(),
     country: z.string().optional().nullable(),
     logo_url: z.string().optional().nullable(),
+    tax_id: z.string().optional().nullable(),
+    sector: z.string().optional().nullable(),
+    onboarding_status: z.enum(["pending", "approved", "rejected"]).optional(),
+    payment_terms: z
+      .enum(["prepaid", "bank_transfer", "net_30", "net_60", "credit"])
+      .optional()
+      .nullable(),
+    default_payment_method: z.string().optional().nullable(),
+    saved_payment_methods: z.array(z.record(z.string(), z.unknown())).optional().nullable(),
     spending_limit_reset_frequency: z
       .enum(["never", "daily", "weekly", "monthly", "yearly"])
       .optional()
@@ -39,6 +48,15 @@ export const StoreUpdateCompany = z
     zip: z.string().optional().nullable(),
     country: z.string().optional().nullable(),
     logo_url: z.string().optional().nullable(),
+    tax_id: z.string().optional().nullable(),
+    sector: z.string().optional().nullable(),
+    onboarding_status: z.enum(["pending", "approved", "rejected"]).optional(),
+    payment_terms: z
+      .enum(["prepaid", "bank_transfer", "net_30", "net_60", "credit"])
+      .optional()
+      .nullable(),
+    default_payment_method: z.string().optional().nullable(),
+    saved_payment_methods: z.array(z.record(z.string(), z.unknown())).optional().nullable(),
     spending_limit_reset_frequency: z
       .enum(["never", "daily", "weekly", "monthly", "yearly"])
       .optional()
@@ -55,6 +73,12 @@ export const StoreCreateEmployee = z
   .object({
     spending_limit: z.number().optional().nullable(),
     is_admin: z.boolean().optional().nullable().default(false),
+    role: z
+      .enum(["buyer", "approver", "company_admin", "readonly"])
+      .optional()
+      .default("buyer"),
+    status: z.enum(["invited", "active", "disabled"]).optional().default("active"),
+    invitation_email: z.string().email().optional().nullable(),
     customer_id: z.string(),
   })
   .strict();
@@ -70,6 +94,25 @@ export const StoreUpdateEmployee = z
       })
       .optional(),
     is_admin: z.boolean().optional(),
+    role: z.enum(["buyer", "approver", "company_admin", "readonly"]).optional(),
+    status: z.enum(["invited", "active", "disabled"]).optional(),
+    invitation_email: z.string().email().optional().nullable(),
+    invitation_token: z.string().optional().nullable(),
+    invited_at: z.string().datetime().optional().nullable(),
+    accepted_at: z.string().datetime().optional().nullable(),
+  })
+  .strict();
+
+export type StoreInviteEmployeeType = z.infer<typeof StoreInviteEmployee>;
+export const StoreInviteEmployee = z
+  .object({
+    email: z.string().email(),
+    first_name: z.string().optional().nullable(),
+    last_name: z.string().optional().nullable(),
+    role: z
+      .enum(["buyer", "approver", "company_admin", "readonly"])
+      .default("buyer"),
+    spending_limit: z.number().optional().default(0),
   })
   .strict();
 

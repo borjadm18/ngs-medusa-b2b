@@ -21,6 +21,8 @@ interface FormData {
   first_name: string
   last_name: string
   company_name: string
+  company_tax_id: string
+  company_sector: string
   password: string
   company_address: string
   company_city: string
@@ -35,6 +37,8 @@ const initialFormData: FormData = {
   first_name: "",
   last_name: "",
   company_name: "",
+  company_tax_id: "",
+  company_sector: "",
   password: "",
   company_address: "",
   company_city: "",
@@ -87,6 +91,8 @@ const Register = ({ setCurrentView, regions, countryCode }: Props) => {
     !!formData.first_name &&
     !!formData.last_name &&
     !!formData.company_name &&
+    !!formData.company_tax_id &&
+    !!formData.company_sector &&
     !!formData.password &&
     !!formData.company_address &&
     !!formData.company_city &&
@@ -156,6 +162,39 @@ const Register = ({ setCurrentView, regions, countryCode }: Props) => {
             value={formData.company_name}
             onChange={handleChange}
           />
+          <Input
+            label="CIF / VAT"
+            name="company_tax_id"
+            required
+            autoComplete="off"
+            data-testid="company-tax-id-input"
+            className="bg-white"
+            value={formData.company_tax_id}
+            onChange={handleChange}
+          />
+          <Select
+            name="company_sector"
+            required
+            data-testid="company-sector-input"
+            value={formData.company_sector}
+            onValueChange={handleSelectChange("company_sector")}
+          >
+            <Select.Trigger className="rounded-full h-10 px-4">
+              <Select.Value
+                placeholder={placeholder({
+                  placeholder: "Selecciona sector",
+                  required: true,
+                })}
+              />
+            </Select.Trigger>
+            <Select.Content>
+              <Select.Item value="instalador">Instalador</Select.Item>
+              <Select.Item value="distribuidor">Distribuidor</Select.Item>
+              <Select.Item value="retail">Retail</Select.Item>
+              <Select.Item value="empresa">Empresa final</Select.Item>
+              <Select.Item value="integrador">Integrador</Select.Item>
+            </Select.Content>
+          </Select>
           <Input
             label="Contrasena"
             name="password"

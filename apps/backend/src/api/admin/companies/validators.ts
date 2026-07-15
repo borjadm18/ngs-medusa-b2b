@@ -18,6 +18,15 @@ export const AdminCreateCompany = z
     zip: z.string().optional(),
     country: z.string().optional(),
     logo_url: z.string().optional(),
+    tax_id: z.string().optional().nullable(),
+    sector: z.string().optional().nullable(),
+    onboarding_status: z.enum(["pending", "approved", "rejected"]).optional(),
+    payment_terms: z
+      .enum(["prepaid", "bank_transfer", "net_30", "net_60", "credit"])
+      .optional()
+      .nullable(),
+    default_payment_method: z.string().optional().nullable(),
+    saved_payment_methods: z.array(z.record(z.string(), z.unknown())).optional().nullable(),
   })
   .strict();
 
@@ -34,6 +43,15 @@ export const AdminUpdateCompany = z
     zip: z.string().optional(),
     country: z.string().optional(),
     logo_url: z.string().optional().nullable(),
+    tax_id: z.string().optional().nullable(),
+    sector: z.string().optional().nullable(),
+    onboarding_status: z.enum(["pending", "approved", "rejected"]).optional(),
+    payment_terms: z
+      .enum(["prepaid", "bank_transfer", "net_30", "net_60", "credit"])
+      .optional()
+      .nullable(),
+    default_payment_method: z.string().optional().nullable(),
+    saved_payment_methods: z.array(z.record(z.string(), z.unknown())).optional().nullable(),
   })
   .strict();
 
@@ -72,6 +90,11 @@ export const AdminCreateEmployee = z
       })
       .optional(),
     is_admin: z.boolean().optional(),
+    role: z
+      .enum(["buyer", "approver", "company_admin", "readonly"])
+      .optional(),
+    status: z.enum(["invited", "active", "disabled"]).optional(),
+    invitation_email: z.string().email().optional().nullable(),
     customer_id: z.string(),
   })
   .strict();
@@ -88,6 +111,12 @@ export const AdminUpdateEmployee = z
       })
       .optional(),
     is_admin: z.boolean().optional(),
+    role: z.enum(["buyer", "approver", "company_admin", "readonly"]).optional(),
+    status: z.enum(["invited", "active", "disabled"]).optional(),
+    invitation_email: z.string().email().optional().nullable(),
+    invitation_token: z.string().optional().nullable(),
+    invited_at: z.string().datetime().optional().nullable(),
+    accepted_at: z.string().datetime().optional().nullable(),
   })
   .strict();
 

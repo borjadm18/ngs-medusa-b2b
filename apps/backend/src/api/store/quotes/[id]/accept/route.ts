@@ -13,13 +13,30 @@ export const POST = async (
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
   const { id } = req.params;
 
-  await customerAcceptQuoteWorkflow(req.scope).run({
-    input: {
-      ...req.validatedBody,
-      quote_id: id,
-      customer_id: req.auth_context.actor_id,
-    },
-  });
+  try {
+    await customerAcceptQuoteWorkflow(req.scope).run({
+      input: {
+        ...req.validatedBody,
+        quote_id: id,
+        customer_id: req.auth_context.actor_id,
+      },
+    });
+  } catch (error) {
+    const {
+      data: [fallbackQuote],
+    } = await query.graph({
+      entity: "quote",
+      fields: ["id", "status", "customer_id"],
+      filters: {
+        id,
+        customer_id: req.auth_context.actor_id,
+      },
+    });
+
+    if (fallbackQuote?.status !== "accepted") {
+      throw error;
+    }
+  }
 
   const {
     data: [quote],
@@ -27,7 +44,10 @@ export const POST = async (
     {
       entity: "quote",
       fields: req.queryConfig.fields,
-      filters: { id },
+      filters: {
+        id,
+        customer_id: req.auth_context.actor_id,
+      },
     },
     { throwIfKeyNotFound: true }
   );

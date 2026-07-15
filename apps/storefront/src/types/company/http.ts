@@ -1,4 +1,10 @@
-import { ModuleCompanySpendingLimitResetFrequency } from "./module"
+import {
+  ModuleCompanyOnboardingStatus,
+  ModuleCompanyPaymentTerms,
+  ModuleCompanySpendingLimitResetFrequency,
+  ModuleEmployeeRole,
+  ModuleEmployeeStatus,
+} from "./module"
 import { QueryCompany, QueryEmployee } from "./query"
 
 export type StoreCompanyResponse = {
@@ -24,6 +30,12 @@ export type StoreCreateCompany = {
   zip?: string | null
   country?: string | null
   logo_url?: string | null
+  tax_id?: string | null
+  sector?: string | null
+  onboarding_status?: ModuleCompanyOnboardingStatus | null
+  payment_terms?: ModuleCompanyPaymentTerms | null
+  default_payment_method?: string | null
+  saved_payment_methods?: Record<string, unknown>[] | null
   spending_limit_reset_frequency?: ModuleCompanySpendingLimitResetFrequency | null
 }
 
@@ -36,6 +48,9 @@ export type StoreCreateEmployee = {
   customer_id: string
   spending_limit?: number | null
   is_admin?: boolean | null
+  role?: ModuleEmployeeRole
+  status?: ModuleEmployeeStatus
+  invitation_email?: string | null
 }
 
 export type StoreUpdateEmployee = {
@@ -43,4 +58,16 @@ export type StoreUpdateEmployee = {
   company_id: string
   spending_limit?: number
   is_admin?: boolean
+  role?: ModuleEmployeeRole
+  status?: ModuleEmployeeStatus
+  invitation_email?: string | null
+}
+
+export type StoreInviteEmployee = {
+  company_id: string
+  email: string
+  first_name?: string | null
+  last_name?: string | null
+  role?: ModuleEmployeeRole
+  spending_limit?: number
 }

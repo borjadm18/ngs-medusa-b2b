@@ -1,7 +1,13 @@
 import { FindParams, PaginatedResponse } from "@medusajs/framework/types";
 import { QueryCompany, QueryEmployee } from "./query";
 import { ModuleCompanyFilters, ModuleEmployeeFilters } from "./service";
-import { ModuleCompanySpendingLimitResetFrequency } from "./module";
+import {
+  ModuleCompanyOnboardingStatus,
+  ModuleCompanyPaymentTerms,
+  ModuleCompanySpendingLimitResetFrequency,
+  ModuleEmployeeRole,
+  ModuleEmployeeStatus,
+} from "./module";
 
 /* Filters */
 
@@ -32,6 +38,12 @@ export type AdminCreateCompany = {
   zip: string | null;
   country: string | null;
   logo_url: string | null;
+  tax_id?: string | null;
+  sector?: string | null;
+  onboarding_status?: ModuleCompanyOnboardingStatus | null;
+  payment_terms?: ModuleCompanyPaymentTerms | null;
+  default_payment_method?: string | null;
+  saved_payment_methods?: Record<string, unknown>[] | null;
   currency_code: string | null;
 };
 
@@ -50,6 +62,9 @@ export type AdminEmployeesResponse = PaginatedResponse<{
 export type AdminCreateEmployee = {
   spending_limit: number;
   is_admin: boolean;
+  role?: ModuleEmployeeRole;
+  status?: ModuleEmployeeStatus;
+  invitation_email?: string | null;
   company_id: string;
   customer_id: string;
 };
@@ -82,6 +97,12 @@ export type StoreCreateCompany = {
   zip?: string | null;
   country?: string | null;
   logo_url?: string | null;
+  tax_id?: string | null;
+  sector?: string | null;
+  onboarding_status?: ModuleCompanyOnboardingStatus | null;
+  payment_terms?: ModuleCompanyPaymentTerms | null;
+  default_payment_method?: string | null;
+  saved_payment_methods?: Record<string, unknown>[] | null;
   currency_code: string;
 };
 
@@ -114,6 +135,9 @@ export type StoreCreateEmployee = {
   customer_id: string;
   spending_limit: number;
   is_admin: boolean;
+  role?: ModuleEmployeeRole;
+  status?: ModuleEmployeeStatus;
+  invitation_email?: string | null;
   company_id: string;
 };
 

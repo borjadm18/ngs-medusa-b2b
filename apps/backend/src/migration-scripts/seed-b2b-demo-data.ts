@@ -25,6 +25,9 @@ type DemoCompany = {
   country: string;
   segment: string;
   spendingLimit: number;
+  taxId: string;
+  onboardingStatus: "pending" | "approved" | "rejected";
+  paymentTerms: "prepaid" | "bank_transfer" | "net_30" | "net_60" | "credit";
 };
 
 const demoCompanies: DemoCompany[] = [
@@ -39,6 +42,9 @@ const demoCompanies: DemoCompany[] = [
     country: "ES",
     segment: "instalador",
     spendingLimit: 25000,
+    taxId: "ESB88100101",
+    onboardingStatus: "approved",
+    paymentTerms: "net_30",
   },
   {
     name: "Distribuciones Norte Audio",
@@ -51,6 +57,9 @@ const demoCompanies: DemoCompany[] = [
     country: "ES",
     segment: "distribuidor",
     spendingLimit: 60000,
+    taxId: "ESB48200202",
+    onboardingStatus: "approved",
+    paymentTerms: "net_60",
   },
   {
     name: "Retail Campus Group",
@@ -63,6 +72,9 @@ const demoCompanies: DemoCompany[] = [
     country: "ES",
     segment: "cuenta_key",
     spendingLimit: 12000,
+    taxId: "ESB08300303",
+    onboardingStatus: "pending",
+    paymentTerms: "bank_transfer",
   },
 ];
 
@@ -238,20 +250,14 @@ export default async function seed_b2b_demo_data({
 
 async function seedCompanies(companyModule: any, companies: DemoCompany[]) {
   const existingCompanies = await companyModule.listCompanies({});
-  const existingByEmail = new Map(
+  const existingByEmail = new Map<string, any>(
     existingCompanies.map((company: any) => [company.email, company])
   );
   const createdOrExisting: any[] = [];
 
   for (const company of companies) {
     const existing = existingByEmail.get(company.email);
-
-    if (existing) {
-      createdOrExisting.push(existing);
-      continue;
-    }
-
-    const created = await companyModule.createCompanies({
+    const companyData = {
       name: company.name,
       email: company.email,
       phone: company.phone,
@@ -261,19 +267,71 @@ async function seedCompanies(companyModule: any, companies: DemoCompany[]) {
       zip: company.zip,
       country: company.country,
       currency_code: "eur",
+      tax_id: company.taxId,
+      sector: company.segment,
+      onboarding_status: company.onboardingStatus,
+      payment_terms: company.paymentTerms,
+      default_payment_method:
+        company.paymentTerms === "bank_transfer"
+          ? "transferencia_bancaria"
+          : "credito_empresa",
+      saved_payment_methods: [
+        {
+          id: "pm_demo_transfer",
+          type: "bank_transfer",
+          label: "Transferencia bancaria",
+          last4: null,
+          is_default: company.paymentTerms === "bank_transfer",
+        },
+        {
+          id: "pm_demo_card",
+          type: "corporate_card",
+          label: "Tarjeta corporativa demo",
+          last4: "4242",
+          is_default: company.paymentTerms !== "bank_transfer",
+        },
+      ],
       spending_limit_reset_frequency: "monthly",
-    });
+    };
+
+    if (existing) {
+      const updated = await companyModule
+        .updateCompanies({
+          id: existing.id,
+          ...companyData,
+        })
+        .catch(() => existing);
+      createdOrExisting.push(updated);
+      continue;
+    }
+
+    const created = await companyModule.createCompanies(companyData);
 
     await companyModule.createEmployees({
       company_id: created.id,
       spending_limit: company.spendingLimit,
       is_admin: true,
+      role: "company_admin",
+      status: "active",
     });
 
     await companyModule.createEmployees({
       company_id: created.id,
       spending_limit: Math.round(company.spendingLimit / 4),
       is_admin: false,
+      role: company.spendingLimit > 30000 ? "approver" : "buyer",
+      status: "active",
+    });
+
+    await companyModule.createEmployees({
+      company_id: created.id,
+      spending_limit: 0,
+      is_admin: false,
+      role: "readonly",
+      status: "invited",
+      invitation_email: `tecnico+${created.id.slice(-6)}@demo.ngs`,
+      invitation_token: `demo-${created.id}`,
+      invited_at: new Date(),
     });
 
     createdOrExisting.push(created);
@@ -317,6 +375,9 @@ async function seedDemoCustomers(
           demo_seed: true,
           company_name: company.name,
           b2b_role: employee.is_admin ? "admin_compras" : "comprador",
+          demo_password: "Demo123!",
+          demo_note:
+            "Cliente demo creado por seed. Si no tiene auth identity, registrarlo desde storefront con este email.",
         },
       }));
 

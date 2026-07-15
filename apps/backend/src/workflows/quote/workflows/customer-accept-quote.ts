@@ -3,7 +3,10 @@ import {
   useRemoteQueryStep,
 } from "@medusajs/core-flows";
 import { OrderStatus } from "@medusajs/framework/utils";
-import { createWorkflow } from "@medusajs/framework/workflows-sdk";
+import {
+  createWorkflow,
+  WorkflowResponse,
+} from "@medusajs/framework/workflows-sdk";
 import { updateOrderWorkflow } from "../../order/workflows/update-order";
 import { validateQuoteAcceptanceStep } from "../steps/validate-quote-acceptance";
 import { updateQuotesWorkflow } from "./update-quote";
@@ -45,5 +48,7 @@ export const customerAcceptQuoteWorkflow = createWorkflow(
         status: OrderStatus.PENDING,
       },
     });
+
+    return new WorkflowResponse({ quote_id: input.quote_id });
   }
 );

@@ -34,7 +34,7 @@ export const GET = async (
   ] = await Promise.all([
     query.graph({
       entity: "companies",
-      fields: ["id"],
+      fields: ["id", "onboarding_status", "payment_terms", "created_at"],
       pagination: { take: 500, skip: 0 },
     }),
     query.graph({
@@ -83,6 +83,16 @@ export const GET = async (
     .filter(Boolean);
   const packaging = [...storedPackaging, ...fallbackPackaging];
   const quoteStatusCounts = countByStatus(quotes);
+  const companyStatusCounts = countByStatus(
+    companies.map((company: any) => ({
+      status: company.onboarding_status || "approved",
+    }))
+  );
+  const paymentTermsCounts = countByStatus(
+    companies.map((company: any) => ({
+      status: company.payment_terms || "bank_transfer",
+    }))
+  );
   const now = Date.now();
   const pendingQuotes = quotes.filter((quote: any) =>
     ["pending_merchant", "pending_customer"].includes(quote.status)
@@ -136,6 +146,10 @@ export const GET = async (
     summary: {
       companies: {
         total: companies.length,
+        pending: companyStatusCounts.pending || 0,
+        approved: companyStatusCounts.approved || 0,
+        rejected: companyStatusCounts.rejected || 0,
+        by_payment_terms: paymentTermsCounts,
       },
       quotes: {
         total: quotes.length,
@@ -148,6 +162,12 @@ export const GET = async (
         units: quoteTotals.units,
         boxes: quoteTotals.boxes,
         estimated_weight: Number(quoteTotals.weight.toFixed(1)),
+        conversion_rate: quotes.length
+          ? Math.round(((quoteStatusCounts.accepted || 0) / quotes.length) * 100)
+          : 0,
+        average_value: quotes.length
+          ? Math.round(quoteTotals.value / quotes.length)
+          : 0,
       },
       catalog_rules: {
         total: catalogRulesCount,

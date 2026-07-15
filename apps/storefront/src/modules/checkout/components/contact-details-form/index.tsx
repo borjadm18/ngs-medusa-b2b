@@ -13,7 +13,10 @@ const ContactDetailsForm = ({
     email: "",
     invoice_recipient: "",
     cost_center: "",
+    po_number: "",
     requisition_number: "",
+    payment_terms: "",
+    selected_payment_method: "",
     door_code: "",
     notes: "",
   })
@@ -30,7 +33,19 @@ const ContactDetailsForm = ({
         email: cart.email || "",
         invoice_recipient: cart.metadata?.invoice_recipient?.toString() || "",
         cost_center: cart.metadata?.cost_center?.toString() || "",
+        po_number:
+          cart.metadata?.po_number?.toString() ||
+          cart.metadata?.requisition_number?.toString() ||
+          "",
         requisition_number: cart.metadata?.requisition_number?.toString() || "",
+        payment_terms:
+          cart.metadata?.payment_terms?.toString() ||
+          cart.company?.payment_terms ||
+          "",
+        selected_payment_method:
+          cart.metadata?.selected_payment_method?.toString() ||
+          cart.company?.default_payment_method ||
+          "",
         door_code: cart.metadata?.door_code?.toString() || "",
         notes: cart.metadata?.notes?.toString() || "",
       }))
@@ -76,11 +91,32 @@ const ContactDetailsForm = ({
         data-testid="cost-center-input"
       />
       <Input
-        label="Requisition number"
+        label="N pedido / PO"
+        name="po_number"
+        value={formData["po_number"]}
+        onChange={handleChange}
+        data-testid="po-number-input"
+      />
+      <Input
+        label="Referencia interna"
         name="requisition_number"
         value={formData["requisition_number"]}
         onChange={handleChange}
         data-testid="requisition-number-input"
+      />
+      <Input
+        label="Condiciones de pago"
+        name="payment_terms"
+        value={formData["payment_terms"]}
+        onChange={handleChange}
+        data-testid="payment-terms-input"
+      />
+      <Input
+        label="Metodo guardado"
+        name="selected_payment_method"
+        value={formData["selected_payment_method"]}
+        onChange={handleChange}
+        data-testid="saved-payment-method-input"
       />
       <Input
         label="Door code/goods mark"

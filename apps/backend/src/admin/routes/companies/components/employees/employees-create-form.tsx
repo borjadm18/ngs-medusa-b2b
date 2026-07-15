@@ -4,6 +4,7 @@ import {
   Drawer,
   Input,
   Label,
+  Select,
   Text,
 } from "@medusajs/ui";
 import { useState } from "react";
@@ -29,6 +30,8 @@ export function EmployeesCreateForm({
   >({
     company_id: company.id,
     is_admin: false,
+    role: "buyer" as any,
+    status: "active" as any,
     spending_limit: "0",
     customer_id: "",
   });
@@ -129,6 +132,31 @@ export function EmployeesCreateForm({
               }
               placeholder="1000"
             />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label size="xsmall" className="txt-compact-small font-medium">
+              Rol B2B
+            </Label>
+            <Select
+              value={formData.role || "buyer"}
+              onValueChange={(value) =>
+                setFormData({
+                  ...formData,
+                  role: value as any,
+                  is_admin: value === "company_admin",
+                })
+              }
+            >
+              <Select.Trigger>
+                <Select.Value />
+              </Select.Trigger>
+              <Select.Content>
+                <Select.Item value="buyer">Comprador</Select.Item>
+                <Select.Item value="approver">Aprobador</Select.Item>
+                <Select.Item value="company_admin">Admin empresa</Select.Item>
+                <Select.Item value="readonly">Solo lectura</Select.Item>
+              </Select.Content>
+            </Select>
           </div>
           <div className="flex flex-col gap-2">
             <Label size="xsmall" className="txt-compact-small font-medium">

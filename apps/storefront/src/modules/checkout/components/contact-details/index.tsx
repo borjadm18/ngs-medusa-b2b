@@ -138,6 +138,27 @@ const ContactDetails = ({
                 <Text className="txt-medium text-ui-fg-subtle">
                   {cart.email}
                 </Text>
+                {(cart.metadata?.po_number ||
+                  cart.metadata?.payment_terms ||
+                  cart.metadata?.selected_payment_method) && (
+                  <div className="grid gap-1 rounded-md border border-neutral-200 p-3 text-xs text-neutral-700">
+                    {cart.metadata?.po_number ? (
+                      <span>PO: {cart.metadata.po_number as string}</span>
+                    ) : null}
+                    {cart.metadata?.payment_terms ? (
+                      <span>
+                        Pago: {formatPaymentTerms(
+                          cart.metadata.payment_terms as string
+                        )}
+                      </span>
+                    ) : null}
+                    {cart.metadata?.selected_payment_method ? (
+                      <span>
+                        Metodo: {cart.metadata.selected_payment_method as string}
+                      </span>
+                    ) : null}
+                  </div>
+                )}
                 {cart.metadata?.notes ? (
                   <div>
                     <Divider />
@@ -156,3 +177,15 @@ const ContactDetails = ({
 }
 
 export default ContactDetails
+
+const formatPaymentTerms = (value: string) => {
+  const labels: Record<string, string> = {
+    prepaid: "Pago anticipado",
+    bank_transfer: "Transferencia bancaria",
+    net_30: "Credito 30 dias",
+    net_60: "Credito 60 dias",
+    credit: "Credito comercial",
+  }
+
+  return labels[value] || value
+}

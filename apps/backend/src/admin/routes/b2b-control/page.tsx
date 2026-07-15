@@ -91,12 +91,12 @@ const B2BControl = () => {
         <>
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             <Metric label="Empresas B2B" value={summary?.companies.total || 0} />
+            <Metric label="Altas pendientes" value={summary?.companies.pending || 0} />
             <Metric label="Presupuestos" value={summary?.quotes.total || 0} />
             <Metric
               label="Reglas activas"
               value={summary?.catalog_rules.active || 0}
             />
-            <Metric label="Packaging" value={`${packagingCoverage}%`} />
           </div>
 
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -104,11 +104,31 @@ const B2BControl = () => {
               label="Valor quotes"
               value={formatCurrency(summary?.quotes.value || 0)}
             />
+            <Metric
+              label="Ticket medio quote"
+              value={formatCurrency(summary?.quotes.average_value || 0)}
+            />
+            <Metric
+              label="Conversion quote"
+              value={`${summary?.quotes.conversion_rate || 0}%`}
+            />
+            <Metric label="Packaging" value={`${packagingCoverage}%`} />
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             <Metric label="Unidades" value={summary?.quotes.units || 0} />
             <Metric label="Cajas" value={summary?.quotes.boxes || 0} />
             <Metric
               label="Peso estimado"
               value={`${summary?.quotes.estimated_weight || 0} kg`}
+            />
+            <Metric
+              label="Empresas credito"
+              value={
+                (summary?.companies.by_payment_terms?.net_30 || 0) +
+                (summary?.companies.by_payment_terms?.net_60 || 0) +
+                (summary?.companies.by_payment_terms?.credit || 0)
+              }
             />
           </div>
 

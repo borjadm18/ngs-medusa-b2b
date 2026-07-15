@@ -35,6 +35,14 @@ export function CompanyForm({
     setFormData({ ...formData, country: value });
   };
 
+  const handleOnboardingStatusChange = (value: string) => {
+    setFormData({ ...formData, onboarding_status: value as any });
+  };
+
+  const handlePaymentTermsChange = (value: string) => {
+    setFormData({ ...formData, payment_terms: value as any });
+  };
+
   return (
     <form>
       <Drawer.Body className="p-4">
@@ -63,6 +71,64 @@ export function CompanyForm({
             onChange={handleChange}
             placeholder="medusa@medusa.com"
           />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-2">
+              <Label size="xsmall">CIF / VAT</Label>
+              <Input
+                type="text"
+                name="tax_id"
+                value={formData.tax_id || ""}
+                onChange={handleChange}
+                placeholder="ESB00000000"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label size="xsmall">Sector</Label>
+              <Input
+                type="text"
+                name="sector"
+                value={formData.sector || ""}
+                onChange={handleChange}
+                placeholder="instalador"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-2">
+              <Label size="xsmall">Estado onboarding</Label>
+              <Select
+                value={formData.onboarding_status || "approved"}
+                onValueChange={handleOnboardingStatusChange}
+              >
+                <Select.Trigger>
+                  <Select.Value />
+                </Select.Trigger>
+                <Select.Content>
+                  <Select.Item value="pending">Pendiente</Select.Item>
+                  <Select.Item value="approved">Aprobada</Select.Item>
+                  <Select.Item value="rejected">Rechazada</Select.Item>
+                </Select.Content>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label size="xsmall">Condiciones pago</Label>
+              <Select
+                value={formData.payment_terms || "bank_transfer"}
+                onValueChange={handlePaymentTermsChange}
+              >
+                <Select.Trigger>
+                  <Select.Value />
+                </Select.Trigger>
+                <Select.Content>
+                  <Select.Item value="prepaid">Pago anticipado</Select.Item>
+                  <Select.Item value="bank_transfer">Transferencia</Select.Item>
+                  <Select.Item value="net_30">Credito 30 dias</Select.Item>
+                  <Select.Item value="net_60">Credito 60 dias</Select.Item>
+                  <Select.Item value="credit">Credito comercial</Select.Item>
+                </Select.Content>
+              </Select>
+            </div>
+          </div>
           <Label size="xsmall">Company Address</Label>
           <Input
             type="text"

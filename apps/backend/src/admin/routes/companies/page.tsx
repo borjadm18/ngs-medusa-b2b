@@ -36,6 +36,7 @@ const Companies = () => {
               <Table.HeaderCell>Name</Table.HeaderCell>
               <Table.HeaderCell>Phone</Table.HeaderCell>
               <Table.HeaderCell>Email</Table.HeaderCell>
+              <Table.HeaderCell>Estado</Table.HeaderCell>
               <Table.HeaderCell>Address</Table.HeaderCell>
               <Table.HeaderCell>Employees</Table.HeaderCell>
               <Table.HeaderCell>Customer Group</Table.HeaderCell>
@@ -61,6 +62,20 @@ const Companies = () => {
                   <Table.Cell>{company.name}</Table.Cell>
                   <Table.Cell>{company.phone}</Table.Cell>
                   <Table.Cell>{company.email}</Table.Cell>
+                  <Table.Cell>
+                    <Badge
+                      size="small"
+                      color={
+                        company.onboarding_status === "pending"
+                          ? "orange"
+                          : company.onboarding_status === "rejected"
+                          ? "red"
+                          : "green"
+                      }
+                    >
+                      {formatOnboardingStatus(company.onboarding_status)}
+                    </Badge>
+                  </Table.Cell>
                   <Table.Cell>{`${company.address}, ${company.city}, ${company.state} ${company.zip}`}</Table.Cell>
                   <Table.Cell>{company.employees?.length || 0}</Table.Cell>
                   <Table.Cell>
@@ -95,3 +110,13 @@ export const config = defineRouteConfig({
 });
 
 export default Companies;
+
+const formatOnboardingStatus = (status?: string) => {
+  const labels: Record<string, string> = {
+    pending: "Pendiente",
+    approved: "Aprobada",
+    rejected: "Rechazada",
+  };
+
+  return labels[status || "approved"] || "Aprobada";
+};

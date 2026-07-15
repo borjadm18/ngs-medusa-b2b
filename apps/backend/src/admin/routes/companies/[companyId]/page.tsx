@@ -69,6 +69,43 @@ const CompanyDetails = () => {
                 </Table.Row>
                 <Table.Row>
                   <Table.Cell className="font-medium font-sans txt-compact-small">
+                    Estado onboarding
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Badge
+                      size="small"
+                      color={
+                        company?.onboarding_status === "pending"
+                          ? "orange"
+                          : company?.onboarding_status === "rejected"
+                          ? "red"
+                          : "green"
+                      }
+                    >
+                      {formatOnboardingStatus(company?.onboarding_status)}
+                    </Badge>
+                  </Table.Cell>
+                </Table.Row>
+                <Table.Row>
+                  <Table.Cell className="font-medium font-sans txt-compact-small">
+                    CIF / VAT
+                  </Table.Cell>
+                  <Table.Cell>{company?.tax_id || "-"}</Table.Cell>
+                </Table.Row>
+                <Table.Row>
+                  <Table.Cell className="font-medium font-sans txt-compact-small">
+                    Sector
+                  </Table.Cell>
+                  <Table.Cell>{company?.sector || "-"}</Table.Cell>
+                </Table.Row>
+                <Table.Row>
+                  <Table.Cell className="font-medium font-sans txt-compact-small">
+                    Condiciones pago
+                  </Table.Cell>
+                  <Table.Cell>{formatPaymentTerms(company?.payment_terms)}</Table.Cell>
+                </Table.Row>
+                <Table.Row>
+                  <Table.Cell className="font-medium font-sans txt-compact-small">
                     Address
                   </Table.Cell>
                   <Table.Cell>{company?.address}</Table.Cell>
@@ -182,12 +219,22 @@ const CompanyDetails = () => {
                       <Table.Cell className="flex w-fit gap-2 items-center">
                         {employee.customer?.first_name}{" "}
                         {employee.customer?.last_name}
-                        {employee.is_admin && (
+                    {employee.is_admin && (
                           <Badge
                             size="2xsmall"
                             color={employee.is_admin ? "green" : "grey"}
                           >
                             Admin
+                          </Badge>
+                        )}
+                        {employee.role && (
+                          <Badge size="2xsmall" color="blue">
+                            {formatEmployeeRole(employee.role)}
+                          </Badge>
+                        )}
+                        {employee.status === "invited" && (
+                          <Badge size="2xsmall" color="orange">
+                            Invitado
                           </Badge>
                         )}
                       </Table.Cell>
@@ -232,3 +279,36 @@ const CompanyDetails = () => {
 };
 
 export default CompanyDetails;
+
+const formatOnboardingStatus = (status?: string) => {
+  const labels: Record<string, string> = {
+    pending: "Pendiente",
+    approved: "Aprobada",
+    rejected: "Rechazada",
+  };
+
+  return labels[status || "approved"] || "Aprobada";
+};
+
+const formatPaymentTerms = (value?: string | null) => {
+  const labels: Record<string, string> = {
+    prepaid: "Pago anticipado",
+    bank_transfer: "Transferencia bancaria",
+    net_30: "Credito 30 dias",
+    net_60: "Credito 60 dias",
+    credit: "Credito comercial",
+  };
+
+  return labels[value || "bank_transfer"] || "Transferencia bancaria";
+};
+
+const formatEmployeeRole = (value: string) => {
+  const labels: Record<string, string> = {
+    buyer: "Comprador",
+    approver: "Aprobador",
+    company_admin: "Admin empresa",
+    readonly: "Solo lectura",
+  };
+
+  return labels[value] || value;
+};

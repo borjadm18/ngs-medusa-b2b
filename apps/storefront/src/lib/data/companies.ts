@@ -12,6 +12,7 @@ import {
   StoreCreateCompany,
   StoreCreateEmployee,
   StoreEmployeeResponse,
+  StoreInviteEmployee,
   StoreUpdateCompany,
   StoreUpdateEmployee,
 } from "@/types"
@@ -107,6 +108,33 @@ export const createEmployee = async (data: StoreCreateEmployee) => {
 
   track("employee_created", {
     employee_id: employee.employee.id,
+  })
+
+  const cacheTag = await getCacheTag("companies")
+  revalidateTag(cacheTag)
+
+  return employee
+}
+
+export const inviteEmployee = async (data: StoreInviteEmployee) => {
+  const { company_id, ...inviteData } = data
+
+  const headers = {
+    ...(await getAuthHeaders()),
+  }
+
+  const employee = await sdk.client.fetch<StoreEmployeeResponse>(
+    `/store/companies/${company_id}/invitations`,
+    {
+      method: "POST",
+      body: inviteData,
+      headers,
+    }
+  )
+
+  track("employee_invited", {
+    employee_id: employee.employee.id,
+    role: inviteData.role || "buyer",
   })
 
   const cacheTag = await getCacheTag("companies")

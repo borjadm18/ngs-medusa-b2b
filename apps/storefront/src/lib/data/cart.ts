@@ -496,7 +496,10 @@ export async function setContactDetails(
       metadata: {
         invoice_recipient: formData.get("invoice_recipient"),
         cost_center: formData.get("cost_center"),
+        po_number: formData.get("po_number"),
         requisition_number: formData.get("requisition_number"),
+        payment_terms: formData.get("payment_terms"),
+        selected_payment_method: formData.get("selected_payment_method"),
         door_code: formData.get("door_code"),
         notes: formData.get("notes"),
       },

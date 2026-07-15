@@ -4,6 +4,7 @@ import {
   CurrencyInput,
   Drawer,
   Label,
+  Select,
   Table,
   Text,
 } from "@medusajs/ui";
@@ -32,9 +33,13 @@ export function EmployeesUpdateForm({
   const [formData, setFormData] = useState<{
     spending_limit: string;
     is_admin: boolean;
+    role: string;
+    status: string;
   }>({
     spending_limit: employee?.spending_limit?.toString() || "0",
     is_admin: employee?.is_admin || false,
+    role: employee?.role || "buyer",
+    status: employee?.status || "active",
   });
 
   const onSubmit = (e: React.FormEvent) => {
@@ -123,6 +128,51 @@ export function EmployeesUpdateForm({
                 }
                 placeholder="1000"
               />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label size="xsmall" className="txt-compact-small font-medium">
+                Rol B2B
+              </Label>
+              <Select
+                value={formData.role}
+                onValueChange={(value) =>
+                  setFormData({
+                    ...formData,
+                    role: value,
+                    is_admin: value === "company_admin",
+                  })
+                }
+              >
+                <Select.Trigger>
+                  <Select.Value />
+                </Select.Trigger>
+                <Select.Content>
+                  <Select.Item value="buyer">Comprador</Select.Item>
+                  <Select.Item value="approver">Aprobador</Select.Item>
+                  <Select.Item value="company_admin">Admin empresa</Select.Item>
+                  <Select.Item value="readonly">Solo lectura</Select.Item>
+                </Select.Content>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label size="xsmall" className="txt-compact-small font-medium">
+                Estado
+              </Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, status: value })
+                }
+              >
+                <Select.Trigger>
+                  <Select.Value />
+                </Select.Trigger>
+                <Select.Content>
+                  <Select.Item value="invited">Invitado</Select.Item>
+                  <Select.Item value="active">Activo</Select.Item>
+                  <Select.Item value="disabled">Desactivado</Select.Item>
+                </Select.Content>
+              </Select>
             </div>
             <div className="flex flex-col gap-2">
               <Label size="xsmall" className="txt-compact-small font-medium">

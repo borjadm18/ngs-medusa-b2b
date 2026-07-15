@@ -6,6 +6,10 @@ import { queryKeysFactory } from "../../lib/query-key-factory";
 export type B2BControlSummary = {
   companies: {
     total: number;
+    pending: number;
+    approved: number;
+    rejected: number;
+    by_payment_terms: Record<string, number>;
   };
   quotes: {
     total: number;
@@ -18,6 +22,8 @@ export type B2BControlSummary = {
     units: number;
     boxes: number;
     estimated_weight: number;
+    conversion_rate: number;
+    average_value: number;
   };
   catalog_rules: {
     total: number;
