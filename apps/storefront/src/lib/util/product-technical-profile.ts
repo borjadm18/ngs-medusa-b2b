@@ -21,6 +21,16 @@ export type ProductDocument = {
   url?: string
 }
 
+type ProductKind =
+  | "speaker"
+  | "headset"
+  | "mouse"
+  | "keyboard-kit"
+  | "webcam"
+  | "monitor"
+  | "powerbank"
+  | "generic"
+
 const readMetadata = (
   product: HttpTypes.StoreProduct,
   keys: string[]
@@ -41,6 +51,69 @@ const readMetadata = (
 }
 
 const profileOrDefault = (profile?: ClientProfile) => profile || clientProfile
+
+const getProductKind = (product: HttpTypes.StoreProduct): ProductKind => {
+  const haystack = [
+    product.title,
+    product.handle,
+    product.subtitle,
+    product.description,
+    product.categories?.map((category) => category.name).join(" "),
+    product.tags?.map((tag) => tag.value).join(" "),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase()
+
+  if (
+    haystack.includes("auricular") ||
+    haystack.includes("headset") ||
+    haystack.includes("headphone") ||
+    haystack.includes("ghx")
+  ) {
+    return "headset"
+  }
+
+  if (haystack.includes("mouse") || haystack.includes("raton")) {
+    return "mouse"
+  }
+
+  if (
+    haystack.includes("teclado") ||
+    haystack.includes("keyboard") ||
+    haystack.includes("funky kit")
+  ) {
+    return "keyboard-kit"
+  }
+
+  if (haystack.includes("webcam") || haystack.includes("camara")) {
+    return "webcam"
+  }
+
+  if (haystack.includes("monitor") || haystack.includes("gmx")) {
+    return "monitor"
+  }
+
+  if (
+    haystack.includes("powerbank") ||
+    haystack.includes("powerpump") ||
+    haystack.includes("bateria")
+  ) {
+    return "powerbank"
+  }
+
+  if (
+    haystack.includes("altavoz") ||
+    haystack.includes("speaker") ||
+    haystack.includes("subwoofer") ||
+    haystack.includes("wild bash") ||
+    haystack.includes("wild space")
+  ) {
+    return "speaker"
+  }
+
+  return "generic"
+}
 
 const isProfileFallbackProduct = (
   product: HttpTypes.StoreProduct,
@@ -98,16 +171,228 @@ export const getProductHighlights = (
     return metadataHighlights
   }
 
-  if (isProfileFallbackProduct(product, profile)) {
-    return [
-      { label: "Potencia RMS", value: "1200 W" },
-      { label: "Woofer", value: '12"' },
-      { label: "Procesamiento", value: "DSP" },
-      { label: "SPL max.", value: "127 dB" },
-    ]
+  if (!isProfileFallbackProduct(product, profile)) {
+    return []
   }
 
-  return []
+  switch (getProductKind(product)) {
+    case "speaker":
+      return [
+        { label: "Potencia RMS", value: "120 W" },
+        { label: "Woofer", value: '6.5"' },
+        { label: "Conectividad", value: "Bluetooth / AUX" },
+        { label: "Autonomia", value: "12 h" },
+      ]
+    case "headset":
+      return [
+        { label: "Driver", value: "50 mm" },
+        { label: "Conexion", value: "Jack 3.5 mm" },
+        { label: "Microfono", value: "Integrado" },
+        { label: "Uso", value: "Gaming / oficina" },
+      ]
+    case "mouse":
+      return [
+        { label: "Conexion", value: "2.4 GHz" },
+        { label: "Resolucion", value: "1600 DPI" },
+        { label: "Alcance", value: "10 m" },
+        { label: "Uso", value: "Profesional" },
+      ]
+    case "keyboard-kit":
+      return [
+        { label: "Formato", value: "Teclado + raton" },
+        { label: "Conexion", value: "2.4 GHz" },
+        { label: "Layout", value: "ES" },
+        { label: "Uso", value: "Oficina" },
+      ]
+    case "webcam":
+      return [
+        { label: "Resolucion", value: "Full HD 1080p" },
+        { label: "Microfono", value: "Integrado" },
+        { label: "Conexion", value: "USB" },
+        { label: "Uso", value: "Videollamada" },
+      ]
+    case "monitor":
+      return [
+        { label: "Panel", value: '27"' },
+        { label: "Resolucion", value: "QHD" },
+        { label: "Frecuencia", value: "165 Hz" },
+        { label: "Uso", value: "Gaming" },
+      ]
+    case "powerbank":
+      return [
+        { label: "Capacidad", value: "10.000 mAh" },
+        { label: "Carga", value: "10 W" },
+        { label: "Conexion", value: "USB-C" },
+        { label: "Uso", value: "Movilidad" },
+      ]
+    default:
+      return []
+  }
+}
+
+const getFallbackSpecGroups = (
+  product: HttpTypes.StoreProduct,
+  dimensions?: string
+): ProductSpecGroup[] => {
+  const logisticsRows = [
+    {
+      label: "Peso",
+      value: product.weight ? `${product.weight} g` : "Dato no publicado",
+    },
+    {
+      label: "Dimensiones",
+      value: dimensions || "Dato no publicado",
+    },
+    {
+      label: "Unidad de venta",
+      value: "Unidad o caja segun variante",
+    },
+  ]
+
+  switch (getProductKind(product)) {
+    case "speaker":
+      return [
+        {
+          title: "Audio",
+          rows: [
+            { label: "Potencia RMS", value: "120 W" },
+            { label: "Respuesta en frecuencia", value: "60 Hz - 20 kHz" },
+            { label: "Conectividad", value: "Bluetooth / AUX / USB" },
+          ],
+        },
+        {
+          title: "Componentes",
+          rows: [
+            { label: "Woofer", value: '6.5"' },
+            { label: "Tweeter", value: '1"' },
+            { label: "Bateria", value: "Autonomia hasta 12 h" },
+          ],
+        },
+        { title: "Logistica", rows: logisticsRows },
+      ]
+    case "headset":
+      return [
+        {
+          title: "Audio",
+          rows: [
+            { label: "Driver", value: "50 mm" },
+            { label: "Respuesta en frecuencia", value: "20 Hz - 20 kHz" },
+            { label: "Impedancia", value: "32 ohm" },
+          ],
+        },
+        {
+          title: "Uso",
+          rows: [
+            { label: "Microfono", value: "Integrado" },
+            { label: "Conexion", value: "Jack 3.5 mm" },
+            { label: "Compatibilidad", value: "PC, consola y movil" },
+          ],
+        },
+        { title: "Logistica", rows: logisticsRows },
+      ]
+    case "mouse":
+      return [
+        {
+          title: "Control",
+          rows: [
+            { label: "Sensor", value: "Optico" },
+            { label: "Resolucion", value: "1600 DPI" },
+            { label: "Botones", value: "3 botones + rueda" },
+          ],
+        },
+        {
+          title: "Conectividad",
+          rows: [
+            { label: "Conexion", value: "Inalambrica 2.4 GHz" },
+            { label: "Alcance", value: "Hasta 10 m" },
+            { label: "Alimentacion", value: "Pila AA" },
+          ],
+        },
+        { title: "Logistica", rows: logisticsRows },
+      ]
+    case "keyboard-kit":
+      return [
+        {
+          title: "Kit",
+          rows: [
+            { label: "Contenido", value: "Teclado + raton" },
+            { label: "Layout", value: "ES" },
+            { label: "Uso", value: "Oficina profesional" },
+          ],
+        },
+        {
+          title: "Conectividad",
+          rows: [
+            { label: "Conexion", value: "Inalambrica 2.4 GHz" },
+            { label: "Receptor", value: "USB nano" },
+            { label: "Compatibilidad", value: "Windows, macOS y Linux" },
+          ],
+        },
+        { title: "Logistica", rows: logisticsRows },
+      ]
+    case "webcam":
+      return [
+        {
+          title: "Video",
+          rows: [
+            { label: "Resolucion", value: "Full HD 1080p" },
+            { label: "FPS", value: "30 fps" },
+            { label: "Enfoque", value: "Fijo" },
+          ],
+        },
+        {
+          title: "Conectividad",
+          rows: [
+            { label: "Conexion", value: "USB" },
+            { label: "Microfono", value: "Integrado" },
+            { label: "Montaje", value: "Clip universal" },
+          ],
+        },
+        { title: "Logistica", rows: logisticsRows },
+      ]
+    case "monitor":
+      return [
+        {
+          title: "Pantalla",
+          rows: [
+            { label: "Tamano", value: '27"' },
+            { label: "Resolucion", value: "QHD" },
+            { label: "Frecuencia", value: "165 Hz" },
+          ],
+        },
+        {
+          title: "Conectividad",
+          rows: [
+            { label: "Entradas", value: "HDMI / DisplayPort" },
+            { label: "Uso", value: "Gaming y productividad" },
+            { label: "Montaje", value: "VESA" },
+          ],
+        },
+        { title: "Logistica", rows: logisticsRows },
+      ]
+    case "powerbank":
+      return [
+        {
+          title: "Energia",
+          rows: [
+            { label: "Capacidad", value: "10.000 mAh" },
+            { label: "Potencia de carga", value: "10 W" },
+            { label: "Tipo de bateria", value: "Litio" },
+          ],
+        },
+        {
+          title: "Conectividad",
+          rows: [
+            { label: "Entrada", value: "USB-C" },
+            { label: "Salida", value: "USB-A / USB-C" },
+            { label: "Indicador", value: "LED de carga" },
+          ],
+        },
+        { title: "Logistica", rows: logisticsRows },
+      ]
+    default:
+      return [{ title: "Logistica", rows: logisticsRows }]
+  }
 }
 
 export const getProductSpecGroups = (
@@ -177,6 +462,10 @@ export const getProductSpecGroups = (
       ],
     },
   ]
+
+  if (isProfileFallbackProduct(product, profile)) {
+    return getFallbackSpecGroups(product, dimensions)
+  }
 
   if (!isProfileFallbackProduct(product, profile) && !product.metadata) {
     return baseGroups.map((group) => ({

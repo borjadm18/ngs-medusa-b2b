@@ -148,14 +148,15 @@ const QuoteDetails = () => {
               <div className="flex items-center justify-between px-6 py-4">
                 <Text className="txt-compact-small">
                   <CheckCircleSolid className="inline-block mr-2 text-green-500 text-lg" />
-                  Quote accepted by customer. Order is ready for processing.
+                  Presupuesto aceptado por el cliente. El pedido ya esta listo
+                  para procesarse.
                 </Text>
 
                 <Button
                   size="small"
                   onClick={() => navigate(`/orders/${quote.draft_order_id}`)}
                 >
-                  View Order
+                  Ver pedido
                 </Button>
               </div>
             </Container>
@@ -184,7 +185,7 @@ const QuoteDetails = () => {
                     onClick={() => handleRejectQuote()}
                     disabled={isSendingQuote}
                   >
-                    Reject Quote
+                    Rechazar presupuesto
                   </Button>
                 )}
 
@@ -195,7 +196,7 @@ const QuoteDetails = () => {
                     onClick={() => handleSendQuote()}
                     disabled={isSendingQuote}
                   >
-                    Send Quote
+                    Enviar presupuesto
                   </Button>
                 )}
               </div>

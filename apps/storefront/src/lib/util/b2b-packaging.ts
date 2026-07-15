@@ -164,7 +164,7 @@ export const getCartLinePackaging = (
 ): CartLinePackaging | undefined => {
   const purchaseUnit = metadata?.purchase_unit as PurchaseUnit | undefined
   const unitsPerBox = toNumber(metadata?.units_per_box)
-  const packageQuantity = toNumber(metadata?.package_quantity)
+  const rawPackageQuantity = toNumber(metadata?.package_quantity)
   const packageWeight = toNumber(metadata?.package_weight)
   const boxesPerPallet = toNumber(metadata?.boxes_per_pallet)
   const packageDimensions =
@@ -172,24 +172,37 @@ export const getCartLinePackaging = (
       ? metadata.package_dimensions
       : undefined
 
-  if (purchaseUnit !== "box" || !unitsPerBox || !packageQuantity) {
+  if (!purchaseUnit || !unitsPerBox) {
     return undefined
   }
+
+  if (purchaseUnit === "box" && !rawPackageQuantity) {
+    return undefined
+  }
+
+  const packageQuantity =
+    purchaseUnit === "box" ? rawPackageQuantity ?? 0 : 0
+  const unitQuantity = quantity
+  const estimatedBoxes = unitQuantity / unitsPerBox
 
   return {
     purchaseUnit,
     unitsPerBox,
     packageQuantity,
-    unitQuantity: quantity,
+    unitQuantity,
     boxesPerPallet,
     packageWeight,
     packageDimensions,
-    totalWeight: packageWeight ? packageWeight * packageQuantity : undefined,
-    palletShare: boxesPerPallet ? packageQuantity / boxesPerPallet : undefined,
+    totalWeight: packageWeight ? packageWeight * estimatedBoxes : undefined,
+    palletShare: boxesPerPallet ? estimatedBoxes / boxesPerPallet : undefined,
   }
 }
 
 export const formatPackagingLine = (packaging: CartLinePackaging) => {
+  if (packaging.purchaseUnit === "unit") {
+    return `${packaging.unitQuantity} uds sueltas`
+  }
+
   return `${packaging.packageQuantity} cajas x ${packaging.unitsPerBox} uds/caja = ${packaging.unitQuantity} uds`
 }
 
@@ -227,8 +240,13 @@ export const getCartPackagingSummary = (
         return summary
       }
 
-      summary.boxes += packaging.packageQuantity
-      summary.boxedUnits += packaging.unitQuantity
+      if (packaging.purchaseUnit === "box") {
+        summary.boxes += packaging.packageQuantity
+        summary.boxedUnits += packaging.unitQuantity
+      } else {
+        summary.looseUnits += packaging.unitQuantity
+      }
+
       summary.estimatedWeight += packaging.totalWeight ?? 0
 
       if (packaging.palletShare) {

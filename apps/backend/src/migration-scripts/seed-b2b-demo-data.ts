@@ -18,7 +18,10 @@ type DemoCompany = {
   name: string;
   email: string;
   phone: string;
+  address: string;
   city: string;
+  state: string;
+  zip: string;
   country: string;
   segment: string;
   spendingLimit: number;
@@ -29,7 +32,10 @@ const demoCompanies: DemoCompany[] = [
     name: "Iberia Pro Installers",
     email: "compras@iberia-pro-installers.demo",
     phone: "+34 910 000 101",
+    address: "Calle de Alcala 125",
     city: "Madrid",
+    state: "Madrid",
+    zip: "28009",
     country: "ES",
     segment: "instalador",
     spendingLimit: 25000,
@@ -38,7 +44,10 @@ const demoCompanies: DemoCompany[] = [
     name: "Distribuciones Norte Audio",
     email: "pedidos@dnaudio.demo",
     phone: "+34 944 000 202",
+    address: "Gran Via 38",
     city: "Bilbao",
+    state: "Bizkaia",
+    zip: "48009",
     country: "ES",
     segment: "distribuidor",
     spendingLimit: 60000,
@@ -47,7 +56,10 @@ const demoCompanies: DemoCompany[] = [
     name: "Retail Campus Group",
     email: "it-procurement@retail-campus.demo",
     phone: "+34 933 000 303",
+    address: "Avinguda Diagonal 640",
     city: "Barcelona",
+    state: "Barcelona",
+    zip: "08017",
     country: "ES",
     segment: "cuenta_key",
     spendingLimit: 12000,
@@ -243,8 +255,10 @@ async function seedCompanies(companyModule: any, companies: DemoCompany[]) {
       name: company.name,
       email: company.email,
       phone: company.phone,
-      address: "Calle Demo 1",
+      address: company.address,
       city: company.city,
+      state: company.state,
+      zip: company.zip,
       country: company.country,
       currency_code: "eur",
       spending_limit_reset_frequency: "monthly",
@@ -670,19 +684,21 @@ async function seedDemoQuotes({
           shipping_address: {
             first_name: company.name,
             last_name: "Compras",
-            address_1: company.address || "Calle Demo 1",
+            address_1: company.address,
             city: company.city || "Madrid",
+            province: company.state,
             country_code: "es",
-            postal_code: "28001",
+            postal_code: company.zip,
             phone: company.phone,
           },
           billing_address: {
             first_name: company.name,
             last_name: "Compras",
-            address_1: company.address || "Calle Demo 1",
+            address_1: company.address,
             city: company.city || "Madrid",
+            province: company.state,
             country_code: "es",
-            postal_code: "28001",
+            postal_code: company.zip,
             phone: company.phone,
           },
           items: [

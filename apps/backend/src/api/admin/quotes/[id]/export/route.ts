@@ -40,11 +40,11 @@ const getPackaging = (item: QuoteLine) => {
   const metadata = item.metadata || {};
   const purchaseUnit = metadata.purchase_unit;
   const unitsPerBox = toNumber(metadata.units_per_box);
-  const packageQuantity = toNumber(metadata.package_quantity);
+  const rawPackageQuantity = toNumber(metadata.package_quantity);
   const packageWeight = toNumber(metadata.package_weight);
   const boxesPerPallet = toNumber(metadata.boxes_per_pallet);
 
-  if (purchaseUnit !== "box" || !unitsPerBox || !packageQuantity) {
+  if ((purchaseUnit !== "box" && purchaseUnit !== "unit") || !unitsPerBox) {
     return {
       purchaseUnit: "unit",
       packageQuantity: "",
@@ -57,13 +57,30 @@ const getPackaging = (item: QuoteLine) => {
     };
   }
 
+  if (purchaseUnit === "box" && !rawPackageQuantity) {
+    return {
+      purchaseUnit: "unit",
+      packageQuantity: "",
+      unitsPerBox: "",
+      totalUnits: item.quantity || 0,
+      estimatedWeight: "",
+      packageDimensions: "",
+      boxesPerPallet: "",
+      palletShare: "",
+    };
+  }
+
+  const totalUnits = item.quantity || 0;
+  const packageQuantity = purchaseUnit === "box" ? rawPackageQuantity || 0 : "";
+  const estimatedBoxes = totalUnits / unitsPerBox;
+
   return {
-    purchaseUnit: "box",
+    purchaseUnit,
     packageQuantity,
     unitsPerBox,
-    totalUnits: item.quantity || 0,
+    totalUnits,
     estimatedWeight: packageWeight
-      ? (packageWeight * packageQuantity).toFixed(1)
+      ? (packageWeight * estimatedBoxes).toFixed(1)
       : "",
     packageDimensions:
       typeof metadata.package_dimensions === "string"
@@ -71,7 +88,7 @@ const getPackaging = (item: QuoteLine) => {
         : "",
     boxesPerPallet: boxesPerPallet || "",
     palletShare: boxesPerPallet
-      ? (packageQuantity / boxesPerPallet).toFixed(2)
+      ? (estimatedBoxes / boxesPerPallet).toFixed(2)
       : "",
   };
 };

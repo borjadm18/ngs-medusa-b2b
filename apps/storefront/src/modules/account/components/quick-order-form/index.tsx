@@ -193,24 +193,24 @@ const getPackageQuantity = (line: QuickOrderDraftLine) => {
 
 const getEstimatedWeight = (line: QuickOrderDraftLine) => {
   const packaging = line.resolved?.packaging
-  const packageQuantity = getPackageQuantity(line)
 
-  if (!packaging?.package_weight || !packageQuantity) {
+  if (!packaging?.package_weight || !packaging.units_per_box) {
     return 0
   }
 
-  return packaging.package_weight * packageQuantity
+  return packaging.package_weight * (getTotalUnits(line) / packaging.units_per_box)
 }
 
 const getPalletShare = (line: QuickOrderDraftLine) => {
   const packaging = line.resolved?.packaging
-  const packageQuantity = getPackageQuantity(line)
 
-  if (!packaging?.boxes_per_pallet || !packageQuantity) {
+  if (!packaging?.boxes_per_pallet || !packaging.units_per_box) {
     return 0
   }
 
-  return packageQuantity / packaging.boxes_per_pallet
+  return (
+    getTotalUnits(line) / packaging.units_per_box / packaging.boxes_per_pallet
+  )
 }
 
 const lineRequiresQuote = (line: QuickOrderDraftLine) =>

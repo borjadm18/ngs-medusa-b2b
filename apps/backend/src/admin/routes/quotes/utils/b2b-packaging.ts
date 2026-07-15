@@ -13,6 +13,7 @@ export type QuoteLineWithPackaging = {
 };
 
 export type QuoteLinePackaging = {
+  purchaseUnit: "unit" | "box";
   packageQuantity: number;
   unitsPerBox: number;
   unitQuantity: number;
@@ -37,7 +38,7 @@ export const getQuoteLinePackaging = (
 ): QuoteLinePackaging | undefined => {
   const purchaseUnit = metadata?.purchase_unit;
   const unitsPerBox = toNumber(metadata?.units_per_box);
-  const packageQuantity = toNumber(metadata?.package_quantity);
+  const rawPackageQuantity = toNumber(metadata?.package_quantity);
   const packageWeight = toNumber(metadata?.package_weight);
   const boxesPerPallet = toNumber(metadata?.boxes_per_pallet);
   const packageDimensions =
@@ -45,24 +46,34 @@ export const getQuoteLinePackaging = (
       ? metadata.package_dimensions
       : undefined;
 
-  if (purchaseUnit !== "box" || !unitsPerBox || !packageQuantity) {
+  if ((purchaseUnit !== "box" && purchaseUnit !== "unit") || !unitsPerBox) {
     return undefined;
   }
 
+  if (purchaseUnit === "box" && !rawPackageQuantity) {
+    return undefined;
+  }
+
+  const packageQuantity = purchaseUnit === "box" ? rawPackageQuantity ?? 0 : 0;
+  const estimatedBoxes = quantity / unitsPerBox;
+
   return {
+    purchaseUnit,
     packageQuantity,
     unitsPerBox,
     unitQuantity: quantity,
     boxesPerPallet,
     packageWeight,
     packageDimensions,
-    totalWeight: packageWeight ? packageWeight * packageQuantity : undefined,
-    palletShare: boxesPerPallet ? packageQuantity / boxesPerPallet : undefined,
+    totalWeight: packageWeight ? packageWeight * estimatedBoxes : undefined,
+    palletShare: boxesPerPallet ? estimatedBoxes / boxesPerPallet : undefined,
   };
 };
 
 export const formatQuotePackagingLine = (packaging: QuoteLinePackaging) =>
-  `${packaging.packageQuantity} cajas x ${packaging.unitsPerBox} uds = ${packaging.unitQuantity} uds`;
+  packaging.purchaseUnit === "unit"
+    ? `${packaging.unitQuantity} uds sueltas`
+    : `${packaging.packageQuantity} cajas x ${packaging.unitsPerBox} uds = ${packaging.unitQuantity} uds`;
 
 export const formatQuotePackagingDetails = (packaging: QuoteLinePackaging) =>
   [
@@ -92,8 +103,13 @@ export const getQuotePackagingSummary = (
         return summary;
       }
 
-      summary.boxes += packaging.packageQuantity;
-      summary.boxedUnits += packaging.unitQuantity;
+      if (packaging.purchaseUnit === "box") {
+        summary.boxes += packaging.packageQuantity;
+        summary.boxedUnits += packaging.unitQuantity;
+      } else {
+        summary.looseUnits += packaging.unitQuantity;
+      }
+
       summary.estimatedWeight += packaging.totalWeight ?? 0;
 
       if (packaging.palletShare) {
@@ -157,7 +173,7 @@ export const quoteItemsToCsv = (
       item.quantity,
       item.unit_price,
       item.total,
-      packaging ? "box" : "unit",
+      packaging?.purchaseUnit ?? "unit",
       packaging?.packageQuantity ?? "",
       packaging?.unitsPerBox ?? "",
       packaging?.unitQuantity ?? item.quantity,
