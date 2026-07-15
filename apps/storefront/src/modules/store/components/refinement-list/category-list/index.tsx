@@ -48,6 +48,15 @@ const CategoryList = ({
   const isCurrentCategory = (handle: string) =>
     pathname.split("/").slice(2).join("/") === `categories/${handle}`
 
+  const getCategoryHref = (handle: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.delete("q")
+    params.delete("page")
+
+    const nextSearch = params.toString()
+    return `/categories/${handle}${nextSearch ? `?${nextSearch}` : ""}`
+  }
+
   useEffect(() => {
     if (currentCategory) {
       const categoriesToExpand = getCategoriesToExpand(currentCategory)
@@ -93,9 +102,7 @@ const CategoryList = ({
                 )}
               </button>
               <LocalizedClientLink
-                href={`/categories/${category.handle}${
-                  searchParams.size ? `?${searchParams.toString()}` : ""
-                }`}
+                href={getCategoryHref(category.handle)}
                 className="flex gap-2 items-center hover:text-neutral-700"
               >
                 {category.name} ({category.products?.length})
@@ -103,9 +110,7 @@ const CategoryList = ({
             </div>
           ) : (
             <LocalizedClientLink
-              href={`/categories/${category.handle}${
-                searchParams.size ? `?${searchParams.toString()}` : ""
-              }`}
+              href={getCategoryHref(category.handle)}
               className="flex gap-2 items-center hover:text-neutral-700 text-start hover:cursor-pointer"
             >
               <Radio checked={isCurrentCategory(category.handle)} />
@@ -130,13 +135,13 @@ const CategoryList = ({
   return (
     <Container className="flex flex-col p-0 divide-y divide-neutral-200">
       <div className="flex justify-between items-center p-3">
-        <Text className="text-sm font-medium">Categories</Text>
+        <Text className="text-sm font-medium">Categorias</Text>
         {pathname.includes("/categories") && (
           <LocalizedClientLink
             href="/store"
             className="text-xs text-neutral-500 hover:text-neutral-700"
           >
-            Clear
+            Limpiar
           </LocalizedClientLink>
         )}
       </div>

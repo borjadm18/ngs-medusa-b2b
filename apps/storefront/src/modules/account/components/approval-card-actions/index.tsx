@@ -42,8 +42,8 @@ const ApprovalCardActions = ({
     if (!pendingAdminApproval) return
 
     const confirmed = await dialog({
-      title: "Are you sure you want to approve this cart?",
-      description: "This action cannot be undone.",
+      title: "Aprobar carrito",
+      description: "Esta accion no se puede deshacer.",
     })
 
     if (!confirmed) return
@@ -57,8 +57,8 @@ const ApprovalCardActions = ({
     if (!pendingAdminApproval) return
 
     const confirmed = await dialog({
-      title: "Are you sure you want to reject this cart?",
-      description: "This action cannot be undone.",
+      title: "Rechazar carrito",
+      description: "Esta accion no se puede deshacer.",
     })
 
     if (!confirmed) return
@@ -89,7 +89,7 @@ const ApprovalCardActions = ({
             isLoading={rejecting}
           >
             <XMarkMini className="inline-block" />
-            Reject
+            Rechazar
           </Button>
           <Button
             size="small"
@@ -100,7 +100,7 @@ const ApprovalCardActions = ({
             isLoading={approving}
           >
             <CheckMini className="inline-block" />
-            Approve
+            Aprobar
           </Button>
         </>
       ) : cartWithApprovals.approval_status?.status ===
@@ -109,7 +109,7 @@ const ApprovalCardActions = ({
           {"·"}
           <Button variant="primary" disabled>
             <LockClosedSolidMini className="inline-block" />
-            Awaiting External Approval
+            Pendiente de aprobacion externa
           </Button>
         </>
       ) : cartWithApprovals.approval_status?.status ===
@@ -127,7 +127,7 @@ const ApprovalCardActions = ({
               <LocalizedClientLink
                 href={`/checkout?cart_id=${cartWithApprovals.id}&step=payment`}
               >
-                Place Order
+                Realizar pedido
                 <ArrowRightMini className="inline-block" />
               </LocalizedClientLink>
             </Button>

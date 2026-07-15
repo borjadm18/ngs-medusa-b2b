@@ -25,9 +25,9 @@ const PendingCustomerApprovals = ({
       className="w-full flex flex-col items-center gap-y-4"
       data-testid="no-approvals-container"
     >
-      <Text className="text-large-semi">Nothing to see here</Text>
+      <Text className="text-large-semi">Sin aprobaciones pendientes</Text>
       <Text className="text-base-regular">
-        You don&apos;t have any approvals yet.
+        Las solicitudes que requieran aprobacion apareceran aqui.
       </Text>
     </div>
   )

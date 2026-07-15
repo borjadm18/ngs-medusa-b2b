@@ -24,13 +24,15 @@ const QuotesOverview = ({
 
   return (
     <div className="w-full flex flex-col items-center gap-y-4">
-      <h2 className="text-large-semi">Nothing to see here</h2>
-      <p className="text-base-regular">You don&apos;t have any quotes yet</p>
+      <h2 className="text-large-semi">Sin presupuestos todavia</h2>
+      <p className="text-base-regular">
+        Cuando solicites un presupuesto, aparecera aqui.
+      </p>
 
       <div className="mt-4">
         <LocalizedClientLink href="/" passHref>
           <Button data-testid="continue-shopping-button">
-            Continue shopping
+            Ver catalogo
           </Button>
         </LocalizedClientLink>
       </div>

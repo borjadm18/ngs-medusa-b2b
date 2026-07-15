@@ -31,6 +31,12 @@ export default async function ProductPreview({
   const inventory = getInventorySummary(product)
   const catalogRuleSummary = getCatalogRuleSummary(product)
   const priceRule = catalogRuleSummary?.priceRule
+  const brandName =
+    typeof product.metadata?.brand === "string"
+      ? product.metadata.brand
+      : typeof product.metadata?.brand_name === "string"
+      ? product.metadata.brand_name
+      : "NGS"
 
   return (
     <LocalizedClientLink href={`/products/${product.handle}`} className="group">
@@ -48,7 +54,7 @@ export default async function ProductPreview({
         </div>
         <div className="flex flex-col txt-compact-medium">
           <div className="flex flex-wrap items-center gap-2">
-            <Text className="text-neutral-600 text-xs">MARCA</Text>
+            <Text className="text-neutral-600 text-xs">{brandName}</Text>
             {canViewPrices && priceRule && (
               <span className="rounded border border-neutral-950 bg-neutral-950 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-white">
                 {priceRule.effect_type === "discount_percentage"

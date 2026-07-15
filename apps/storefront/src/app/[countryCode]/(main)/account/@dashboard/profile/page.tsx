@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const profile = await retrieveBrandProfile()
 
   return {
-    title: "Profile",
+    title: "Perfil",
     description: `Consulta y edita tu perfil B2B ${profile.brand.name}.`,
   }
 }
@@ -28,13 +28,13 @@ export default async function Profile() {
     <div className="w-full" data-testid="profile-page-wrapper">
       <div className="mb-8 flex flex-col gap-y-4">
         <Heading level="h2" className="text-lg text-neutral-950">
-          Details
+          Datos personales
         </Heading>
         <ProfileCard customer={customer} />
       </div>
       <div className="mb-8 flex flex-col gap-y-4">
         <Heading level="h2" className="text-lg text-neutral-950">
-          Security
+          Seguridad
         </Heading>
         <SecurityCard customer={customer} />
       </div>

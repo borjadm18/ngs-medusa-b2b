@@ -96,7 +96,9 @@ export default async function PaginatedProducts({
           })
         ) : (
           <Container className="text-center text-sm text-neutral-500">
-            No products found for this category.
+            {searchQuery
+              ? `No se encontraron productos para "${searchQuery}".`
+              : "No hay productos disponibles en esta seleccion."}
           </Container>
         )}
       </ul>

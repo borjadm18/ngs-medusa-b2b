@@ -66,7 +66,11 @@ const QuoteCard = ({ quote }: QuoteCardProps) => {
 
         <div className="flex pr-2 text-small-regular items-center">
           <CalendarMini className="inline-block mr-1" />
-          {createdAt.getDate()}-{createdAt.getMonth()}-{createdAt.getFullYear()}
+          {createdAt.toLocaleDateString("es-ES", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          })}
         </div>
 
         <div className="flex text-small-regular items-center">
@@ -89,14 +93,14 @@ const QuoteCard = ({ quote }: QuoteCardProps) => {
           </span>
           {"·"}
           <span className="pl-2">{`${numberOfLines} ${
-            numberOfLines > 1 ? "items" : "item"
+            numberOfLines > 1 ? "lineas" : "linea"
           }`}</span>
         </div>
 
         <div className="pl-4">
           <LocalizedClientLink href={`/account/quotes/details/${quote.id}`}>
             <Button variant="secondary" className="rounded-full text-xs">
-              See details
+              Ver detalle
             </Button>
           </LocalizedClientLink>
         </div>

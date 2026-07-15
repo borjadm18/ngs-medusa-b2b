@@ -45,5 +45,5 @@ export default async function ApprovedApprovalRequestsAdminList({
     )
   }
 
-  return <Text>No requests</Text>
+  return <Text>No hay solicitudes aprobadas</Text>
 }

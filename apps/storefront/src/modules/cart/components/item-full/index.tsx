@@ -46,6 +46,12 @@ const ItemFull = ({
   const displayedQuantity = quantity
   const quantityLabel = packaging ? "cajas" : "uds"
   const packagingDetails = packaging ? formatPackagingDetails(packaging) : ""
+  const brandName =
+    typeof item.product?.metadata?.brand === "string"
+      ? item.product.metadata.brand
+      : typeof item.product?.metadata?.brand_name === "string"
+      ? item.product.metadata.brand_name
+      : "NGS"
 
   const changeQuantity = async (newQuantity: number) => {
     setError(null)
@@ -151,7 +157,7 @@ const ItemFull = ({
         </LocalizedClientLink>
         <div className="flex flex-col gap-y-2 justify-between min-h-full self-stretch">
           <div className="flex flex-col">
-            <span className="text-neutral-600 text-[0.6rem]">MARCA</span>
+            <span className="text-neutral-600 text-[0.6rem]">{brandName}</span>
 
             <span className="txt-medium-plus text-neutral-950">
               {item.product?.title}

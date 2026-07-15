@@ -38,6 +38,8 @@ const normalizeOptionTitle = (title?: string) => {
 const normalizeKey = (value?: string) =>
   (value || "").trim().toLowerCase().replace(/\s+/g, "-")
 
+const visibleOptionTitles = new Set(["color"])
+
 const OptionsPicker = ({ options }: OptionsPickerProps) => {
   const router = useRouter()
   const pathname = usePathname()
@@ -92,7 +94,11 @@ const OptionsPicker = ({ options }: OptionsPickerProps) => {
     })
 
     return Array.from(optionMap.values())
-      .filter((option) => option.values.length > 0)
+      .filter(
+        (option) =>
+          option.values.length > 0 &&
+          visibleOptionTitles.has(normalizeKey(option.title))
+      )
       .sort((a, b) => a.title.localeCompare(b.title))
   }, [options])
 
