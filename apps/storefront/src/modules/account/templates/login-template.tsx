@@ -23,6 +23,7 @@ const LoginTemplate = ({ regions }: { regions: HttpTypes.StoreRegion[] }) => {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { countryCode } = useParams<{ countryCode: string }>()
+  const redirectTo = searchParams.get("redirect_to")
 
   const [imageLoaded, setImageLoaded] = useState(false)
   const [currentView, setCurrentView] = useState<LOGIN_VIEW>(() => {
@@ -53,14 +54,26 @@ const LoginTemplate = ({ regions }: { regions: HttpTypes.StoreRegion[] }) => {
 
   const updateView = (view: LOGIN_VIEW) => {
     setCurrentView(view)
-    router.push(`/${countryCode}/account?view=${view}`)
+    const nextParams = new URLSearchParams()
+
+    nextParams.set("view", view)
+
+    if (redirectTo) {
+      nextParams.set("redirect_to", redirectTo)
+    }
+
+    router.push(`/${countryCode}/account?${nextParams.toString()}`)
   }
 
   return (
     <div className="grid grid-cols-1 small:grid-cols-2 gap-2 m-2 min-h-[80vh]">
       <div className="flex justify-center items-center bg-neutral-100 p-6 small:p-0 h-full">
         {currentView === LOGIN_VIEW.LOG_IN ? (
-          <Login setCurrentView={updateView} countryCode={countryCode} />
+          <Login
+            setCurrentView={updateView}
+            countryCode={countryCode}
+            redirectTo={redirectTo}
+          />
         ) : (
           <Register
             setCurrentView={updateView}

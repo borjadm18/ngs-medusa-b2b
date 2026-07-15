@@ -82,6 +82,24 @@ export async function middleware(request: NextRequest) {
   const urlHasCountryCode =
     countryCode && request.nextUrl.pathname.split("/")[1].includes(countryCode)
 
+  if (urlHasCountryCode && countryCode) {
+    const accountRoot = `/${countryCode}/account`
+    const isProtectedAccountPath =
+      request.nextUrl.pathname.startsWith(`${accountRoot}/`)
+    const hasAuthToken = Boolean(request.cookies.get("_medusa_jwt")?.value)
+
+    if (isProtectedAccountPath && !hasAuthToken) {
+      const redirectTo = `${request.nextUrl.pathname}${request.nextUrl.search}`
+      const loginUrl = request.nextUrl.clone()
+
+      loginUrl.pathname = accountRoot
+      loginUrl.search = ""
+      loginUrl.searchParams.set("redirect_to", redirectTo)
+
+      return NextResponse.redirect(loginUrl, 307)
+    }
+  }
+
   // check if one of the country codes is in the url
   if (urlHasCountryCode && (!cartId || cartIdCookie)) {
     return response

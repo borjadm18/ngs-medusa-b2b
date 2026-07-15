@@ -146,6 +146,7 @@ export async function login(_currentState: unknown, formData: FormData) {
   const password = formData.get("password") as string
   const redirectCountryCode =
     (formData.get("redirect_country_code") as string) || "es"
+  const redirectTo = formData.get("redirect_to") as string | null
 
   try {
     await sdk.auth
@@ -188,7 +189,13 @@ export async function login(_currentState: unknown, formData: FormData) {
     return error.toString()
   }
 
-  redirect(`/${redirectCountryCode}/account`)
+  const safeRedirectTo =
+    redirectTo?.startsWith(`/${redirectCountryCode}/`) &&
+    !redirectTo.startsWith(`//`)
+      ? redirectTo
+      : `/${redirectCountryCode}/account`
+
+  redirect(safeRedirectTo)
 }
 
 export async function signout(countryCode: string, customerId: string) {

@@ -10,9 +10,10 @@ import { useActionState } from "react"
 type Props = {
   setCurrentView: (view: LOGIN_VIEW) => void
   countryCode: string
+  redirectTo?: string | null
 }
 
-const Login = ({ setCurrentView, countryCode }: Props) => {
+const Login = ({ setCurrentView, countryCode, redirectTo }: Props) => {
   const [message, formAction] = useActionState(login, null)
 
   return (
@@ -27,6 +28,9 @@ const Login = ({ setCurrentView, countryCode }: Props) => {
       </Text>
       <form className="w-full" action={formAction}>
         <input type="hidden" name="redirect_country_code" value={countryCode} />
+        {redirectTo && (
+          <input type="hidden" name="redirect_to" value={redirectTo} />
+        )}
         <div className="flex flex-col w-full gap-y-2">
           <Input
             label="Email"
