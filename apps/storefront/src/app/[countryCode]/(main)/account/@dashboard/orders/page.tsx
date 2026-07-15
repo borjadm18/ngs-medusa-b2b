@@ -14,11 +14,13 @@ export const metadata: Metadata = {
 }
 
 export default async function Orders() {
-  const customer = await retrieveCustomer()
-  const orders = await listOrders()
+  const customer = await retrieveCustomer().catch(() => null)
+  const orders = await listOrders().catch(() => [])
 
   const { approval_settings } =
-    (await retrieveCompany(customer?.employee?.company_id!)) || {}
+    (customer?.employee?.company_id
+      ? await retrieveCompany(customer.employee.company_id).catch(() => ({}))
+      : {}) || {}
 
   const approval_required =
     approval_settings?.requires_admin_approval ||
@@ -26,7 +28,7 @@ export default async function Orders() {
 
   const { carts_with_approvals } = await listApprovals({
     status: ApprovalStatusType.PENDING,
-  })
+  }).catch(() => ({ carts_with_approvals: [] }))
 
   return (
     <div

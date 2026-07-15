@@ -5,7 +5,7 @@ import ApprovalSettingsCard from "@/modules/account/components/approval-settings
 import CompanyCard from "@/modules/account/components/company-card"
 import EmployeesCard from "@/modules/account/components/employees-card"
 import InviteEmployeeCard from "@/modules/account/components/invite-employee-card"
-import { Heading } from "@medusajs/ui"
+import { Heading, Text } from "@medusajs/ui"
 import { notFound } from "next/navigation"
 
 export default async function Company() {
@@ -14,7 +14,23 @@ export default async function Company() {
 
   if (!customer || !customer?.employee?.company) return notFound()
 
-  const company = await retrieveCompany(customer.employee.company.id)
+  const company = await retrieveCompany(customer.employee.company.id).catch(
+    () => null
+  )
+
+  if (!company) {
+    return (
+      <div className="w-full rounded border border-neutral-200 bg-white p-6">
+        <Heading level="h2" className="text-lg text-neutral-950">
+          Datos de empresa
+        </Heading>
+        <Text className="mt-2 text-neutral-600">
+          Tu usuario no tiene permisos para administrar la empresa. Puedes seguir
+          comprando, solicitando presupuestos y revisando pedidos.
+        </Text>
+      </div>
+    )
+  }
 
   return (
     <div className="w-full">

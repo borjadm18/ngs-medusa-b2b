@@ -20,7 +20,9 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
   let freeShippingPrices: StoreFreeShippingPrice[] = []
 
   if (cart) {
-    freeShippingPrices = await listCartFreeShippingPrices(cart.id)
+    freeShippingPrices = await listCartFreeShippingPrices(cart.id).catch(
+      () => []
+    )
   }
 
   return (

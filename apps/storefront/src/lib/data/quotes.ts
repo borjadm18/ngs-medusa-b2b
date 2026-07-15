@@ -48,15 +48,19 @@ export const fetchQuotes = async (query?: QuoteFilterParams) => {
     ...(await getCacheOptions("quotes")),
   }
 
-  return sdk.client.fetch<StoreQuotesResponse>(
-    `/store/quotes?order=-created_at`,
-    {
+  return sdk.client
+    .fetch<StoreQuotesResponse>(`/store/quotes?order=-created_at`, {
       method: "GET",
       query,
       headers,
       next,
-    }
-  )
+    })
+    .catch(() => ({
+      quotes: [],
+      count: 0,
+      offset: 0,
+      limit: 0,
+    }))
 }
 
 export const fetchQuote = async (id: string, query?: QuoteFilterParams) => {

@@ -40,9 +40,8 @@ export const listApprovals = async ({
     ...(await getCacheOptions("approvals")),
   }
 
-  const result = await sdk.client.fetch<StoreApprovalsResponse>(
-    `/store/approvals`,
-    {
+  const result = await sdk.client
+    .fetch<StoreApprovalsResponse>(`/store/approvals`, {
       query: {
         status,
         type,
@@ -54,8 +53,13 @@ export const listApprovals = async ({
       headers,
       next,
       credentials: "include",
-    }
-  )
+    })
+    .catch(() => ({
+      carts_with_approvals: [],
+      count: 0,
+      offset,
+      limit,
+    }))
 
   return result
 }
