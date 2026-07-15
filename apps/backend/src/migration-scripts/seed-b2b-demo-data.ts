@@ -823,9 +823,13 @@ async function seedDemoQuotes({
       continue;
     }
 
-    if (
-      existingQuotes.some((quote: any) => quote.customer_id === customer.id)
-    ) {
+    const hasOpenDemoQuote = existingQuotes.some(
+      (quote: any) =>
+        quote.customer_id === customer.id &&
+        ["pending_merchant", "pending_customer"].includes(quote.status)
+    );
+
+    if (hasOpenDemoQuote) {
       continue;
     }
 

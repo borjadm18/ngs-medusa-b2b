@@ -20,6 +20,7 @@
     "smoke:catalog-rules": "node scripts/smoke-catalog-rules.mjs",
     "smoke:brand-profile": "node scripts/smoke-brand-profile.mjs",
     "smoke:assets": "node scripts/smoke-assets.mjs",
+    "smoke:demo-readiness": "node scripts/smoke-demo-readiness.mjs",
     "test": "turbo run test",
     "test:integration:http": "turbo run test:integration:http",
     "test:integration:modules": "turbo run test:integration:modules",

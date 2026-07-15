@@ -124,12 +124,18 @@ const QuoteDetails: React.FC<QuoteDetailsProps> = ({
               <PromptModal
                 title="Rechazar presupuesto"
                 description="Esta accion no se puede deshacer."
-                handleAction={() => {
+                handleAction={async () => {
                   setIsRejecting(true)
 
-                  rejectQuote(quote.id)
-                    .catch((e) => toast.error(e.message))
-                    .finally(() => setIsRejecting(false))
+                  try {
+                    await rejectQuote(quote.id)
+                    toast.success("Presupuesto rechazado")
+                    router.refresh()
+                  } catch (e) {
+                    toast.error((e as Error).message)
+                  } finally {
+                    setIsRejecting(false)
+                  }
                 }}
                 isLoading={isRejecting}
               >
@@ -141,12 +147,18 @@ const QuoteDetails: React.FC<QuoteDetailsProps> = ({
               <PromptModal
                 title="Aceptar presupuesto"
                 description="Esta accion no se puede deshacer."
-                handleAction={() => {
+                handleAction={async () => {
                   setIsAccepting(true)
 
-                  acceptQuote(quote.id)
-                    .catch((e) => toast.error(e.message))
-                    .finally(() => setIsAccepting(false))
+                  try {
+                    await acceptQuote(quote.id)
+                    toast.success("Presupuesto aceptado")
+                    router.refresh()
+                  } catch (e) {
+                    toast.error((e as Error).message)
+                  } finally {
+                    setIsAccepting(false)
+                  }
                 }}
                 isLoading={isAccepting}
               >
