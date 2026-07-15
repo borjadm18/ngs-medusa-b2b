@@ -2,8 +2,10 @@ import LocalizedClientLink from "@/modules/common/components/localized-client-li
 
 export function PriceLoginGate({
   compact = false,
+  showLink = true,
 }: {
   compact?: boolean
+  showLink?: boolean
 }) {
   if (compact) {
     return (
@@ -13,12 +15,18 @@ export function PriceLoginGate({
       >
         <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-2 gap-y-1">
           <span className="font-semibold text-red-950">Precio privado</span>
-          <LocalizedClientLink
-            href="/account"
-            className="shrink-0 font-semibold text-red-900 underline underline-offset-4"
-          >
-            Iniciar sesion
-          </LocalizedClientLink>
+          {showLink ? (
+            <LocalizedClientLink
+              href="/account"
+              className="shrink-0 font-semibold text-red-900 underline underline-offset-4"
+            >
+              Iniciar sesion
+            </LocalizedClientLink>
+          ) : (
+            <span className="shrink-0 font-semibold text-red-900 underline underline-offset-4">
+              Iniciar sesion
+            </span>
+          )}
         </div>
       </div>
     )

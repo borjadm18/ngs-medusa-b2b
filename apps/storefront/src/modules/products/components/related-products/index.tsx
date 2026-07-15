@@ -113,7 +113,7 @@ export default async function RelatedProducts({
                       {cheapestPrice?.calculated_price || "Consultar"}
                     </p>
                   ) : (
-                    <PriceLoginGate compact />
+                    <PriceLoginGate compact showLink={false} />
                   )}
                 </div>
                 <p className="mt-2 text-xs text-green-600">En stock</p>

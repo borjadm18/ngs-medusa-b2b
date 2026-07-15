@@ -79,7 +79,7 @@ export default async function ProductPreview({
               <Text className="text-neutral-600 text-[0.6rem]">Sin IVA</Text>
             </>
           ) : (
-            <PriceLoginGate compact />
+            <PriceLoginGate compact showLink={false} />
           )}
         </div>
         <div className="flex justify-between">

@@ -58,7 +58,7 @@ function ProductCard({
               {cheapestPrice?.calculated_price || "Consultar precio"}
             </p>
           ) : (
-            <PriceLoginGate compact />
+            <PriceLoginGate compact showLink={false} />
           )}
         </div>
         <span className="mt-4 inline-flex min-h-10 items-center justify-center rounded bg-neutral-100 px-4 text-sm font-semibold text-neutral-950 transition group-hover:bg-neutral-950 group-hover:text-white">
