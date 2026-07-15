@@ -2,70 +2,165 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { clientProfile } from "@/lib/client-profile"
 
-const catalogue = [
+type DemoStep = {
+  number: string
+  title: string
+  focus: string
+  show: string[]
+  say: string
+  route?: string
+  status: "ready" | "partial" | "concept"
+}
+
+const demoUsers = [
   {
-    sku: "NGS-WILD-SPACE-3",
-    name: "WILD SPACE 3",
-    family: "Audio | Video",
-    stock: "420 units",
-    eta: "48/72h",
-    retail: "339.00 EUR",
-    b2b: "271.20 EUR",
+    company: "Iberia Pro Installers",
+    buyer: "compras+buyer@iberia-pro-installers.demo",
+    approver: "compras+approver@iberia-pro-installers.demo",
+    role: "Cliente aprobado, credito 30 dias",
   },
   {
-    sku: "NGS-WILD-BASH-COMPACT",
-    name: "WILD BASH COMPACT",
-    family: "Audio | Video",
-    stock: "1,180 units",
-    eta: "24/48h",
-    retail: "109.00 EUR",
-    b2b: "87.20 EUR",
+    company: "Distribuciones Norte Audio",
+    buyer: "pedidos+buyer@dnaudio.demo",
+    approver: "pedidos+approver@dnaudio.demo",
+    role: "Distribuidor aprobado, credito 60 dias",
   },
   {
-    sku: "NGS-ROLLER-FURIA-2-BLK",
-    name: "ROLLER FURIA 2 BLACK",
-    family: "Audio | Video",
-    stock: "2,450 units",
-    eta: "Immediate",
-    retail: "39.99 EUR",
-    b2b: "31.99 EUR",
-  },
-  {
-    sku: "NGS-HUB-PRO-7",
-    name: "HUB PRO 7",
-    family: "PC Accessories",
-    stock: "610 units",
-    eta: "48/72h",
-    retail: "49.90 EUR",
-    b2b: "39.92 EUR",
-  },
-  {
-    sku: "NGS-WEBCAM-1080-PRO",
-    name: "WEBCAM 1080 PRO",
-    family: "PC Accessories",
-    stock: "320 units",
-    eta: "48/72h",
-    retail: "59.90 EUR",
-    b2b: "47.92 EUR",
+    company: "Retail Campus Group",
+    buyer: "it-procurement+buyer@retail-campus.demo",
+    approver: "it-procurement+approver@retail-campus.demo",
+    role: "Empresa pendiente, transferencia bancaria",
   },
 ]
 
-const b2bCapabilities = [
-  "Company accounts and buyer roles",
-  "Contract pricing by distributor",
-  "Private catalogues by market",
-  "Quick order by SKU or CSV",
-  "Quote request for volume deals",
-  "Approval rules by order amount",
-  "Real-time stock and lead time",
-  "ERP/PIM integration ready",
+const demoSteps: DemoStep[] = [
+  {
+    number: "0",
+    title: "El problema actual",
+    focus: "Crear identificacion con el cliente.",
+    show: ["Email de pedido", "Excel de tarifas", "ERP", "Storefront B2B"],
+    say: "Muchas empresas ya tienen ERP, CRM y sistemas internos, pero la relacion comercial sigue dependiendo de emails, llamadas y tareas manuales. La pregunta es: que parte de este proceso podria gestionar directamente el cliente.",
+    route: "/store",
+    status: "ready",
+  },
+  {
+    number: "1",
+    title: "Catalogo digital",
+    focus: "El cliente encuentra informacion sin depender del comercial.",
+    show: ["Categorias", "Producto", "Documentacion", "Precio oculto"],
+    say: "El catalogo puede ser publico. Lo que no tiene por que ser publico son las condiciones comerciales.",
+    route: "/store",
+    status: "ready",
+  },
+  {
+    number: "2",
+    title: "Registro de empresa",
+    focus: "El alta de nuevos clientes puede ser autoservicio.",
+    show: ["Formulario", "Solicitud", "Aprobacion"],
+    say: "Un nuevo cliente puede solicitar acceso sin depender de intercambios de correos. La empresa mantiene control sobre quien accede y en que condiciones.",
+    route: "/account?view=register",
+    status: "ready",
+  },
+  {
+    number: "3",
+    title: "Cuenta de empresa",
+    focus: "En B2B el cliente es una organizacion.",
+    show: ["Empresa", "Usuarios", "Direcciones", "Historial"],
+    say: "En B2C hablamos de usuarios. En B2B hablamos de empresas, equipos, direcciones, historial y condiciones comerciales.",
+    route: "/account/company",
+    status: "ready",
+  },
+  {
+    number: "4",
+    title: "Roles y aprobaciones",
+    focus: "La plataforma refleja la estructura de compra del cliente.",
+    show: ["Comprador", "Aprobador", "Pedido pendiente", "Aprobacion"],
+    say: "No todas las personas pueden comprar lo mismo. Muchas empresas tienen limites, aprobaciones y responsabilidades distintas.",
+    route: "/account/approvals",
+    status: "ready",
+  },
+  {
+    number: "5",
+    title: "Condiciones comerciales",
+    focus: "Cada cliente ve sus propias condiciones.",
+    show: ["Mismo producto", "Dos clientes", "Dos precios"],
+    say: "En B2B no existe un unico precio. Cada cliente puede tener condiciones negociadas diferentes y la plataforma las aplica automaticamente.",
+    route: "/store",
+    status: "partial",
+  },
+  {
+    number: "6",
+    title: "Quick Order",
+    focus: "Comprar rapido.",
+    show: ["Busqueda por SKU", "Varias referencias", "Pedido masivo"],
+    say: "Un comprador profesional normalmente ya sabe que necesita. Quiere introducir referencias, cantidades y generar el pedido rapidamente.",
+    route: "/account/quick-order",
+    status: "ready",
+  },
+  {
+    number: "7",
+    title: "Solicitud de presupuesto",
+    focus: "Digitalizar la negociacion.",
+    show: ["Carrito", "Solicitar presupuesto", "Revision", "Conversion a pedido"],
+    say: "No todas las compras son inmediatas. El presupuesto deja de vivir en emails y pasa a formar parte del proceso digital.",
+    route: "/account/quotes",
+    status: "ready",
+  },
+  {
+    number: "8",
+    title: "Checkout B2B",
+    focus: "El pedido recoge toda la informacion operativa.",
+    show: ["Direccion", "PO Number", "Condiciones de pago", "Confirmacion"],
+    say: "Una empresa no compra igual que un consumidor. Necesita indicar donde entregar, como facturar y en que condiciones comprar.",
+    route: "/cart",
+    status: "ready",
+  },
+  {
+    number: "9",
+    title: "Reorder",
+    focus: "La mayoria de compras B2B son recurrentes.",
+    show: ["Historial", "Repetir pedido", "Confirmar"],
+    say: "El cliente no deberia reconstruir un pedido desde cero cada vez. Puede reutilizar pedidos anteriores y ajustarlos si es necesario.",
+    route: "/account/orders",
+    status: "partial",
+  },
+  {
+    number: "10",
+    title: "Workflows",
+    focus: "Automatizar procesos.",
+    show: ["Solicitud", "Aprobacion", "Tarifa asignada", "Acceso concedido"],
+    say: "Lo importante no es unicamente digitalizar pantallas. Tambien es digitalizar procesos.",
+    status: "partial",
+  },
+  {
+    number: "11",
+    title: "Integraciones",
+    focus: "El ecommerce forma parte del ecosistema.",
+    show: ["ERP", "CRM", "PIM", "WMS"],
+    say: "El ecommerce no sustituye a los sistemas existentes. Se conecta con ellos y cada sistema mantiene su responsabilidad.",
+    status: "concept",
+  },
+  {
+    number: "12",
+    title: "Extensibilidad",
+    focus: "Aqui brilla Medusa.",
+    show: ["Procesos propios", "Campos propios", "Integraciones"],
+    say: "Ninguna empresa funciona exactamente igual. La plataforma debe adaptarse al negocio, no obligar al negocio a adaptarse a una herramienta cerrada.",
+    status: "ready",
+  },
 ]
 
-const quickOrderRows = [
-  ["NGS-WILD-BASH-COMPACT", "240", "87.20 EUR", "20,928.00 EUR"],
-  ["NGS-ROLLER-FURIA-2-BLK", "600", "31.99 EUR", "19,194.00 EUR"],
-  ["NGS-HUB-PRO-7", "180", "39.92 EUR", "7,185.60 EUR"],
-]
+const statusLabel = {
+  ready: "Listo para mostrar",
+  partial: "Mostrar con contexto",
+  concept: "Explicar como arquitectura",
+}
+
+const statusClassName = {
+  ready: "border-green-200 bg-green-50 text-green-800",
+  partial: "border-amber-200 bg-amber-50 text-amber-800",
+  concept: "border-neutral-200 bg-neutral-100 text-neutral-700",
+}
 
 export default async function NgsPocPage(props: {
   params: Promise<{ countryCode: string }>
@@ -77,203 +172,174 @@ export default async function NgsPocPage(props: {
   const { countryCode } = await props.params
 
   return (
-    <main className="bg-[#f7f7f3] text-neutral-950">
-      <section className="border-b border-neutral-200 bg-white">
-        <div className="content-container grid gap-10 py-12 small:grid-cols-[1.15fr_0.85fr] small:py-16">
-          <div className="flex flex-col justify-center gap-7">
-            <div className="flex flex-wrap items-center gap-3 text-small-semi uppercase tracking-normal text-neutral-600">
-              <span className="rounded-full border border-neutral-300 px-3 py-1">
-                Medusa B2B POC
-              </span>
-              <span>NGS distributor portal</span>
-            </div>
-            <div className="max-w-3xl">
-              <h1 className="text-[42px] font-semibold leading-[1.05] small:text-[64px]">
-                NGS wholesale commerce, built around accounts, stock and speed.
-              </h1>
-              <p className="mt-6 max-w-2xl text-large-regular text-neutral-700">
-                A focused proof of concept for distributors and corporate buyers:
-                contract pricing, quick replenishment, quote requests, approval
-                flows and ERP-ready inventory.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
+    <main className="bg-white text-neutral-950">
+      <section className="border-b border-neutral-200 bg-neutral-950 text-white">
+        <div className="content-container grid gap-8 py-10 small:grid-cols-[1fr_360px] small:py-14">
+          <div>
+            <p className="text-small-semi uppercase tracking-normal text-red-300">
+              Demo B2B playbook
+            </p>
+            <h1 className="mt-3 max-w-4xl text-[38px] font-semibold leading-tight small:text-[58px]">
+              Digitalizar la relacion comercial B2B, no solo montar una tienda.
+            </h1>
+            <p className="mt-5 max-w-3xl text-base-regular leading-7 text-neutral-300">
+              Este guion convierte el POC de Medusa en una demo clara: problema,
+              pantalla e impacto. La reunion debe demostrar catalogo,
+              condiciones comerciales, negociacion, compra, automatizacion e
+              integracion como un unico proceso.
+            </p>
+            <div className="mt-7 flex flex-wrap gap-3">
               <Link
                 href={`/${countryCode}/store`}
-                className="rounded-full bg-neutral-950 px-5 py-3 text-small-semi text-white"
+                className="rounded border border-white bg-white px-4 py-2 text-small-semi text-neutral-950"
               >
-                View live catalogue
+                Abrir catalogo
               </Link>
               <Link
-                href={`/${countryCode}/account`}
-                className="rounded-full border border-neutral-300 px-5 py-3 text-small-semi"
+                href={`/${countryCode}/account/quotes`}
+                className="rounded border border-white/30 px-4 py-2 text-small-semi text-white"
               >
-                Open B2B account area
+                Ver presupuestos
               </Link>
             </div>
           </div>
 
-          <div className="grid content-start gap-4">
-            <div className="rounded-lg border border-neutral-200 bg-[#101820] p-5 text-white">
-              <p className="text-small-semi uppercase tracking-normal text-[#93c5fd]">
-                Demo account
-              </p>
-              <h2 className="mt-3 text-xl-semi">Iberia Retail Distribution</h2>
-              <div className="mt-6 grid grid-cols-2 gap-3 text-small-regular">
-                <Metric label="Role" value="Distributor" />
-                <Metric label="Price list" value="Gold -20%" />
-                <Metric label="Credit limit" value="75,000 EUR" />
-                <Metric label="Approval" value="Over 10,000 EUR" />
-              </div>
+          <aside className="rounded-lg border border-white/15 bg-white/10 p-5">
+            <p className="text-small-semi uppercase tracking-normal text-neutral-300">
+              Regla de oro
+            </p>
+            <div className="mt-4 grid gap-3">
+              <PlaybookFormula label="Problema" value="Que duele hoy" />
+              <PlaybookFormula label="Mostrar" value="Pantalla o flujo" />
+              <PlaybookFormula label="Impacto" value="Que cambia para negocio" />
             </div>
-            <div className="rounded-lg border border-neutral-200 bg-white p-5">
-              <p className="text-small-semi uppercase tracking-normal text-neutral-500">
-                Why this matters
-              </p>
-              <p className="mt-3 text-base-regular text-neutral-700">
-                NGS already exposes catalogue, cart, stock, payments and several
-                markets online. The POC shows how Medusa adds the B2B layer:
-                accounts, negotiated pricing, approvals, quotes and operational
-                integrations.
-              </p>
-            </div>
-          </div>
+          </aside>
         </div>
       </section>
 
-      <section className="content-container py-10">
-        <div className="grid gap-3 small:grid-cols-4">
-          {b2bCapabilities.map((item) => (
-            <div
-              key={item}
-              className="rounded-lg border border-neutral-200 bg-white px-4 py-4 text-small-semi"
-            >
-              {item}
+      <section className="content-container grid gap-4 py-8 small:grid-cols-3">
+        {demoUsers.map((user) => (
+          <div
+            key={user.company}
+            className="rounded-lg border border-neutral-200 bg-neutral-50 p-4"
+          >
+            <p className="text-small-semi text-neutral-950">{user.company}</p>
+            <p className="mt-2 text-small-regular text-neutral-600">
+              {user.role}
+            </p>
+            <div className="mt-4 grid gap-1 text-[12px] text-neutral-700">
+              <p>
+                <span className="font-semibold">Comprador:</span> {user.buyer}
+              </p>
+              <p>
+                <span className="font-semibold">Aprobador:</span>{" "}
+                {user.approver}
+              </p>
+              <p>
+                <span className="font-semibold">Password:</span> Demo123!
+              </p>
             </div>
+          </div>
+        ))}
+      </section>
+
+      <section className="content-container pb-12">
+        <div className="mb-5 flex flex-col gap-2 small:flex-row small:items-end small:justify-between">
+          <div>
+            <p className="text-small-semi uppercase tracking-normal text-red-700">
+              Recorrido recomendado
+            </p>
+            <h2 className="mt-1 text-2xl-semi">
+              13 bloques para una demo B2B industrial
+            </h2>
+          </div>
+          <p className="max-w-xl text-small-regular text-neutral-600">
+            No hace falta mostrar todo con la misma profundidad. La clave es
+            mantener ritmo y volver siempre a problema, pantalla e impacto.
+          </p>
+        </div>
+
+        <div className="grid gap-3">
+          {demoSteps.map((step) => (
+            <article
+              key={step.number}
+              className="grid gap-4 rounded-lg border border-neutral-200 bg-white p-4 small:grid-cols-[72px_1fr_260px]"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded border border-neutral-200 bg-neutral-50 text-xl-semi">
+                {step.number}
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-large-semi">{step.title}</h3>
+                  <span
+                    className={`rounded border px-2 py-1 text-[11px] font-semibold ${statusClassName[step.status]}`}
+                  >
+                    {statusLabel[step.status]}
+                  </span>
+                </div>
+                <p className="mt-2 text-small-semi text-neutral-700">
+                  {step.focus}
+                </p>
+                <p className="mt-3 max-w-4xl text-small-regular leading-6 text-neutral-600">
+                  {step.say}
+                </p>
+              </div>
+              <div className="grid content-start gap-3 rounded border border-neutral-200 bg-neutral-50 p-3">
+                <p className="text-[11px] font-semibold uppercase text-neutral-500">
+                  Mostrar
+                </p>
+                <ul className="grid gap-1 text-small-regular text-neutral-700">
+                  {step.show.map((item) => (
+                    <li key={item}>- {item}</li>
+                  ))}
+                </ul>
+                {step.route && (
+                  <Link
+                    href={`/${countryCode}${step.route}`}
+                    className="mt-2 inline-flex w-fit rounded border border-neutral-950 bg-neutral-950 px-3 py-2 text-small-semi text-white"
+                  >
+                    Abrir pantalla
+                  </Link>
+                )}
+              </div>
+            </article>
           ))}
         </div>
       </section>
 
-      <section className="content-container grid gap-6 pb-12 small:grid-cols-[1fr_420px]">
-        <div className="rounded-lg border border-neutral-200 bg-white">
-          <div className="flex flex-col gap-2 border-b border-neutral-200 p-5 small:flex-row small:items-end small:justify-between">
-            <div>
-              <p className="text-small-semi uppercase tracking-normal text-neutral-500">
-                Contract catalogue
-              </p>
-              <h2 className="mt-2 text-xl-semi">Products with B2B price and availability</h2>
-            </div>
-            <span className="text-small-regular text-neutral-500">
-              Source families mirror NGS public catalogue.
-            </span>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-left text-small-regular">
-              <thead className="bg-neutral-50 text-small-semi text-neutral-500">
-                <tr>
-                  <th className="px-5 py-3">SKU</th>
-                  <th className="px-5 py-3">Product</th>
-                  <th className="px-5 py-3">Family</th>
-                  <th className="px-5 py-3">Stock</th>
-                  <th className="px-5 py-3">ETA</th>
-                  <th className="px-5 py-3">Retail</th>
-                  <th className="px-5 py-3">B2B</th>
-                </tr>
-              </thead>
-              <tbody>
-                {catalogue.map((item) => (
-                  <tr key={item.sku} className="border-t border-neutral-100">
-                    <td className="px-5 py-4 font-mono text-[12px]">{item.sku}</td>
-                    <td className="px-5 py-4 text-small-semi">{item.name}</td>
-                    <td className="px-5 py-4">{item.family}</td>
-                    <td className="px-5 py-4">{item.stock}</td>
-                    <td className="px-5 py-4">{item.eta}</td>
-                    <td className="px-5 py-4 text-neutral-500">{item.retail}</td>
-                    <td className="px-5 py-4 text-small-semi">{item.b2b}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="grid gap-6">
+      <section className="border-t border-neutral-200 bg-neutral-50">
+        <div className="content-container grid gap-6 py-10 small:grid-cols-[1fr_1fr]">
           <div className="rounded-lg border border-neutral-200 bg-white p-5">
-            <p className="text-small-semi uppercase tracking-normal text-neutral-500">
-              Quick order
-            </p>
-            <h2 className="mt-2 text-xl-semi">CSV or SKU replenishment</h2>
-            <div className="mt-5 grid gap-3">
-              {quickOrderRows.map(([sku, qty, price, total]) => (
-                <div
-                  key={sku}
-                  className="grid grid-cols-[1fr_56px] gap-3 rounded-md border border-neutral-200 p-3"
-                >
-                  <div>
-                    <p className="font-mono text-[12px]">{sku}</p>
-                    <p className="mt-1 text-small-regular text-neutral-500">
-                      {price} per unit
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-small-semi">{qty}</p>
-                    <p className="mt-1 text-[11px] text-neutral-500">units</p>
-                  </div>
-                  <p className="col-span-2 border-t border-neutral-100 pt-3 text-small-semi">
-                    {total}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-lg border border-[#f4c430] bg-[#fff9db] p-5">
-            <p className="text-small-semi uppercase tracking-normal text-[#8a6d00]">
-              Approval triggered
-            </p>
-            <h2 className="mt-2 text-xl-semi">Order total: 47,307.60 EUR</h2>
-            <p className="mt-3 text-base-regular text-neutral-700">
-              This cart exceeds the distributor threshold. Medusa routes it to a
-              sales manager, keeps the cart locked, and logs the approval history.
+            <h2 className="text-xl-semi">Cierre recomendado</h2>
+            <p className="mt-3 text-base-regular leading-7 text-neutral-700">
+              Lo que hemos visto no es una tienda online. Es la digitalizacion
+              de la relacion comercial entre una empresa y sus clientes:
+              catalogo, condiciones comerciales, negociacion, compra,
+              automatizacion e integracion trabajando como un unico proceso.
             </p>
           </div>
-        </div>
-      </section>
-
-      <section className="border-y border-neutral-200 bg-white">
-        <div className="content-container grid gap-6 py-10 small:grid-cols-3">
-          <DemoColumn
-            title="RFQ to order"
-            body="For large speaker or accessory bundles, the buyer can request a quote, negotiate with sales, and convert the accepted quote to an order."
-          />
-          <DemoColumn
-            title="ERP and PIM fit"
-            body="Products, prices, stock, customers, orders and invoices can be owned by external systems while Medusa orchestrates commerce workflows."
-          />
-          <DemoColumn
-            title="Multi-market storefront"
-            body="The current NGS footprint across languages and regions maps naturally to Medusa regions, sales channels and publishable API keys."
-          />
+          <div className="rounded-lg border border-neutral-200 bg-white p-5">
+            <h2 className="text-xl-semi">Prioridad despues de la demo</h2>
+            <ul className="mt-3 grid gap-2 text-base-regular text-neutral-700">
+              <li>- Reorder mas visible desde historial de pedidos.</li>
+              <li>- Comparativa guiada de dos clientes con precios distintos.</li>
+              <li>- Workflow visual administrable para onboarding y tarifas.</li>
+              <li>- Pantalla conceptual de integraciones ERP/CRM/PIM/WMS.</li>
+            </ul>
+          </div>
         </div>
       </section>
     </main>
   )
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
+function PlaybookFormula({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-white/15 bg-white/10 p-3">
-      <p className="text-[11px] uppercase text-white/60">{label}</p>
-      <p className="mt-1 text-small-semi">{value}</p>
-    </div>
-  )
-}
-
-function DemoColumn({ title, body }: { title: string; body: string }) {
-  return (
-    <div className="rounded-lg border border-neutral-200 bg-[#f7f7f3] p-5">
-      <h3 className="text-large-semi">{title}</h3>
-      <p className="mt-3 text-base-regular text-neutral-700">{body}</p>
+    <div className="rounded border border-white/15 bg-neutral-950/40 p-3">
+      <p className="text-[11px] font-semibold uppercase text-red-200">
+        {label}
+      </p>
+      <p className="mt-1 text-small-regular text-white">{value}</p>
     </div>
   )
 }
