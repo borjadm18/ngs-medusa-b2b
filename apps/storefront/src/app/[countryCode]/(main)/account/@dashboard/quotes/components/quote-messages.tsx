@@ -78,13 +78,17 @@ const QuoteMessages = ({
           >
             <div className="font-medium font-sans txt-compact-small text-ui-fg-subtle ">
               {!!message.admin &&
-                `${message.admin.first_name} ${message.admin.last_name}`}
+                `${message.admin.first_name || ""} ${
+                  message.admin.last_name || ""
+                }`.trim()}
 
               {!!message.customer &&
-                `${message.customer.first_name} ${message.customer.last_name}`}
+                `${message.customer.first_name || ""} ${
+                  message.customer.last_name || ""
+                }`.trim()}
             </div>
 
-            {!!message.item_id && (
+            {!!message.item_id && previewItemsMap.has(message.item_id) && (
               <div className="border border-dashed border-neutral-400 rounded-md my-2 px-4 py-2">
                 <QuoteTableItem
                   key={message.item_id}

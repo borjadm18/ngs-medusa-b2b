@@ -3,7 +3,7 @@ import { Heading } from "@medusajs/ui"
 import QuotesOverview from "./components/quotes-overview"
 
 export default async function Quotes() {
-  const { quotes } = await fetchQuotes()
+  const { quotes = [] } = await fetchQuotes().catch(() => ({ quotes: [] }))
 
   return (
     <div className="w-full" data-testid="quotes-page-wrapper">
@@ -12,7 +12,7 @@ export default async function Quotes() {
       </div>
 
       <div>
-        <QuotesOverview quotes={quotes!} />
+        <QuotesOverview quotes={quotes} />
       </div>
     </div>
   )

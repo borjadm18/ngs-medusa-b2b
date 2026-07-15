@@ -42,7 +42,7 @@ const RemoveEmployeePrompt = ({ employee }: { employee: QueryEmployee }) => {
           <Prompt.Title>Remove Employee</Prompt.Title>
           <Prompt.Description>
             Are you sure you want to remove{" "}
-            <strong>{employee.customer.email}</strong> from your team? They will
+            <strong>{employee.customer?.email || "este usuario"}</strong> from your team? They will
             no longer be able to purchase on behalf of your company.
           </Prompt.Description>
         </Prompt.Header>
@@ -78,11 +78,11 @@ const Employee = ({
   const [employeeData, setEmployeeData] = useState({
     id: employee.id,
     company_id: employee.company_id,
-    spending_limit: employee.spending_limit.toString(),
+    spending_limit: String(employee.spending_limit || 0),
     is_admin: employee.is_admin,
   })
 
-  const isCurrentUser = employee.customer.id === customer?.id
+  const isCurrentUser = employee.customer?.id === customer?.id
 
   const handleSubmit = async () => {
     const updateData = {
@@ -109,7 +109,8 @@ const Employee = ({
       <div className="flex justify-between p-4 border-b border-neutral-200">
         <div className="flex flex-col">
           <Text className=" text-neutral-950 font-medium">
-            {employee.customer.first_name} {employee.customer.last_name}{" "}
+            {employee.customer?.first_name || "Usuario"}{" "}
+            {employee.customer?.last_name || ""}{" "}
             {isCurrentUser && "(You)"}{" "}
             {employee.is_admin && (
               <>
@@ -119,11 +120,11 @@ const Employee = ({
             )}
           </Text>
           <div className="flex gap-x-2 small:flex-row flex-col">
-            <Text className=" text-neutral-500">{employee.customer.email}</Text>
+            <Text className=" text-neutral-500">{employee.customer?.email || "-"}</Text>
             <Text className=" text-neutral-500 hidden small:block">
               {" • "}
             </Text>
-            <Text className=" text-neutral-500">{employee.customer.phone}</Text>
+            <Text className=" text-neutral-500">{employee.customer?.phone || "-"}</Text>
             <Text className=" text-neutral-500 hidden small:block">
               {" • "}
             </Text>
