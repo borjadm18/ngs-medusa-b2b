@@ -21,6 +21,7 @@
     "smoke:brand-profile": "node scripts/smoke-brand-profile.mjs",
     "smoke:assets": "node scripts/smoke-assets.mjs",
     "smoke:demo-readiness": "node scripts/smoke-demo-readiness.mjs",
+    "smoke:storefront-account": "node scripts/smoke-storefront-account.mjs",
     "test": "turbo run test",
     "test:integration:http": "turbo run test:integration:http",
     "test:integration:modules": "turbo run test:integration:modules",
