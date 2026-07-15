@@ -10,8 +10,8 @@ const EmployeeWrapper = async ({
   employee: QueryEmployee
   company: QueryCompany
 }) => {
-  const customer = await retrieveCustomer()
-  const customerOrders = await listOrders()
+  const customer = await retrieveCustomer().catch(() => null)
+  const customerOrders = await listOrders().catch(() => [])
   const orderIds = customerOrders.map((order) => order.id)
 
   const orders =

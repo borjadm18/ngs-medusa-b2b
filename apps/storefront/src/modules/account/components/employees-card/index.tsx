@@ -12,7 +12,8 @@ const EmployeesCard = async ({ company }: { company: QueryCompany }) => {
       <div className="flex flex-col">
         {employees &&
           employees
-            .sort((a) => (a.customer.email === customer?.email ? -1 : 1))
+            .filter((employee) => employee.customer)
+            .sort((a) => (a.customer?.email === customer?.email ? -1 : 1))
             .map((employee) => (
               <EmployeeWrapper
                 key={employee.id}

@@ -52,12 +52,14 @@ export default async function Company() {
         </Heading>
         <EmployeesCard company={company} />
       </div>
-      <div className="mb-8 flex flex-col gap-y-4">
-        <Heading level="h2" className="text-lg text-neutral-950">
-          Invitar usuarios
-        </Heading>
-        <InviteEmployeeCard company={company} />
-      </div>
+      {customer.employee?.is_admin && (
+        <div className="mb-8 flex flex-col gap-y-4">
+          <Heading level="h2" className="text-lg text-neutral-950">
+            Invitar usuarios
+          </Heading>
+          <InviteEmployeeCard company={company} />
+        </div>
+      )}
     </div>
   )
 }
