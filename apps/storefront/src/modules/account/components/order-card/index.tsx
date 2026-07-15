@@ -1,64 +1,38 @@
-"use client"
-
-import { addToCartEventBus } from "@/lib/data/cart-event-bus"
 import { convertToLocale } from "@/lib/util/money"
 import LocalizedClientLink from "@/modules/common/components/localized-client-link"
 import CalendarIcon from "@/modules/common/icons/calendar"
 import DocumentIcon from "@/modules/common/icons/document"
-import { HttpTypes, StoreProduct, StoreProductVariant } from "@medusajs/types"
-import { Button, clx, Container, toast } from "@medusajs/ui"
+import { HttpTypes } from "@medusajs/types"
+import { Button, clx, Container } from "@medusajs/ui"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
-import { useMemo } from "react"
+import ReorderButton from "./reorder-button"
 
 type OrderCardProps = {
   order: HttpTypes.StoreOrder
 }
 
 const OrderCard = ({ order }: OrderCardProps) => {
-  const router = useRouter()
   const createdAt = new Date(order.created_at)
-  const numberOfUnits = useMemo(() => {
-    return (
-      order.items?.reduce((acc, item) => {
-        return acc + item.quantity
-      }, 0) ?? 0
-    )
-  }, [order])
-  const reorderableItems = useMemo(
-    () =>
-      (order.items || []).filter(
-        (item) => item.variant_id && item.variant && item.product
-      ),
-    [order.items]
-  )
-
-  const handleReorder = () => {
-    if (!reorderableItems.length) {
-      toast.error("No hay lineas disponibles para repetir")
-      return
-    }
-
-    addToCartEventBus.emitCartAdd({
-      regionId: order.region_id || "",
-      lineItems: reorderableItems.map((item) => ({
-        productVariant: {
-          ...(item.variant as StoreProductVariant),
-          product: item.product as StoreProduct,
-        },
-        quantity: item.quantity,
-        metadata: (item.metadata || {}) as Record<string, unknown>,
-      })),
-    })
-
-    toast.success(`${reorderableItems.length} lineas enviadas al carrito`)
-    router.push("/cart")
-  }
+  const numberOfUnits =
+    order.items?.reduce((acc, item) => {
+      return acc + item.quantity
+    }, 0) ?? 0
+  const reorderableItems = (order.items || []).filter((item) => item.variant_id)
+  const reorderLineItems = reorderableItems.map((item) => ({
+    variant_id: item.variant_id as string,
+    quantity: item.quantity,
+    metadata: (item.metadata || {}) as Record<string, unknown>,
+  }))
 
   const reorderSummary =
     reorderableItems.length > 0
       ? `${reorderableItems.length} referencias listas para repetir`
       : "Sin lineas repetibles"
+
+  const orderTotal = convertToLocale({
+    amount: order.total,
+    currency_code: order.currency_code,
+  })
 
   return (
     <Container className="flex flex-col gap-4 rounded-md bg-white p-4">
@@ -128,24 +102,17 @@ const OrderCard = ({ order }: OrderCardProps) => {
         <div className="flex flex-wrap items-center gap-2 small:justify-end">
           <div className="rounded border border-neutral-200 bg-neutral-50 px-3 py-2 text-small-regular text-ui-fg-base">
             <span className="font-semibold" data-testid="order-amount">
-              {convertToLocale({
-                amount: order.total,
-                currency_code: order.currency_code,
-              })}
+              {orderTotal}
             </span>
             <span className="px-2 text-neutral-400">/</span>
             <span>{`${numberOfUnits} ${numberOfUnits > 1 ? "uds" : "ud"}`}</span>
           </div>
 
-          <Button
-            data-testid="card-reorder-button"
-            variant="primary"
-            className="rounded text-xs"
-            disabled={!reorderableItems.length}
-            onClick={handleReorder}
-          >
-            Repetir pedido
-          </Button>
+          <ReorderButton
+            disabled={!reorderLineItems.length}
+            lineItems={reorderLineItems}
+            lineCount={reorderLineItems.length}
+          />
           <LocalizedClientLink href={`/account/orders/details/${order.id}`}>
             <Button
               data-testid="card-details-link"

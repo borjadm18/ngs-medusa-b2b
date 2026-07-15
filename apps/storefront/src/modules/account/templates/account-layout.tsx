@@ -16,7 +16,7 @@ const AccountLayout: React.FC<AccountLayoutProps> = async ({
   const { carts_with_approvals } = await listApprovals({
     type: ApprovalType.ADMIN,
     status: ApprovalStatusType.PENDING,
-  })
+  }).catch(() => ({ carts_with_approvals: [] }))
 
   const numPendingApprovals = carts_with_approvals?.length || 0
 
