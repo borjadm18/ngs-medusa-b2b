@@ -319,7 +319,15 @@ async function seedCompanies(companyModule: any, companies: DemoCompany[]) {
       company_id: created.id,
       spending_limit: Math.round(company.spendingLimit / 4),
       is_admin: false,
-      role: company.spendingLimit > 30000 ? "approver" : "buyer",
+      role: "buyer",
+      status: "active",
+    });
+
+    await companyModule.createEmployees({
+      company_id: created.id,
+      spending_limit: Math.round(company.spendingLimit / 2),
+      is_admin: false,
+      role: "approver",
       status: "active",
     });
 
@@ -347,6 +355,7 @@ async function seedDemoCustomers(
   logger: any
 ) {
   const customerModule = container.resolve<any>(Modules.CUSTOMER);
+  const authModule = container.resolve<any>(Modules.AUTH);
   const companyModule = container.resolve<any>(COMPANY_MODULE);
   const existingCustomers = await customerModule.listCustomers({});
   const existingByEmail = new Map(
@@ -357,45 +366,131 @@ async function seedDemoCustomers(
     const employees = await companyModule.listEmployees({
       company_id: company.id,
     });
-    const employee = employees[0];
+    const activeEmployees = employees.filter(
+      (employee: any) => employee.status !== "invited"
+    );
 
-    if (!employee) {
+    if (!activeEmployees.length) {
       continue;
     }
 
-    const email = company.email.replace("@", "+buyer@");
-    const existing = existingByEmail.get(email);
-    const customer =
-      existing ||
-      (await customerModule.createCustomers({
-        email,
-        first_name: company.name.split(" ")[0],
-        last_name: "Buyer",
-        metadata: {
-          demo_seed: true,
-          company_name: company.name,
-          b2b_role: employee.is_admin ? "admin_compras" : "comprador",
-          demo_password: "Demo123!",
-          demo_note:
-            "Cliente demo creado por seed. Si no tiene auth identity, registrarlo desde storefront con este email.",
-        },
-      }));
+    for (const employee of activeEmployees) {
+      const role = employee.role || (employee.is_admin ? "company_admin" : "buyer");
+      const roleSlug = role === "company_admin" ? "admin" : role;
+      const email = company.email.replace("@", `+${roleSlug}@`);
+      const existing = existingByEmail.get(email);
+      const customer =
+        existing ||
+        (await customerModule.createCustomers({
+          email,
+          first_name: company.name.split(" ")[0],
+          last_name: formatDemoRole(role),
+          metadata: {
+            demo_seed: true,
+            company_name: company.name,
+            b2b_role: role,
+            demo_password: "Demo123!",
+          },
+        }));
 
-    if (!existing) {
-      await link
-        .create({
-          [COMPANY_MODULE]: {
-            employee_id: employee.id,
-          },
-          [Modules.CUSTOMER]: {
-            customer_id: customer.id,
-          },
-        })
-        .catch(() => {
-          logger.warn(`Could not link demo customer ${email} to employee.`);
-        });
+      await ensureDemoCustomerAuthIdentity({
+        authModule,
+        query: container.resolve(ContainerRegistrationKeys.QUERY),
+        customer,
+        email,
+        role,
+        logger,
+      });
+
+      if (!existing) {
+        await link
+          .create({
+            [COMPANY_MODULE]: {
+              employee_id: employee.id,
+            },
+            [Modules.CUSTOMER]: {
+              customer_id: customer.id,
+            },
+          })
+          .catch(() => {
+            logger.warn(`Could not link demo customer ${email} to employee.`);
+          });
+      }
     }
   }
+}
+
+async function ensureDemoCustomerAuthIdentity({
+  authModule,
+  query,
+  customer,
+  email,
+  role,
+  logger,
+}: {
+  authModule: any;
+  query: any;
+  customer: any;
+  email: string;
+  role: string;
+  logger: any;
+}) {
+  const {
+    data: [providerIdentity],
+  } = await query.graph({
+    entity: "provider_identity",
+    fields: ["id"],
+    filters: {
+      provider: "emailpass",
+      entity_id: email,
+    },
+  });
+
+  if (providerIdentity) {
+    return;
+  }
+
+  try {
+    const Scrypt = require("scrypt-kdf");
+    const passwordHash = await Scrypt.kdf("Demo123!", {
+      logN: 15,
+      r: 8,
+      p: 1,
+    });
+
+    await authModule.createAuthIdentities({
+      provider_identities: [
+        {
+          provider: "emailpass",
+          entity_id: email,
+          provider_metadata: {
+            password: passwordHash.toString("base64"),
+          },
+          user_metadata: {
+            role: role === "company_admin" ? "company_admin" : role,
+          },
+        },
+      ],
+      app_metadata: {
+        customer_id: customer.id,
+      },
+    });
+  } catch (error) {
+    logger.warn(
+      `Could not create demo auth identity for ${email} (${(error as Error).message}).`
+    );
+  }
+}
+
+function formatDemoRole(role: string) {
+  const labels: Record<string, string> = {
+    company_admin: "Admin",
+    approver: "Aprobador",
+    buyer: "Comprador",
+    readonly: "Lectura",
+  };
+
+  return labels[role] || "Comprador";
 }
 
 async function seedOperationalStock(
