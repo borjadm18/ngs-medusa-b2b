@@ -50,6 +50,29 @@ const readMetadata = (
   }
 }
 
+const readNumberMetadata = (
+  product: HttpTypes.StoreProduct,
+  keys: string[]
+): number | undefined => {
+  const metadata = product.metadata || {}
+
+  for (const key of keys) {
+    const value = metadata[key]
+
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value
+    }
+
+    if (typeof value === "string" && value.trim()) {
+      const parsed = Number(value)
+
+      if (Number.isFinite(parsed)) {
+        return parsed
+      }
+    }
+  }
+}
+
 const profileOrDefault = (profile?: ClientProfile) => profile || clientProfile
 
 const getProductKind = (product: HttpTypes.StoreProduct): ProductKind => {
@@ -512,6 +535,70 @@ export const getProductDocuments = (
 }
 
 export const getInventorySummary = (product: HttpTypes.StoreProduct) => {
+  const b2bStatus = readMetadata(product, [
+    "b2b_stock_status",
+    "stock_status",
+    "availability_status",
+  ])?.toLowerCase()
+  const stockFree = readNumberMetadata(product, [
+    "stock_free",
+    "available_stock",
+    "stock_available",
+  ])
+  const stockReserved = readNumberMetadata(product, [
+    "stock_reserved",
+    "reserved_stock",
+  ])
+  const stockEta = readMetadata(product, ["stock_eta", "eta", "lead_time"])
+
+  if (typeof stockFree === "number" || b2bStatus) {
+    const quantity = stockFree ?? null
+    const reservedDetail =
+      typeof stockReserved === "number" && stockReserved > 0
+        ? `, ${stockReserved} reservadas`
+        : ""
+
+    if (b2bStatus?.includes("agot") || b2bStatus?.includes("sin stock")) {
+      return {
+        label: "Sin stock",
+        detail: stockEta || "Consulta plazo con soporte comercial",
+        tone: "red" as const,
+        quantity: quantity ?? 0,
+      }
+    }
+
+    if (
+      b2bStatus?.includes("limit") ||
+      (typeof stockFree === "number" && stockFree > 0 && stockFree <= 10)
+    ) {
+      return {
+        label: "Stock limitado",
+        detail:
+          typeof stockFree === "number"
+            ? `${stockFree} unidades libres${reservedDetail}`
+            : stockEta || "Disponibilidad limitada",
+        tone: "amber" as const,
+        quantity,
+      }
+    }
+
+    if (
+      b2bStatus?.includes("stock") ||
+      b2bStatus?.includes("disponible") ||
+      (typeof stockFree === "number" && stockFree > 0)
+    ) {
+      return {
+        label: "En stock",
+        detail:
+          typeof stockFree === "number"
+            ? `${stockFree} unidades libres${reservedDetail}`
+            : stockEta || "Disponibilidad B2B confirmada",
+        tone: "green" as const,
+        quantity,
+      }
+    }
+  }
+
   const managedVariants = product.variants?.filter(
     (variant) => variant.manage_inventory !== false
   )
