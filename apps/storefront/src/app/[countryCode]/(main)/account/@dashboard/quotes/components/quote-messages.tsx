@@ -52,7 +52,7 @@ const QuoteMessages = ({
       quote.draft_order?.items?.map((item: AdminOrderLineItem) => [
         item.id,
         item,
-      ])
+      ]) || []
     )
   }, [quote.draft_order])
 
@@ -94,7 +94,7 @@ const QuoteMessages = ({
                   key={message.item_id}
                   item={previewItemsMap.get(message.item_id)!}
                   originalItem={originalItemsMap.get(message.item_id)}
-                  currencyCode={quote.draft_order.currency_code}
+                  currencyCode={quote.draft_order?.currency_code || "eur"}
                 />
               </div>
             )}

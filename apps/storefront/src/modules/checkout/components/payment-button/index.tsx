@@ -111,9 +111,14 @@ const RequestApprovalButton = ({
     cartApprovalStatus === ApprovalStatusType.PENDING
 
   const createApproval = async () => {
+    if (!cart.customer?.id) {
+      toast.error("No se ha podido identificar el cliente del carrito")
+      return
+    }
+
     setSubmitting(true)
 
-    await createCartApproval(cart.id, cart.customer!.id).catch((err) => {
+    await createCartApproval(cart.id, cart.customer.id).catch((err) => {
       toast.error(err.message)
     })
 

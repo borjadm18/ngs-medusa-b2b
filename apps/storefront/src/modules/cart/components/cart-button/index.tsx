@@ -7,12 +7,14 @@ import { StoreFreeShippingPrice } from "@/types/shipping-option/http"
 
 export default async function CartButton() {
   const cart = await retrieveCart().catch(() => null)
-  const customer = await retrieveCustomer()
+  const customer = await retrieveCustomer().catch(() => null)
 
   let freeShippingPrices: StoreFreeShippingPrice[] = []
 
   if (cart) {
-    freeShippingPrices = await listCartFreeShippingPrices(cart.id)
+    freeShippingPrices = await listCartFreeShippingPrices(cart.id).catch(
+      () => []
+    )
   }
 
   return (

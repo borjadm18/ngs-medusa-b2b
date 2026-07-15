@@ -32,13 +32,14 @@ const QuoteDetails: React.FC<QuoteDetailsProps> = ({
   countryCode,
 }) => {
   const order = quote.draft_order
+  const currencyCode = order?.currency_code || "eur"
   const logisticsSummary = useMemo(
     () => getQuoteExportPackagingSummary(quote, preview),
     [quote, preview]
   )
   const originalItemsMap = useMemo(() => {
     return new Map<string, AdminOrderLineItem>(
-      order.items?.map((item: AdminOrderLineItem) => [item.id, item])
+      order?.items?.map((item: AdminOrderLineItem) => [item.id, item]) || []
     )
   }, [order])
   const router = useRouter()
@@ -74,9 +75,10 @@ const QuoteDetails: React.FC<QuoteDetailsProps> = ({
                   size="small"
                   onClick={() =>
                     router.push(
-                      `/${countryCode}/account/orders/details/${quote.draft_order_id}`
+                      `/${countryCode}/account/orders/details/${quote.draft_order_id || ""}`
                     )
                   }
+                  disabled={!quote.draft_order_id}
                 >
                   Ver pedido
                 </Button>
@@ -84,13 +86,13 @@ const QuoteDetails: React.FC<QuoteDetailsProps> = ({
             </Container>
           )}
 
-          {preview.items?.map((item) => (
+          {(preview.items || []).map((item) => (
             <Container key={item.id}>
               <QuoteTableItem
                 key={item.id}
                 item={item}
                 originalItem={originalItemsMap.get(item.id)}
-                currencyCode={order.currency_code}
+                currencyCode={currencyCode}
               />
             </Container>
           ))}
@@ -103,7 +105,7 @@ const QuoteDetails: React.FC<QuoteDetailsProps> = ({
                 </span>
 
                 <span className="txt-small text-ui-fg-subtle">
-                  {formatAmount(order.total, order.currency_code)}
+                  {formatAmount(order?.total || 0, currencyCode)}
                 </span>
               </div>
 
@@ -113,7 +115,7 @@ const QuoteDetails: React.FC<QuoteDetailsProps> = ({
                 </span>
 
                 <span className="txt-small text-ui-fg-subtle">
-                  {formatAmount(preview.total, order.currency_code)}
+                  {formatAmount(preview.total || 0, currencyCode)}
                 </span>
               </div>
             </div>
@@ -178,7 +180,7 @@ const QuoteDetails: React.FC<QuoteDetailsProps> = ({
               <span className="font-semibold text-ui-fg-subtle">
                 Presupuesto:
               </span>{" "}
-              #<span>{quote.draft_order.display_id}</span>
+              #<span>{order?.display_id || "-"}</span>
             </div>
 
             <QuoteStatusBadge status={quote.status} />
@@ -245,7 +247,7 @@ const QuoteDetails: React.FC<QuoteDetailsProps> = ({
                   {(quote.customer?.employee?.spending_limit &&
                     formatAmount(
                       quote.customer?.employee?.spending_limit || 0,
-                      order.currency_code.toUpperCase()
+                      currencyCode.toUpperCase()
                     )) ||
                     "-"}
                 </Text>
