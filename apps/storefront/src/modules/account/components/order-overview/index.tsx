@@ -8,7 +8,17 @@ import { HttpTypes } from "@medusajs/types"
 const OrderOverview = ({ orders }: { orders: HttpTypes.StoreOrder[] }) => {
   if (orders?.length) {
     return (
-      <div className="flex flex-col gap-y-2 w-full">
+      <div className="flex w-full flex-col gap-y-3">
+        <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
+          <p className="text-small-semi text-neutral-950">
+            Reorder para compras recurrentes
+          </p>
+          <p className="mt-1 text-small-regular text-neutral-600">
+            Repite un pedido anterior en un clic. El carrito conserva
+            referencias, cantidades y reglas de compra B2B para que solo tengas
+            que revisar y confirmar.
+          </p>
+        </div>
         {orders.map((o) => (
           <div key={o.id}>
             <OrderCard order={o} />

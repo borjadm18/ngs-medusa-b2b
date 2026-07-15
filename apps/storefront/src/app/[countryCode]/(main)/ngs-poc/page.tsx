@@ -149,7 +149,7 @@ const demoSteps: DemoStep[] = [
     show: ["Historial", "Repetir pedido", "Confirmar"],
     say: "El cliente no deberia reconstruir un pedido desde cero cada vez. Puede reutilizar pedidos anteriores y ajustarlos si es necesario.",
     route: "/account/orders",
-    status: "partial",
+    status: "ready",
   },
   {
     number: "10",
@@ -445,7 +445,7 @@ export default async function NgsPocPage(props: {
           <div className="rounded-lg border border-neutral-200 bg-white p-5">
             <h2 className="text-xl-semi">Prioridad despues de la demo</h2>
             <ul className="mt-3 grid gap-2 text-base-regular text-neutral-700">
-              <li>- Reorder mas visible desde historial de pedidos.</li>
+              <li>- Reorder visible desde historial de pedidos.</li>
               <li>- Comparativa guiada de dos clientes con precios distintos.</li>
               <li>- Workflow visual administrable para onboarding y tarifas.</li>
               <li>- Pantalla conceptual de integraciones ERP/CRM/PIM/WMS.</li>

@@ -170,7 +170,7 @@ Mostrar:
 Decir:
 El cliente no deberia reconstruir un pedido desde cero cada vez.
 
-Estado: parcial. Hay historial; falta hacer mas visible el boton/flujo de repetir pedido.
+Estado: listo. El historial de pedidos muestra un bloque de Reorder y un boton `Repetir pedido` que envia referencias y cantidades al carrito.
 
 ### 10. Workflows
 
@@ -222,7 +222,7 @@ Estado: listo a nivel explicacion tecnica y ejemplos ya construidos.
 ### P1 - Huecos que mas afectan al guion
 
 - Pantalla comparativa de precios por cliente. Estado: implementada en `/es/ngs-poc`.
-- Reorder mas visible.
+- Reorder mas visible. Estado: implementado desde historial de pedidos.
 - Workflow visual de onboarding/tarifas.
 - Pantalla conceptual de integraciones.
 
