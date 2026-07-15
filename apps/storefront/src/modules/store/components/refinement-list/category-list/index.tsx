@@ -1,9 +1,8 @@
 import LocalizedClientLink from "@/modules/common/components/localized-client-link"
-import Radio from "@/modules/common/components/radio"
 import SquareMinus from "@/modules/common/icons/square-minus"
 import SquarePlus from "@/modules/common/icons/square-plus"
 import { HttpTypes } from "@medusajs/types"
-import { Container, Text } from "@medusajs/ui"
+import { Container, Text, clx } from "@medusajs/ui"
 import { usePathname, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 
@@ -88,13 +87,27 @@ const CategoryList = ({
     const hasChildren = category.category_children.length > 0
     const isExpanded = expandedCategories.includes(category.id)
     const paddingLeft = getCategoryMarginLeft(category)
+    const isActive = isCurrentCategory(category.handle)
+    const productsCount = category.products?.length || 0
 
     return (
       <li key={category.id}>
-        <div className={`flex items-center gap-2 mb-2 pl-${paddingLeft}`}>
+        <div
+          className="mb-2 flex items-center gap-2"
+          style={{ paddingLeft: `${paddingLeft * 0.25}rem` }}
+        >
           {hasChildren ? (
-            <div className="flex items-center gap-2 hover:text-neutral-700">
-              <button onClick={() => toggleCategory(category.id)}>
+            <div className="flex items-center gap-2 text-neutral-500 hover:text-neutral-700">
+              <button
+                type="button"
+                aria-label={
+                  isExpanded
+                    ? `Contraer ${category.name}`
+                    : `Expandir ${category.name}`
+                }
+                aria-expanded={isExpanded}
+                onClick={() => toggleCategory(category.id)}
+              >
                 {isExpanded ? (
                   <SquareMinus className="h-3 mx-1" />
                 ) : (
@@ -103,18 +116,34 @@ const CategoryList = ({
               </button>
               <LocalizedClientLink
                 href={getCategoryHref(category.handle)}
-                className="flex gap-2 items-center hover:text-neutral-700"
+                aria-current={isActive ? "page" : undefined}
+                className={clx(
+                  "flex items-center gap-2 hover:text-neutral-700",
+                  isActive && "font-semibold text-neutral-950"
+                )}
               >
-                {category.name} ({category.products?.length})
+                {category.name} ({productsCount})
               </LocalizedClientLink>
             </div>
           ) : (
             <LocalizedClientLink
               href={getCategoryHref(category.handle)}
-              className="flex gap-2 items-center hover:text-neutral-700 text-start hover:cursor-pointer"
+              aria-current={isActive ? "page" : undefined}
+              className={clx(
+                "flex items-center gap-2 text-start text-neutral-500 hover:cursor-pointer hover:text-neutral-700",
+                isActive && "font-semibold text-neutral-950"
+              )}
             >
-              <Radio checked={isCurrentCategory(category.handle)} />
-              {category.name} ({category.products?.length})
+              <span
+                aria-hidden="true"
+                className={clx(
+                  "h-3 w-3 shrink-0 rounded-full border border-neutral-300 bg-white",
+                  isActive && "border-neutral-950 bg-neutral-950"
+                )}
+              />
+              <span>
+                {category.name} ({productsCount})
+              </span>
             </LocalizedClientLink>
           )}
         </div>
