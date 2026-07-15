@@ -1,7 +1,8 @@
+import { retrieveCustomer } from "@/lib/data/customer"
 import ApprovedApprovalRequestsAdminList from "@/modules/account/components/approval-requests-admin-list/approved-list"
 import PendingApprovalRequestsAdminList from "@/modules/account/components/approval-requests-admin-list/pending-list"
 import RejectedApprovalRequestsAdminList from "@/modules/account/components/approval-requests-admin-list/rejected-list"
-import { Heading } from "@medusajs/ui"
+import { Heading, Text } from "@medusajs/ui"
 import { Metadata } from "next"
 import { Suspense } from "react"
 
@@ -16,6 +17,19 @@ export default async function Approvals({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const urlSearchParams = await searchParams
+  const customer = await retrieveCustomer().catch(() => null)
+
+  if (!customer?.employee?.is_admin) {
+    return (
+      <div className="w-full rounded border border-neutral-200 bg-white p-6">
+        <Heading>Aprobaciones</Heading>
+        <Text className="mt-2 text-neutral-600">
+          Esta seccion esta disponible para administradores de empresa. Puedes
+          seguir comprando, solicitando presupuestos y revisando tus pedidos.
+        </Text>
+      </div>
+    )
+  }
 
   return (
     <div className="w-full flex flex-col gap-y-4">
