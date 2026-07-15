@@ -33,6 +33,33 @@ const demoUsers = [
   },
 ]
 
+const priceComparison = [
+  {
+    sku: "NGS-WILD-BASH-COMPACT-BLK",
+    product: "WILD BASH COMPACT",
+    publicPrice: "Acceso requerido",
+    iberia: "87,20 EUR",
+    dnaudio: "79,95 EUR",
+    condition: "Caja 6 uds",
+  },
+  {
+    sku: "NGS-XPRESSCAM-1080-BLK",
+    product: "XPRESSCAM 1080",
+    publicPrice: "Acceso requerido",
+    iberia: "47,92 EUR",
+    dnaudio: "44,90 EUR",
+    condition: "Caja 24 uds",
+  },
+  {
+    sku: "NGS-FUNKY-KIT-BLK",
+    product: "FUNKY KIT",
+    publicPrice: "Acceso requerido",
+    iberia: "18,90 EUR",
+    dnaudio: "17,50 EUR",
+    condition: "Min. 12 uds",
+  },
+]
+
 const demoSteps: DemoStep[] = [
   {
     number: "0",
@@ -86,7 +113,7 @@ const demoSteps: DemoStep[] = [
     show: ["Mismo producto", "Dos clientes", "Dos precios"],
     say: "En B2B no existe un unico precio. Cada cliente puede tener condiciones negociadas diferentes y la plataforma las aplica automaticamente.",
     route: "/store",
-    status: "partial",
+    status: "ready",
   },
   {
     number: "6",
@@ -243,6 +270,103 @@ export default async function NgsPocPage(props: {
         ))}
       </section>
 
+      <section className="border-y border-neutral-200 bg-neutral-50">
+        <div className="content-container grid gap-6 py-10">
+          <div className="grid gap-3 small:grid-cols-[1fr_420px] small:items-end">
+            <div>
+              <p className="text-small-semi uppercase tracking-normal text-red-700">
+                Condiciones comerciales
+              </p>
+              <h2 className="mt-1 text-2xl-semi">
+                Mismo producto, dos empresas, dos condiciones
+              </h2>
+              <p className="mt-3 max-w-3xl text-base-regular leading-7 text-neutral-700">
+                En B2B el catalogo puede ser el mismo, pero el precio, el
+                minimo de compra, la unidad logistica y las condiciones de pago
+                cambian por relacion comercial. Esta vista permite contarlo en
+                30 segundos sin cambiar de sesion.
+              </p>
+            </div>
+            <div className="rounded-lg border border-neutral-200 bg-white p-4">
+              <p className="text-[11px] font-semibold uppercase text-neutral-500">
+                Mensaje para la demo
+              </p>
+              <p className="mt-2 text-small-regular leading-6 text-neutral-700">
+                Lo importante no es ocultar precios. Lo importante es que cada
+                cliente vea automaticamente sus condiciones negociadas y compre
+                con las reglas operativas correctas.
+              </p>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white">
+            <table className="w-full min-w-[860px] text-left text-small-regular">
+              <thead className="border-b border-neutral-200 bg-white text-[11px] font-semibold uppercase text-neutral-500">
+                <tr>
+                  <th className="px-4 py-3">SKU</th>
+                  <th className="px-4 py-3">Producto</th>
+                  <th className="px-4 py-3">Visitante publico</th>
+                  <th className="px-4 py-3">Iberia Pro Installers</th>
+                  <th className="px-4 py-3">Distribuciones Norte Audio</th>
+                  <th className="px-4 py-3">Regla operativa</th>
+                </tr>
+              </thead>
+              <tbody>
+                {priceComparison.map((row) => (
+                  <tr key={row.sku} className="border-b border-neutral-100">
+                    <td className="px-4 py-4 font-mono text-[12px] text-neutral-700">
+                      {row.sku}
+                    </td>
+                    <td className="px-4 py-4 font-semibold text-neutral-950">
+                      {row.product}
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className="rounded border border-red-200 bg-red-50 px-2 py-1 text-[12px] font-semibold text-red-800">
+                        {row.publicPrice}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4">
+                      <p className="font-semibold text-neutral-950">
+                        {row.iberia}
+                      </p>
+                      <p className="mt-1 text-[12px] text-neutral-500">
+                        Credito 30 dias
+                      </p>
+                    </td>
+                    <td className="px-4 py-4">
+                      <p className="font-semibold text-neutral-950">
+                        {row.dnaudio}
+                      </p>
+                      <p className="mt-1 text-[12px] text-neutral-500">
+                        Credito 60 dias
+                      </p>
+                    </td>
+                    <td className="px-4 py-4 text-neutral-700">
+                      {row.condition}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="grid gap-3 small:grid-cols-3">
+            <ComparisonCard
+              title="Precio publico"
+              body="El visitante ve producto, documentacion y disponibilidad, pero no condiciones comerciales."
+            />
+            <ComparisonCard
+              title="Precio negociado"
+              body="Cada empresa puede tener tarifa, descuento, canal y condiciones de pago propias."
+            />
+            <ComparisonCard
+              title="Regla operativa"
+              body="La compra respeta cajas, minimos, multiplos y flujo de presupuesto cuando aplica."
+            />
+          </div>
+        </div>
+      </section>
+
       <section className="content-container pb-12">
         <div className="mb-5 flex flex-col gap-2 small:flex-row small:items-end small:justify-between">
           <div>
@@ -340,6 +464,17 @@ function PlaybookFormula({ label, value }: { label: string; value: string }) {
         {label}
       </p>
       <p className="mt-1 text-small-regular text-white">{value}</p>
+    </div>
+  )
+}
+
+function ComparisonCard({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="rounded-lg border border-neutral-200 bg-white p-4">
+      <h3 className="text-large-semi">{title}</h3>
+      <p className="mt-2 text-small-regular leading-6 text-neutral-600">
+        {body}
+      </p>
     </div>
   )
 }

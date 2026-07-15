@@ -112,7 +112,7 @@ Mostrar:
 Decir:
 En B2B no existe un unico precio. Cada cliente puede tener condiciones negociadas diferentes.
 
-Estado: parcial. Tenemos reglas y precios B2B, pero falta una pantalla comparativa simple para mostrar dos clientes en paralelo.
+Estado: listo en el playbook guiado. La pagina `/es/ngs-poc` incluye una comparativa directa de productos con visitante publico, Iberia Pro Installers y Distribuciones Norte Audio.
 
 ### 6. Quick Order
 
@@ -221,7 +221,7 @@ Estado: listo a nivel explicacion tecnica y ejemplos ya construidos.
 
 ### P1 - Huecos que mas afectan al guion
 
-- Pantalla comparativa de precios por cliente.
+- Pantalla comparativa de precios por cliente. Estado: implementada en `/es/ngs-poc`.
 - Reorder mas visible.
 - Workflow visual de onboarding/tarifas.
 - Pantalla conceptual de integraciones.
