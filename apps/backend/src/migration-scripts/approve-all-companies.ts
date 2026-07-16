@@ -18,6 +18,7 @@ export default async function approve_all_companies({
 }) {
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
   const query = container.resolve(ContainerRegistrationKeys.QUERY);
+  const pg = container.resolve<any>(ContainerRegistrationKeys.PG_CONNECTION);
   const companyModule = container.resolve<any>(COMPANY_MODULE);
   const customerModule = container.resolve<any>(Modules.CUSTOMER);
 
@@ -65,11 +66,13 @@ export default async function approve_all_companies({
     (customer: any) => customer.has_account === false
   );
 
-  for (const customer of customersWithoutAccount) {
-    await customerModule.updateCustomers({
-      id: customer.id,
-      has_account: true,
-    });
+  if (customersWithoutAccount.length) {
+    await pg.raw(
+      `update "customer" set "has_account" = true, "updated_at" = now() where "id" in (${customersWithoutAccount
+        .map(() => "?")
+        .join(", ")})`,
+      customersWithoutAccount.map((customer: any) => customer.id)
+    );
   }
 
   logger.info(`Validated ${customersWithoutAccount.length} customer accounts.`);

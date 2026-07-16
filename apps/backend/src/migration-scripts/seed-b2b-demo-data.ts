@@ -357,6 +357,7 @@ async function seedDemoCustomers(
   const customerModule = container.resolve<any>(Modules.CUSTOMER);
   const authModule = container.resolve<any>(Modules.AUTH);
   const companyModule = container.resolve<any>(COMPANY_MODULE);
+  const pg = container.resolve<any>(ContainerRegistrationKeys.PG_CONNECTION);
   const existingCustomers = await customerModule.listCustomers({});
   const existingByEmail = new Map(
     existingCustomers.map((customer: any) => [customer.email, customer])
@@ -395,10 +396,10 @@ async function seedDemoCustomers(
         }));
 
       if (existing?.has_account === false) {
-        await customerModule.updateCustomers({
-          id: existing.id,
-          has_account: true,
-        });
+        await pg.raw(
+          `update "customer" set "has_account" = true, "updated_at" = now() where "id" = ?`,
+          [existing.id]
+        );
       }
 
       await ensureDemoCustomerAuthIdentity({
