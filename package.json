@@ -15,6 +15,7 @@
     "sync:client-profile": "node scripts/sync-client-profile.mjs",
     "seed:product-catalog": "pnpm --dir apps/backend medusa exec ./src/migration-scripts/seed-product-catalog.ts",
     "seed:product-packaging": "pnpm --dir apps/backend medusa exec ./src/migration-scripts/seed-product-packaging.ts",
+    "import:novisound-products": "corepack pnpm@9.15.0 --config.engine-strict=false --filter @b2b-starter/backend exec medusa exec ./src/migration-scripts/import-novisound-products.ts",
     "seed:b2b-demo": "corepack pnpm@9.15.0 --config.engine-strict=false --filter @b2b-starter/backend exec medusa exec ./src/migration-scripts/seed-b2b-demo-data.ts",
     "approve:companies": "corepack pnpm@9.15.0 --config.engine-strict=false --filter @b2b-starter/backend exec medusa exec ./src/migration-scripts/approve-all-companies.ts",
     "smoke:admin-packaging": "node scripts/smoke-admin-packaging.mjs",
