@@ -41,7 +41,8 @@ export async function NavigationHeader() {
           <div className="flex items-center gap-8">
             <LocalizedClientLink className="flex w-fit items-center" href="/">
               <BrandLogo
-                className="h-10 w-[156px]"
+                className="h-14 w-[220px]"
+                imageClassName="scale-[1.35]"
                 name={clientProfile.brand.name}
                 logoUrl={clientProfile.brand.logo.dark}
               />

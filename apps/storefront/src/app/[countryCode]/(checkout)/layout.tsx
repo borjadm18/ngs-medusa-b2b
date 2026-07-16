@@ -16,8 +16,10 @@ export default async function CheckoutLayout({
           <LocalizedClientLink className="hover:text-ui-fg-base" href="/">
             <span className="text-base font-medium flex items-center">
               <BrandLogo
-                className="mr-3 h-8 w-[124px]"
+                className="mr-3 h-10 w-[180px]"
+                imageClassName="scale-[1.25]"
                 name={profile.brand.name}
+                logoUrl={profile.brand.logo.dark}
               />
               {profile.brand.name} B2B
             </span>
