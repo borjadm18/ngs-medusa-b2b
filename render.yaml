@@ -18,7 +18,7 @@ services:
     healthCheckPath: /health
     buildCommand: npm install -g pnpm@9.15.0 && pnpm install --frozen-lockfile --prod=false && pnpm --filter @b2b-starter/backend build && cd apps/backend/.medusa/server && pnpm install --prod --no-frozen-lockfile
     initialDeployHook: cd apps/backend && pnpm medusa exec ./src/migration-scripts/initial-data-seed.ts
-    startCommand: cd apps/backend/.medusa/server && pnpm medusa db:migrate --execute-safe-links && cd ../.. && (timeout 120s pnpm medusa exec ./src/migration-scripts/seed-b2b-demo-data.ts || true) && (timeout 120s pnpm medusa exec ./src/migration-scripts/import-novisound-products.ts || true) && cd .medusa/server && if [ -n "$NGS_ADMIN_PASSWORD" ]; then pnpm medusa user -e "${NGS_ADMIN_EMAIL:-admin@ngs.local}" -p "$NGS_ADMIN_PASSWORD" || true; fi && pnpm start
+    startCommand: cd apps/backend/.medusa/server && pnpm medusa db:migrate --execute-safe-links && cd ../.. && (timeout 120s pnpm medusa exec ./src/migration-scripts/seed-b2b-demo-data.ts || true) && cd .medusa/server && if [ -n "$NGS_ADMIN_PASSWORD" ]; then pnpm medusa user -e "${NGS_ADMIN_EMAIL:-admin@ngs.local}" -p "$NGS_ADMIN_PASSWORD" || true; fi && pnpm start
     envVars:
       - key: NODE_ENV
         value: production
@@ -26,6 +26,8 @@ services:
         value: 22.19.0
       - key: PORT
         value: 10000
+      - key: MEDUSA_FF_INDEX_ENGINE
+        value: "false"
       - key: STORE_CORS
         value: http://localhost:8000,https://ngs-medusa-poc-vercel.vercel.app,https://storefront-virid-three-41.vercel.app,https://storefront-borjadm18-borjadm18s-projects.vercel.app,https://storefront-p6oyms4g2-borjadm18s-projects.vercel.app
       - key: ADMIN_CORS
