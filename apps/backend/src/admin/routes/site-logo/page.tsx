@@ -11,6 +11,7 @@ import {
   toast,
 } from "@medusajs/ui";
 import { useEffect, useState } from "react";
+import type { ChangeEvent } from "react";
 import {
   BrandProfileContent,
   DEFAULT_BRAND_PROFILE_CONTENT,
@@ -37,6 +38,9 @@ const readFileAsBase64 = (file: File) =>
     reader.onerror = () => reject(reader.error);
     reader.readAsDataURL(file);
   });
+
+const getErrorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : "No se pudo subir el logo";
 
 const SiteLogo = () => {
   const { data, isPending } = useBrandProfileContent();
@@ -82,7 +86,7 @@ const SiteLogo = () => {
     updateBrandProfile.mutate(profile);
   };
 
-  const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
     if (!file) {
@@ -118,8 +122,8 @@ const SiteLogo = () => {
 
       setForm(nextProfile);
       saveProfile(nextProfile);
-    } catch {
-      toast.error("No se pudo procesar el archivo");
+    } catch (error) {
+      toast.error(getErrorMessage(error));
     } finally {
       setUploading(false);
       event.target.value = "";

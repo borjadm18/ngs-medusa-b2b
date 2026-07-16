@@ -5,7 +5,7 @@ import { MedusaError } from "@medusajs/framework/utils";
 import { createStep, StepResponse } from "@medusajs/framework/workflows-sdk";
 import { UpsertAssetInput } from "./upsert-asset";
 
-const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
 const UPLOAD_DIR =
   process.env.ASSET_UPLOAD_DIR || path.join(process.cwd(), "uploads", "assets");
 
@@ -49,7 +49,7 @@ export const saveUploadedAssetFileStep = createStep(
     if (!buffer.length || buffer.byteLength > MAX_UPLOAD_BYTES) {
       throw new MedusaError(
         MedusaError.Types.INVALID_DATA,
-        "La imagen debe pesar menos de 4 MB."
+        "La imagen debe pesar menos de 8 MB."
       );
     }
 

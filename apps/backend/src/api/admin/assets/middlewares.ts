@@ -11,6 +11,7 @@ export const adminAssetsMiddlewares: MiddlewareRoute[] = [
   {
     method: ["POST"],
     matcher: "/admin/assets/upload",
+    bodyParser: { sizeLimit: "12mb" },
     middlewares: [validateAndTransformBody(AdminUploadAsset)],
   },
 ];

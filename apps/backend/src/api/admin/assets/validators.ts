@@ -34,7 +34,7 @@ export const AdminUploadAsset = AdminUpsertAsset.omit({
     "image/gif",
     "image/svg+xml",
   ]),
-  content_base64: z.string().min(1).max(6_000_000),
+  content_base64: z.string().min(1).max(12_000_000),
 });
 
 export type AdminUploadAssetType = z.infer<typeof AdminUploadAsset>;
