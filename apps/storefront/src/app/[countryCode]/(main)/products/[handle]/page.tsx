@@ -2,6 +2,7 @@ import { retrieveBrandProfile } from "@/lib/data/brand-profile"
 import { retrieveCustomer } from "@/lib/data/customer"
 import { getProductByHandle } from "@/lib/data/products"
 import { getRegion } from "@/lib/data/regions"
+import { canCustomerViewB2BPrices } from "@/lib/util/b2b-access"
 import { getProductPrice } from "@/lib/util/get-product-price"
 import ProductTemplate from "@/modules/products/templates"
 import { Metadata } from "next"
@@ -68,7 +69,7 @@ export default async function ProductPage(props: Props) {
     retrieveCustomer().catch(() => null),
   ])
   const { cheapestPrice } = getProductPrice({ product: pricedProduct })
-  const canViewPrices = Boolean(customer)
+  const canViewPrices = canCustomerViewB2BPrices(customer)
   const category = pricedProduct.categories?.[0]
   const productJsonLd = {
     "@context": "https://schema.org",

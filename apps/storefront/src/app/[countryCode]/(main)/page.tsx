@@ -6,6 +6,7 @@ import {
   getHomepageContent,
 } from "@/lib/data/homepage"
 import { listProducts } from "@/lib/data/products"
+import { canCustomerViewB2BPrices } from "@/lib/util/b2b-access"
 import { getBaseURL } from "@/lib/util/env"
 import { NgsHomepage } from "@/modules/home/templates/ngs-homepage"
 import { Metadata } from "next"
@@ -85,7 +86,7 @@ export default async function Home(props: {
         content={homepage}
         categories={categories}
         products={products}
-        canViewPrices={Boolean(customer)}
+        canViewPrices={canCustomerViewB2BPrices(customer)}
       />
     </>
   )

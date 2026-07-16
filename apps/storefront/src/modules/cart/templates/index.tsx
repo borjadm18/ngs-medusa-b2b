@@ -1,6 +1,7 @@
 "use client"
 
 import { useCart } from "@/lib/context/cart-context"
+import { canCustomerViewB2BPrices } from "@/lib/util/b2b-access"
 import { checkSpendingLimit } from "@/lib/util/check-spending-limit"
 import ApprovalStatusBanner from "@/modules/cart/components/approval-status-banner"
 import EmptyCartMessage from "@/modules/cart/components/empty-cart-message"
@@ -23,6 +24,7 @@ const CartTemplate = ({ customer }: { customer: B2BCustomer | null }) => {
     () => cart?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0,
     [cart?.items]
   )
+  const canViewPrices = canCustomerViewB2BPrices(customer)
 
   return (
     <div className="small:py-12 py-6 bg-neutral-100">
@@ -43,7 +45,7 @@ const CartTemplate = ({ customer }: { customer: B2BCustomer | null }) => {
                   )}
                   <ItemsTemplate
                     cart={cart}
-                    canViewPrices={Boolean(customer)}
+                    canViewPrices={canViewPrices}
                   />
                 </div>
                 <div className="relative">
@@ -51,6 +53,7 @@ const CartTemplate = ({ customer }: { customer: B2BCustomer | null }) => {
                     {cart && cart.region && (
                       <Summary
                         customer={customer}
+                        canViewPrices={canViewPrices}
                         spendLimitExceeded={spendLimitExceeded}
                       />
                     )}

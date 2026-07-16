@@ -1,5 +1,6 @@
 import { getProductsById } from "@/lib/data/products"
 import { retrieveCustomer } from "@/lib/data/customer"
+import { canCustomerViewB2BPrices } from "@/lib/util/b2b-access"
 import { HttpTypes } from "@medusajs/types"
 import { Text } from "@medusajs/ui"
 
@@ -24,6 +25,7 @@ export default async function ProductRail({
     regionId: region.id,
   })
   const customer = await retrieveCustomer().catch(() => null)
+  const canViewPrices = canCustomerViewB2BPrices(customer)
 
   return (
     <div className="content-container py-12 small:py-24 bg-neutral-100">
@@ -41,7 +43,7 @@ export default async function ProductRail({
                 product={product}
                 region={region}
                 isFeatured
-                canViewPrices={Boolean(customer)}
+                canViewPrices={canViewPrices}
               />
             </li>
           ))}

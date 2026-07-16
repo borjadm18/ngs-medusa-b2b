@@ -1,6 +1,7 @@
 "use client"
 
 import { useCart } from "@/lib/context/cart-context"
+import { canCustomerViewB2BPrices } from "@/lib/util/b2b-access"
 import { checkSpendingLimit } from "@/lib/util/check-spending-limit"
 import { getCheckoutStep } from "@/lib/util/get-checkout-step"
 import { convertToLocale } from "@/lib/util/money"
@@ -109,7 +110,9 @@ const CartDrawer = ({
       ? `/checkout?step=${checkoutStep}`
       : "/checkout"
     : "/account"
-  const canViewPrices = Boolean(customer)
+  const canViewPrices = canCustomerViewB2BPrices(customer)
+  const companyStatus = customer?.employee?.company?.onboarding_status
+  const isPendingApproval = Boolean(customer) && !canViewPrices
 
   return (
     <>
@@ -185,9 +188,17 @@ const CartDrawer = ({
                   ) : (
                     <div className="rounded border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-800">
                       <p className="font-semibold text-red-950">
-                        Tarifa B2B privada
+                        {isPendingApproval
+                          ? "Cuenta pendiente de aprobacion"
+                          : "Tarifa B2B privada"}
                       </p>
-                      <p>Inicia sesion para ver precios y descuentos.</p>
+                      <p>
+                        {isPendingApproval
+                          ? companyStatus === "rejected"
+                            ? "Tu solicitud ha sido rechazada. Contacta con el equipo comercial."
+                            : "Estamos revisando tu alta B2B. Veras precios cuando sea aprobada."
+                          : "Inicia sesion para ver precios y descuentos."}
+                      </p>
                     </div>
                   )}
                   <div className="flex flex-col gap-y-2">
@@ -204,11 +215,17 @@ const CartDrawer = ({
                       <Button
                         className="w-full"
                         size="large"
-                        disabled={totalItems === 0 || spendLimitExceeded}
+                        disabled={
+                          totalItems === 0 ||
+                          spendLimitExceeded ||
+                          isPendingApproval
+                        }
                       >
                         <LockClosedSolidMini />
                         {customer
-                          ? spendLimitExceeded
+                          ? isPendingApproval
+                            ? "Pendiente de aprobacion"
+                            : spendLimitExceeded
                             ? "Limite de gasto superado"
                             : "Finalizar compra"
                           : "Inicia sesion para comprar"}

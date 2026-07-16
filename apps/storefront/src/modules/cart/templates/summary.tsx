@@ -20,10 +20,15 @@ import { Container } from "@medusajs/ui"
 
 type SummaryProps = {
   customer: B2BCustomer | null
+  canViewPrices: boolean
   spendLimitExceeded: boolean
 }
 
-const Summary = ({ customer, spendLimitExceeded }: SummaryProps) => {
+const Summary = ({
+  customer,
+  canViewPrices,
+  spendLimitExceeded,
+}: SummaryProps) => {
   const { handleEmptyCart, cart } = useCart()
 
   if (!cart) return null
@@ -40,11 +45,13 @@ const Summary = ({ customer, spendLimitExceeded }: SummaryProps) => {
   )
   const quoteRequiredItems = getQuoteRequiredCartItems(cart)
   const requiresQuote = quoteRequiredItems.length > 0
+  const companyStatus = customer?.employee?.company?.onboarding_status
+  const isOnboardingBlocked = Boolean(customer) && !canViewPrices
 
   return (
     <Container className="flex flex-col gap-y-3">
       <CartLogisticsSummary />
-      {customer ? (
+      {canViewPrices ? (
         <>
           <CartTotals />
           <Divider />
@@ -52,10 +59,17 @@ const Summary = ({ customer, spendLimitExceeded }: SummaryProps) => {
         </>
       ) : (
         <div className="rounded border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-800">
-          <p className="font-semibold text-red-950">Tarifa B2B privada</p>
+          <p className="font-semibold text-red-950">
+            {isOnboardingBlocked
+              ? "Cuenta pendiente de aprobacion"
+              : "Tarifa B2B privada"}
+          </p>
           <p>
-            Inicia sesion para ver subtotales, descuentos, promociones y
-            documentos comerciales.
+            {isOnboardingBlocked
+              ? companyStatus === "rejected"
+                ? "Tu solicitud ha sido rechazada. Contacta con el equipo comercial."
+                : "Estamos revisando tu alta B2B. Veras precios, descuentos y checkout cuando sea aprobada."
+              : "Inicia sesion para ver subtotales, descuentos, promociones y documentos comerciales."}
           </p>
         </div>
       )}
@@ -90,17 +104,19 @@ const Summary = ({ customer, spendLimitExceeded }: SummaryProps) => {
         >
           <Button
             className="w-full h-10 rounded-md shadow-none"
-            disabled={spendLimitExceeded}
+            disabled={spendLimitExceeded || isOnboardingBlocked}
           >
             {customer
-              ? spendLimitExceeded
+              ? isOnboardingBlocked
+                ? "Pendiente de aprobacion"
+                : spendLimitExceeded
                 ? "Limite de compra superado"
                 : "Finalizar compra"
               : "Inicia sesion para comprar"}
           </Button>
         </LocalizedClientLink>
       )}
-      {!!customer && (
+      {canViewPrices && (
         <RequestQuoteConfirmation>
           <Button
             className="w-full h-10 rounded-md shadow-borders-base"
@@ -122,7 +138,7 @@ const Summary = ({ customer, spendLimitExceeded }: SummaryProps) => {
           </Button>
         </RequestQuotePrompt>
       )}
-      {!!customer && (
+      {canViewPrices && (
         <>
           <CartToCsvButton cart={cart} />
           <CartToPdfButton cart={cart} />

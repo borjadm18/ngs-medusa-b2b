@@ -1,6 +1,7 @@
 import { retrieveCart } from "@/lib/data/cart"
 import { retrieveCustomer } from "@/lib/data/customer"
 import { listCartFreeShippingPrices } from "@/lib/data/fulfillment"
+import { canCustomerViewB2BPrices } from "@/lib/util/b2b-access"
 import { getBaseURL } from "@/lib/util/env"
 import CartMismatchBanner from "@/modules/layout/components/cart-mismatch-banner"
 import Footer from "@/modules/layout/templates/footer"
@@ -17,9 +18,10 @@ export const metadata: Metadata = {
 export default async function PageLayout(props: { children: React.ReactNode }) {
   const customer = await retrieveCustomer().catch(() => null)
   const cart = await retrieveCart()
+  const canViewPrices = canCustomerViewB2BPrices(customer)
   let freeShippingPrices: StoreFreeShippingPrice[] = []
 
-  if (cart) {
+  if (cart && canViewPrices) {
     freeShippingPrices = await listCartFreeShippingPrices(cart.id).catch(
       () => []
     )
@@ -37,7 +39,7 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
 
       <Footer />
 
-      {cart && freeShippingPrices && (
+      {cart && canViewPrices && freeShippingPrices && (
         <FreeShippingPriceNudge
           variant="popup"
           cart={cart as StoreCart}
