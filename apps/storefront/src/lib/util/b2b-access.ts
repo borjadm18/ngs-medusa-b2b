@@ -7,6 +7,14 @@ export const getCustomerCompanyStatus = (customer?: B2BCustomer | null) =>
 export const isCustomerCompanyApproved = (customer?: B2BCustomer | null) =>
   getCustomerCompanyStatus(customer) === ModuleCompanyOnboardingStatus.APPROVED
 
+export const isCustomerCompanyBlocked = (customer?: B2BCustomer | null) => {
+  const status = getCustomerCompanyStatus(customer)
+
+  return (
+    status === ModuleCompanyOnboardingStatus.PENDING ||
+    status === ModuleCompanyOnboardingStatus.REJECTED
+  )
+}
+
 export const canCustomerViewB2BPrices = (customer?: B2BCustomer | null) =>
   Boolean(customer && isCustomerCompanyApproved(customer))
-

@@ -1,5 +1,5 @@
 import { listApprovals } from "@/lib/data/approvals"
-import { isCustomerCompanyApproved } from "@/lib/util/b2b-access"
+import { isCustomerCompanyBlocked } from "@/lib/util/b2b-access"
 import AccountNav from "@/modules/account/components/account-nav"
 import OnboardingStatusPanel from "@/modules/account/components/onboarding-status-panel"
 import { B2BCustomer } from "@/types"
@@ -22,7 +22,7 @@ const AccountLayout: React.FC<AccountLayoutProps> = async ({
 
   const numPendingApprovals = carts_with_approvals?.length || 0
   const shouldShowOnboardingGate =
-    customer?.employee?.company && !isCustomerCompanyApproved(customer)
+    customer?.employee?.company && isCustomerCompanyBlocked(customer)
 
   return (
     <div
