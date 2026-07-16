@@ -18,7 +18,7 @@ services:
     healthCheckPath: /health
     buildCommand: npm install -g pnpm@9.15.0 && pnpm install --frozen-lockfile --prod=false && pnpm --filter @b2b-starter/backend build && cd apps/backend/.medusa/server && pnpm install --prod --no-frozen-lockfile
     initialDeployHook: cd apps/backend && pnpm medusa exec ./src/migration-scripts/initial-data-seed.ts
-    startCommand: cd apps/backend/.medusa/server && pnpm medusa db:migrate --execute-safe-links && cd ../.. && (timeout 120s pnpm medusa exec ./src/migration-scripts/seed-b2b-demo-data.ts || true) && cd .medusa/server && if [ -n "$NGS_ADMIN_PASSWORD" ]; then pnpm medusa user -e "${NGS_ADMIN_EMAIL:-admin@ngs.local}" -p "$NGS_ADMIN_PASSWORD" || true; fi && pnpm start
+    startCommand: cd apps/backend/.medusa/server && pnpm medusa db:migrate --execute-safe-links && cd ../.. && (timeout 120s pnpm medusa exec ./src/migration-scripts/seed-b2b-demo-data.ts || true) && (timeout 120s pnpm medusa exec ./src/migration-scripts/import-novisound-products.ts || true) && cd .medusa/server && if [ -n "$NGS_ADMIN_PASSWORD" ]; then pnpm medusa user -e "${NGS_ADMIN_EMAIL:-admin@ngs.local}" -p "$NGS_ADMIN_PASSWORD" || true; fi && pnpm start
     envVars:
       - key: NODE_ENV
         value: production
