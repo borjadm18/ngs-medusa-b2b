@@ -378,13 +378,14 @@ async function seedDemoCustomers(
       const role = employee.role || (employee.is_admin ? "company_admin" : "buyer");
       const roleSlug = role === "company_admin" ? "admin" : role;
       const email = company.email.replace("@", `+${roleSlug}@`);
-      const existing = existingByEmail.get(email);
+      const existing = existingByEmail.get(email) as any;
       const customer =
         existing ||
         (await customerModule.createCustomers({
           email,
           first_name: company.name.split(" ")[0],
           last_name: formatDemoRole(role),
+          has_account: true,
           metadata: {
             demo_seed: true,
             company_name: company.name,
@@ -392,6 +393,13 @@ async function seedDemoCustomers(
             demo_password: "Demo123!",
           },
         }));
+
+      if (existing?.has_account === false) {
+        await customerModule.updateCustomers({
+          id: existing.id,
+          has_account: true,
+        });
+      }
 
       await ensureDemoCustomerAuthIdentity({
         authModule,
@@ -402,20 +410,18 @@ async function seedDemoCustomers(
         logger,
       });
 
-      if (!existing) {
-        await link
-          .create({
-            [COMPANY_MODULE]: {
-              employee_id: employee.id,
-            },
-            [Modules.CUSTOMER]: {
-              customer_id: customer.id,
-            },
-          })
-          .catch(() => {
-            logger.warn(`Could not link demo customer ${email} to employee.`);
-          });
-      }
+      await link
+        .create({
+          [COMPANY_MODULE]: {
+            employee_id: employee.id,
+          },
+          [Modules.CUSTOMER]: {
+            customer_id: customer.id,
+          },
+        })
+        .catch(() => {
+          logger.warn(`Could not link demo customer ${email} to employee.`);
+        });
     }
   }
 }
