@@ -42,8 +42,8 @@ export function MobileNavigation({
           <div className="ml-auto flex h-full w-full max-w-sm flex-col bg-white shadow-2xl">
             <div className="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
               <BrandLogo
-                className="h-12 w-[190px]"
-                imageClassName="scale-[1.35]"
+                className="h-14 w-[230px]"
+                imageClassName="scale-[1.45]"
                 name={profile.brand.name}
                 logoUrl={profile.brand.logo.dark}
               />
