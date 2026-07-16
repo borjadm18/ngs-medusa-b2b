@@ -106,7 +106,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
       currency_code: formData.get("currency_code") as string,
       tax_id: formData.get("company_tax_id") as string,
       sector: formData.get("company_sector") as string,
-      onboarding_status: "pending" as any,
+      onboarding_status: "approved" as any,
       payment_terms: "bank_transfer" as any,
       default_payment_method: "transferencia_bancaria",
       saved_payment_methods: [

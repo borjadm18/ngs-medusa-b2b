@@ -73,7 +73,7 @@ const demoCompanies: DemoCompany[] = [
     segment: "cuenta_key",
     spendingLimit: 12000,
     taxId: "ESB08300303",
-    onboardingStatus: "pending",
+    onboardingStatus: "approved",
     paymentTerms: "bank_transfer",
   },
 ];
