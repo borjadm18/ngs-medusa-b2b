@@ -1,6 +1,7 @@
 import { defineRouteConfig } from "@medusajs/admin-sdk";
 import { Photo, Plus, Trash } from "@medusajs/icons";
 import {
+  Badge,
   Button,
   Container,
   Heading,
@@ -13,21 +14,53 @@ import {
   toast,
 } from "@medusajs/ui";
 import { useEffect, useMemo, useState } from "react";
+import type { ChangeEvent, ReactNode } from "react";
 import {
   DEFAULT_HOMEPAGE_CONTENT,
   HomepageContent,
+  HomepageImageBlock,
 } from "../../../modules/homepage/defaults";
+import { useBrandProfileContent } from "../../hooks/api/brand-profile";
+import {
+  AdminAsset,
+  AssetType,
+  useAssets,
+  useUploadAsset,
+} from "../../hooks/api/assets";
 import {
   useHomepageContent,
   useUpdateHomepageContent,
 } from "../../hooks/api/homepage";
-import { useBrandProfileContent } from "../../hooks/api/brand-profile";
-import { AssetPickerField } from "../../components/assets/asset-picker-field";
 import { resolveAdminAssetPreviewUrl } from "../../lib/assets";
 
-type HomepageFormState = HomepageContent;
+type SectionKey =
+  | "hero"
+  | "metrics"
+  | "trust"
+  | "capabilities"
+  | "detail"
+  | "catalog"
+  | "operations";
 
-const toFormState = (content: HomepageContent): HomepageFormState => ({
+const sectionNav: Array<{
+  key: SectionKey;
+  label: string;
+  description: string;
+}> = [
+  { key: "hero", label: "Hero", description: "Titular, CTAs e imagen principal" },
+  { key: "metrics", label: "Metricas", description: "Datos rapidos bajo el hero" },
+  { key: "trust", label: "Banda superior", description: "Calidad, stock, soporte" },
+  {
+    key: "capabilities",
+    label: "Soluciones",
+    description: "Bloques comerciales con imagen",
+  },
+  { key: "detail", label: "Bloque visual", description: "CTA y bloques de detalle" },
+  { key: "catalog", label: "Catalogo", description: "Titulos del rail de producto" },
+  { key: "operations", label: "Operativa B2B", description: "Puntos de valor Medusa" },
+];
+
+const toFormState = (content: HomepageContent): HomepageContent => ({
   ...content,
   metrics: content.metrics.map((item) => ({ ...item })),
   trustBlocks: content.trustBlocks.map((item) => ({ ...item })),
@@ -36,10 +69,23 @@ const toFormState = (content: HomepageContent): HomepageFormState => ({
   operations: [...content.operations],
 });
 
+const readFileAsBase64 = (file: File) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const value = String(reader.result || "");
+      resolve(value.includes(",") ? value.split(",")[1] : value);
+    };
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+
 const Homepage = () => {
   const { data, isPending } = useHomepageContent();
   const { data: brandProfileData } = useBrandProfileContent();
-  const [form, setForm] = useState<HomepageFormState>(
+  const [activeSection, setActiveSection] = useState<SectionKey>("hero");
+  const [form, setForm] = useState<HomepageContent>(
     toFormState(DEFAULT_HOMEPAGE_CONTENT)
   );
   const activeProfileId = brandProfileData?.brand_profile?.id || "ngs";
@@ -56,20 +102,13 @@ const Homepage = () => {
     }
   }, [data?.homepage]);
 
-  const heroPreview = useMemo(
-    () => ({
-      title: form.heroTitle,
-      body: form.heroBody,
-      image: form.heroImage,
-    }),
-    [form.heroBody, form.heroImage, form.heroTitle]
+  const activeLabel = useMemo(
+    () => sectionNav.find((section) => section.key === activeSection)?.label,
+    [activeSection]
   );
 
-  const updateField = (field: keyof HomepageFormState, value: string) => {
-    setForm((current) => ({
-      ...current,
-      [field]: value,
-    }));
+  const updateField = (field: keyof HomepageContent, value: string) => {
+    setForm((current) => ({ ...current, [field]: value }));
   };
 
   const updateMetric = (
@@ -102,7 +141,7 @@ const Homepage = () => {
   const updateImageBlock = (
     collection: "trustBlocks" | "capabilityBlocks" | "detailBlocks",
     index: number,
-    field: keyof HomepageContent["trustBlocks"][number],
+    field: keyof HomepageImageBlock,
     value: string
   ) => {
     setForm((current) => ({
@@ -163,13 +202,13 @@ const Homepage = () => {
   };
 
   const handleSubmit = () => {
-    if (!form.metrics.length) {
-      toast.error("Anade al menos una metrica");
+    if (!form.heroTitle || !form.heroBody) {
+      toast.error("Hero necesita titulo y texto");
       return;
     }
 
-    if (!form.trustBlocks.length || !form.capabilityBlocks.length) {
-      toast.error("Anade al menos un bloque comercial");
+    if (!form.metrics.length) {
+      toast.error("Anade al menos una metrica");
       return;
     }
 
@@ -178,254 +217,377 @@ const Homepage = () => {
 
   return (
     <>
-      <Container className="flex flex-col p-0 overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b">
+      <Container className="flex flex-col overflow-hidden p-0">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b px-6 py-4">
           <div>
             <Heading className="font-sans font-medium h1-core">
               Homepage
             </Heading>
             <Text size="small" className="text-ui-fg-subtle">
-              Edita textos, CTAs, bloques e imagenes de la home publica.
+              Editor visual para textos, CTAs e imagenes de la home publica.
             </Text>
           </div>
-          <Button
-            size="small"
-            onClick={handleSubmit}
-            isLoading={updateHomepage.isPending}
-            disabled={isPending}
-          >
-            Guardar cambios
-          </Button>
+          <div className="flex items-center gap-2">
+            <Badge>{activeLabel}</Badge>
+            <Button
+              size="small"
+              onClick={handleSubmit}
+              isLoading={updateHomepage.isPending}
+              disabled={isPending}
+            >
+              Guardar cambios
+            </Button>
+          </div>
         </div>
 
-        <div className="grid gap-6 p-6 small:grid-cols-[1fr_360px]">
-          <div className="grid gap-6">
-            <Section title="Hero principal">
-              <TextField
-                label="Badge 1"
-                value={form.heroBadgePrimary}
-                onChange={(value) => updateField("heroBadgePrimary", value)}
-              />
-              <TextField
-                label="Badge 2"
-                value={form.heroBadgeSecondary}
-                onChange={(value) => updateField("heroBadgeSecondary", value)}
-              />
-              <TextAreaField
-                label="Titulo"
-                value={form.heroTitle}
-                onChange={(value) => updateField("heroTitle", value)}
-              />
-              <TextAreaField
-                label="Texto"
-                value={form.heroBody}
-                onChange={(value) => updateField("heroBody", value)}
-              />
-              <div className="grid gap-3 small:grid-cols-2">
-                <TextField
-                  label="CTA principal"
-                  value={form.primaryCtaLabel}
-                  onChange={(value) => updateField("primaryCtaLabel", value)}
-                />
-                <TextField
-                  label="Link CTA principal"
-                  value={form.primaryCtaHref}
-                  onChange={(value) => updateField("primaryCtaHref", value)}
-                />
-                <TextField
-                  label="CTA secundario"
-                  value={form.secondaryCtaLabel}
-                  onChange={(value) => updateField("secondaryCtaLabel", value)}
-                />
-                <TextField
-                  label="Link CTA secundario"
-                  value={form.secondaryCtaHref}
-                  onChange={(value) => updateField("secondaryCtaHref", value)}
-                />
-              </div>
-              <AssetPickerField
-                label="Imagen hero"
-                value={form.heroImage}
-                profileId={activeProfileId}
-                preferredType="hero"
-                onChange={(value) => updateField("heroImage", value)}
-              />
-              <TextField
-                label="Alt imagen"
-                value={form.heroImageAlt}
-                onChange={(value) => updateField("heroImageAlt", value)}
-              />
-              <TextField
-                label="Eyebrow sobre imagen"
-                value={form.heroImageEyebrow}
-                onChange={(value) => updateField("heroImageEyebrow", value)}
-              />
-              <TextAreaField
-                label="Texto sobre imagen"
-                value={form.heroImageTitle}
-                onChange={(value) => updateField("heroImageTitle", value)}
-              />
-            </Section>
+        <div className="grid gap-0 small:grid-cols-[280px_minmax(0,1fr)_380px]">
+          <aside className="border-b bg-ui-bg-subtle p-4 small:border-b-0 small:border-r">
+            <div className="grid gap-2">
+              {sectionNav.map((section) => (
+                <button
+                  key={section.key}
+                  type="button"
+                  onClick={() => setActiveSection(section.key)}
+                  className={[
+                    "rounded-lg border px-3 py-3 text-left transition",
+                    activeSection === section.key
+                      ? "border-ui-border-interactive bg-ui-bg-base shadow-elevation-card-rest"
+                      : "border-transparent hover:bg-ui-bg-base",
+                  ].join(" ")}
+                >
+                  <Text size="small" weight="plus">
+                    {section.label}
+                  </Text>
+                  <Text size="xsmall" className="mt-1 text-ui-fg-subtle">
+                    {section.description}
+                  </Text>
+                </button>
+              ))}
+            </div>
+          </aside>
 
-            <Section title="Secciones">
-              <TextField
-                label="Eyebrow capacidades"
-                value={form.capabilityEyebrow}
-                onChange={(value) => updateField("capabilityEyebrow", value)}
-              />
-              <TextAreaField
-                label="Titulo capacidades"
-                value={form.capabilityTitle}
-                onChange={(value) => updateField("capabilityTitle", value)}
-              />
-              <TextField
-                label="Eyebrow categorias"
-                value={form.categoryEyebrow}
-                onChange={(value) => updateField("categoryEyebrow", value)}
-              />
-              <TextField
-                label="Titulo categorias"
-                value={form.categoryTitle}
-                onChange={(value) => updateField("categoryTitle", value)}
-              />
-              <TextField
-                label="Eyebrow catalogo"
-                value={form.catalogEyebrow}
-                onChange={(value) => updateField("catalogEyebrow", value)}
-              />
-              <TextField
-                label="Titulo catalogo"
-                value={form.catalogTitle}
-                onChange={(value) => updateField("catalogTitle", value)}
-              />
-              <TextField
-                label="Eyebrow operativa"
-                value={form.operationsEyebrow}
-                onChange={(value) => updateField("operationsEyebrow", value)}
-              />
-              <TextAreaField
-                label="Titulo operativa"
-                value={form.operationsTitle}
-                onChange={(value) => updateField("operationsTitle", value)}
-              />
-            </Section>
-
-            <Section
-              title="Metricas"
-              actionLabel="Anadir metrica"
-              onAction={addMetric}
-            >
-              <div className="grid gap-3">
-                {form.metrics.map((metric, index) => (
-                  <EditableRow
-                    key={`metric-${index}`}
-                    title={`Metrica ${index + 1}`}
-                    onRemove={() => removeMetric(index)}
-                    removeDisabled={form.metrics.length === 1}
-                  >
-                    <div className="grid gap-3 small:grid-cols-[160px_1fr]">
-                      <TextField
-                        label="Valor"
-                        value={metric.value}
-                        onChange={(value) => updateMetric(index, "value", value)}
-                      />
-                      <TextField
-                        label="Texto"
-                        value={metric.label}
-                        onChange={(value) => updateMetric(index, "label", value)}
-                      />
-                    </div>
-                  </EditableRow>
-                ))}
-              </div>
-            </Section>
-
-            <ImageBlockSection
-              title="Banda superior"
-              items={form.trustBlocks}
-              profileId={activeProfileId}
-              onAdd={() => addImageBlock("trustBlocks")}
-              onRemove={(index) => removeImageBlock("trustBlocks", index)}
-              onChange={(index, field, value) =>
-                updateImageBlock("trustBlocks", index, field, value)
-              }
-            />
-
-            <ImageBlockSection
-              title="Bloques comerciales"
-              items={form.capabilityBlocks}
-              profileId={activeProfileId}
-              onAdd={() => addImageBlock("capabilityBlocks")}
-              onRemove={(index) => removeImageBlock("capabilityBlocks", index)}
-              onChange={(index, field, value) =>
-                updateImageBlock("capabilityBlocks", index, field, value)
-              }
-            />
-
-            <ImageBlockSection
-              title="Bloques visuales"
-              items={form.detailBlocks}
-              profileId={activeProfileId}
-              onAdd={() => addImageBlock("detailBlocks")}
-              onRemove={(index) => removeImageBlock("detailBlocks", index)}
-              onChange={(index, field, value) =>
-                updateImageBlock("detailBlocks", index, field, value)
-              }
-            />
-
-            <Section
-              title="Operativa B2B"
-              actionLabel="Anadir punto"
-              onAction={addOperation}
-            >
-              <div className="grid gap-3">
-                {form.operations.map((operation, index) => (
-                  <EditableRow
-                    key={`operation-${index}`}
-                    title={`Punto ${index + 1}`}
-                    onRemove={() => removeOperation(index)}
-                    removeDisabled={form.operations.length === 1}
-                  >
-                    <TextAreaField
-                      label="Texto"
-                      value={operation}
-                      rows={2}
-                      onChange={(value) => updateOperation(index, value)}
+          <main className="min-h-[760px] p-6">
+            {activeSection === "hero" && (
+              <EditorPanel
+                title="Hero principal"
+                description="La primera impresion de la home. Cambia aqui el claim, CTAs e imagen principal."
+              >
+                <div className="grid gap-4">
+                  <div className="grid gap-3 small:grid-cols-2">
+                    <TextField
+                      label="Badge izquierdo"
+                      value={form.heroBadgePrimary}
+                      onChange={(value) =>
+                        updateField("heroBadgePrimary", value)
+                      }
                     />
-                  </EditableRow>
-                ))}
-              </div>
-            </Section>
-          </div>
-
-          <div className="h-fit border rounded-lg overflow-hidden bg-ui-bg-base">
-            <div className="p-4 border-b">
-              <Text size="small" weight="plus">
-                Vista rapida
-              </Text>
-              <Text size="small" className="text-ui-fg-subtle">
-                Usa rutas como /images/ngs/home-hero-speakers.jpg o URLs
-                absolutas.
-              </Text>
-            </div>
-            <div className="p-4">
-              <div className="aspect-video overflow-hidden rounded-lg border bg-ui-bg-subtle">
-                {heroPreview.image ? (
-                  <img
-                    src={resolveAdminAssetPreviewUrl(heroPreview.image)}
-                    alt=""
-                    className="h-full w-full object-cover"
+                    <TextField
+                      label="Badge derecho"
+                      value={form.heroBadgeSecondary}
+                      onChange={(value) =>
+                        updateField("heroBadgeSecondary", value)
+                      }
+                    />
+                  </div>
+                  <TextAreaField
+                    label="Titulo"
+                    value={form.heroTitle}
+                    rows={3}
+                    onChange={(value) => updateField("heroTitle", value)}
                   />
-                ) : null}
-              </div>
-              <Text className="mt-4" weight="plus">
-                {heroPreview.title}
-              </Text>
-              <Text size="small" className="mt-2 text-ui-fg-subtle">
-                {heroPreview.body}
-              </Text>
+                  <TextAreaField
+                    label="Texto"
+                    value={form.heroBody}
+                    rows={3}
+                    onChange={(value) => updateField("heroBody", value)}
+                  />
+                  <div className="grid gap-3 small:grid-cols-2">
+                    <TextField
+                      label="CTA principal"
+                      value={form.primaryCtaLabel}
+                      onChange={(value) =>
+                        updateField("primaryCtaLabel", value)
+                      }
+                    />
+                    <TextField
+                      label="Link CTA principal"
+                      value={form.primaryCtaHref}
+                      onChange={(value) =>
+                        updateField("primaryCtaHref", value)
+                      }
+                    />
+                    <TextField
+                      label="CTA secundario"
+                      value={form.secondaryCtaLabel}
+                      onChange={(value) =>
+                        updateField("secondaryCtaLabel", value)
+                      }
+                    />
+                    <TextField
+                      label="Link CTA secundario"
+                      value={form.secondaryCtaHref}
+                      onChange={(value) =>
+                        updateField("secondaryCtaHref", value)
+                      }
+                    />
+                  </div>
+                  <ImageField
+                    label="Imagen hero"
+                    value={form.heroImage}
+                    profileId={activeProfileId}
+                    preferredType="hero"
+                    onChange={(value) => updateField("heroImage", value)}
+                  />
+                  <TextField
+                    label="Alt imagen"
+                    value={form.heroImageAlt}
+                    onChange={(value) => updateField("heroImageAlt", value)}
+                  />
+                  <div className="grid gap-3 small:grid-cols-2">
+                    <TextField
+                      label="Eyebrow sobre imagen"
+                      value={form.heroImageEyebrow}
+                      onChange={(value) =>
+                        updateField("heroImageEyebrow", value)
+                      }
+                    />
+                    <TextField
+                      label="Texto sobre imagen"
+                      value={form.heroImageTitle}
+                      onChange={(value) =>
+                        updateField("heroImageTitle", value)
+                      }
+                    />
+                  </div>
+                </div>
+              </EditorPanel>
+            )}
+
+            {activeSection === "metrics" && (
+              <EditorPanel
+                title="Metricas"
+                description="Pequenos argumentos de confianza que aparecen cerca del hero."
+                action={<AddButton label="Anadir metrica" onClick={addMetric} />}
+              >
+                <div className="grid gap-3">
+                  {form.metrics.map((metric, index) => (
+                    <EditableCard
+                      key={`metric-${index}`}
+                      title={`Metrica ${index + 1}`}
+                      onRemove={() => removeMetric(index)}
+                      removeDisabled={form.metrics.length === 1}
+                    >
+                      <div className="grid gap-3 small:grid-cols-[160px_1fr]">
+                        <TextField
+                          label="Valor"
+                          value={metric.value}
+                          onChange={(value) =>
+                            updateMetric(index, "value", value)
+                          }
+                        />
+                        <TextField
+                          label="Texto"
+                          value={metric.label}
+                          onChange={(value) =>
+                            updateMetric(index, "label", value)
+                          }
+                        />
+                      </div>
+                    </EditableCard>
+                  ))}
+                </div>
+              </EditorPanel>
+            )}
+
+            {activeSection === "trust" && (
+              <ImageBlocksEditor
+                title="Banda superior"
+                description="Bloques cortos de confianza: stock, calidad, soporte, condiciones."
+                items={form.trustBlocks}
+                profileId={activeProfileId}
+                onAdd={() => addImageBlock("trustBlocks")}
+                onRemove={(index) => removeImageBlock("trustBlocks", index)}
+                onChange={(index, field, value) =>
+                  updateImageBlock("trustBlocks", index, field, value)
+                }
+              />
+            )}
+
+            {activeSection === "capabilities" && (
+              <EditorPanel
+                title="Soluciones"
+                description="Seccion comercial con titular y tarjetas visuales."
+                action={
+                  <AddButton
+                    label="Anadir bloque"
+                    onClick={() => addImageBlock("capabilityBlocks")}
+                  />
+                }
+              >
+                <div className="grid gap-4">
+                  <TextField
+                    label="Eyebrow"
+                    value={form.capabilityEyebrow}
+                    onChange={(value) =>
+                      updateField("capabilityEyebrow", value)
+                    }
+                  />
+                  <TextAreaField
+                    label="Titulo"
+                    value={form.capabilityTitle}
+                    rows={3}
+                    onChange={(value) => updateField("capabilityTitle", value)}
+                  />
+                  <BlockList
+                    items={form.capabilityBlocks}
+                    profileId={activeProfileId}
+                    onRemove={(index) =>
+                      removeImageBlock("capabilityBlocks", index)
+                    }
+                    onChange={(index, field, value) =>
+                      updateImageBlock("capabilityBlocks", index, field, value)
+                    }
+                  />
+                </div>
+              </EditorPanel>
+            )}
+
+            {activeSection === "detail" && (
+              <EditorPanel
+                title="Bloque visual"
+                description="Bloque de refuerzo con CTA y mosaico de imagenes."
+                action={
+                  <AddButton
+                    label="Anadir bloque"
+                    onClick={() => addImageBlock("detailBlocks")}
+                  />
+                }
+              >
+                <div className="grid gap-4">
+                  <div className="grid gap-3 small:grid-cols-2">
+                    <TextField
+                      label="Eyebrow"
+                      value={form.detailEyebrow}
+                      onChange={(value) => updateField("detailEyebrow", value)}
+                    />
+                    <TextField
+                      label="CTA"
+                      value={form.detailCtaLabel}
+                      onChange={(value) =>
+                        updateField("detailCtaLabel", value)
+                      }
+                    />
+                    <TextField
+                      label="Link CTA"
+                      value={form.detailCtaHref}
+                      onChange={(value) => updateField("detailCtaHref", value)}
+                    />
+                  </div>
+                  <TextAreaField
+                    label="Titulo"
+                    value={form.detailTitle}
+                    rows={2}
+                    onChange={(value) => updateField("detailTitle", value)}
+                  />
+                  <TextAreaField
+                    label="Texto"
+                    value={form.detailBody}
+                    rows={3}
+                    onChange={(value) => updateField("detailBody", value)}
+                  />
+                  <BlockList
+                    items={form.detailBlocks}
+                    profileId={activeProfileId}
+                    onRemove={(index) => removeImageBlock("detailBlocks", index)}
+                    onChange={(index, field, value) =>
+                      updateImageBlock("detailBlocks", index, field, value)
+                    }
+                  />
+                </div>
+              </EditorPanel>
+            )}
+
+            {activeSection === "catalog" && (
+              <EditorPanel
+                title="Catalogo"
+                description="Titulos de categorias y productos destacados."
+              >
+                <div className="grid gap-4">
+                  <div className="grid gap-3 small:grid-cols-2">
+                    <TextField
+                      label="Eyebrow categorias"
+                      value={form.categoryEyebrow}
+                      onChange={(value) =>
+                        updateField("categoryEyebrow", value)
+                      }
+                    />
+                    <TextField
+                      label="Titulo categorias"
+                      value={form.categoryTitle}
+                      onChange={(value) => updateField("categoryTitle", value)}
+                    />
+                    <TextField
+                      label="Eyebrow catalogo"
+                      value={form.catalogEyebrow}
+                      onChange={(value) => updateField("catalogEyebrow", value)}
+                    />
+                    <TextField
+                      label="Titulo catalogo"
+                      value={form.catalogTitle}
+                      onChange={(value) => updateField("catalogTitle", value)}
+                    />
+                  </div>
+                </div>
+              </EditorPanel>
+            )}
+
+            {activeSection === "operations" && (
+              <EditorPanel
+                title="Operativa B2B"
+                description="Argumentos de plataforma y backoffice."
+                action={<AddButton label="Anadir punto" onClick={addOperation} />}
+              >
+                <div className="grid gap-4">
+                  <TextField
+                    label="Eyebrow"
+                    value={form.operationsEyebrow}
+                    onChange={(value) =>
+                      updateField("operationsEyebrow", value)
+                    }
+                  />
+                  <TextAreaField
+                    label="Titulo"
+                    value={form.operationsTitle}
+                    rows={2}
+                    onChange={(value) => updateField("operationsTitle", value)}
+                  />
+                  <div className="grid gap-3">
+                    {form.operations.map((operation, index) => (
+                      <EditableCard
+                        key={`operation-${index}`}
+                        title={`Punto ${index + 1}`}
+                        onRemove={() => removeOperation(index)}
+                        removeDisabled={form.operations.length === 1}
+                      >
+                        <TextAreaField
+                          label="Texto"
+                          value={operation}
+                          rows={2}
+                          onChange={(value) => updateOperation(index, value)}
+                        />
+                      </EditableCard>
+                    ))}
+                  </div>
+                </div>
+              </EditorPanel>
+            )}
+          </main>
+
+          <aside className="border-t bg-ui-bg-subtle p-4 small:border-l small:border-t-0">
+            <div className="sticky top-4 grid gap-4">
+              <PreviewCard form={form} />
             </div>
-          </div>
+          </aside>
         </div>
       </Container>
       <Toaster />
@@ -433,45 +595,52 @@ const Homepage = () => {
   );
 };
 
-const Section = ({
+const EditorPanel = ({
   title,
+  description,
+  action,
   children,
-  actionLabel,
-  onAction,
 }: {
   title: string;
-  children: React.ReactNode;
-  actionLabel?: string;
-  onAction?: () => void;
+  description: string;
+  action?: ReactNode;
+  children: ReactNode;
 }) => (
-  <div className="grid gap-4 rounded-lg border p-4">
-    <div className="flex items-center justify-between gap-3">
-      <Text size="small" leading="compact" weight="plus">
-        {title}
-      </Text>
-      {onAction ? (
-        <Button size="small" variant="secondary" onClick={onAction}>
-          <Plus />
-          {actionLabel}
-        </Button>
-      ) : null}
+  <div className="grid gap-5">
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <Text size="large" weight="plus">
+          {title}
+        </Text>
+        <Text size="small" className="mt-1 text-ui-fg-subtle">
+          {description}
+        </Text>
+      </div>
+      {action}
     </div>
-    <div className="grid gap-3">{children}</div>
+    {children}
   </div>
 );
 
-const EditableRow = ({
+const AddButton = ({ label, onClick }: { label: string; onClick: () => void }) => (
+  <Button size="small" variant="secondary" onClick={onClick}>
+    <Plus />
+    {label}
+  </Button>
+);
+
+const EditableCard = ({
   title,
   children,
   removeDisabled,
   onRemove,
 }: {
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
   removeDisabled?: boolean;
   onRemove: () => void;
 }) => (
-  <div className="grid gap-3 rounded-lg border bg-ui-bg-subtle p-3">
+  <div className="grid gap-3 rounded-lg border bg-ui-bg-base p-4 shadow-elevation-card-rest">
     <div className="flex items-center justify-between gap-3">
       <Text size="small" leading="compact" weight="plus">
         {title}
@@ -489,49 +658,74 @@ const EditableRow = ({
   </div>
 );
 
-const ImageBlockSection = ({
+const ImageBlocksEditor = ({
   title,
+  description,
   items,
+  profileId,
   onAdd,
   onRemove,
   onChange,
-  profileId = "ngs",
 }: {
   title: string;
-  items: HomepageContent["trustBlocks"];
-  profileId?: string;
+  description: string;
+  items: HomepageImageBlock[];
+  profileId: string;
   onAdd: () => void;
   onRemove: (index: number) => void;
   onChange: (
     index: number,
-    field: keyof HomepageContent["trustBlocks"][number],
+    field: keyof HomepageImageBlock,
     value: string
   ) => void;
 }) => (
-  <Section title={title} actionLabel="Anadir bloque" onAction={onAdd}>
-    <div className="grid gap-3">
-      {items.map((item, index) => (
-        <EditableRow
-          key={`${title}-${index}`}
-          title={`Bloque ${index + 1}`}
-          onRemove={() => onRemove(index)}
-          removeDisabled={items.length === 1}
-        >
+  <EditorPanel title={title} description={description} action={<AddButton label="Anadir bloque" onClick={onAdd} />}>
+    <BlockList
+      items={items}
+      profileId={profileId}
+      onRemove={onRemove}
+      onChange={onChange}
+    />
+  </EditorPanel>
+);
+
+const BlockList = ({
+  items,
+  profileId,
+  onRemove,
+  onChange,
+}: {
+  items: HomepageImageBlock[];
+  profileId: string;
+  onRemove: (index: number) => void;
+  onChange: (
+    index: number,
+    field: keyof HomepageImageBlock,
+    value: string
+  ) => void;
+}) => (
+  <div className="grid gap-3">
+    {items.map((item, index) => (
+      <EditableCard
+        key={`block-${index}`}
+        title={`Bloque ${index + 1}`}
+        onRemove={() => onRemove(index)}
+        removeDisabled={items.length === 1}
+      >
+        <div className="grid gap-4 small:grid-cols-[220px_1fr]">
+          <ImageField
+            label="Imagen"
+            value={item.image}
+            profileId={profileId}
+            preferredType="homepage"
+            onChange={(value) => onChange(index, "image", value)}
+          />
           <div className="grid gap-3">
-            <div className="grid gap-3 small:grid-cols-2">
-              <TextField
-                label="Titulo"
-                value={item.title}
-                onChange={(value) => onChange(index, "title", value)}
-              />
-              <AssetPickerField
-                label="Imagen"
-                value={item.image}
-                profileId={profileId}
-                preferredType="homepage"
-                onChange={(value) => onChange(index, "image", value)}
-              />
-            </div>
+            <TextField
+              label="Titulo"
+              value={item.title}
+              onChange={(value) => onChange(index, "title", value)}
+            />
             <TextAreaField
               label="Texto"
               value={item.body}
@@ -539,10 +733,180 @@ const ImageBlockSection = ({
               onChange={(value) => onChange(index, "body", value)}
             />
           </div>
-        </EditableRow>
-      ))}
+        </div>
+      </EditableCard>
+    ))}
+  </div>
+);
+
+const ImageField = ({
+  label,
+  value,
+  profileId,
+  preferredType = "homepage",
+  onChange,
+}: {
+  label: string;
+  value: string;
+  profileId: string;
+  preferredType?: AssetType | "all";
+  onChange: (value: string) => void;
+}) => {
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const { data, isPending } = useAssets({
+    client_profile_id: profileId,
+    type: preferredType,
+  });
+  const uploadAsset = useUploadAsset({
+    onError: (error) =>
+      toast.error(error.message || "No se pudo subir la imagen"),
+  });
+
+  const assets = data?.assets || [];
+
+  const handleUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const content_base64 = await readFileAsBase64(file);
+      const { asset } = await uploadAsset.mutateAsync({
+        label: file.name.replace(/\.[^.]+$/, ""),
+        filename: file.name,
+        mime_type: file.type || "image/png",
+        content_base64,
+        type: preferredType === "logo" || preferredType === "hero" ? preferredType : "homepage",
+        client_profile_id: profileId,
+        alt: file.name,
+        tags: "homepage, uploaded",
+        sort_order: 0,
+      });
+
+      onChange(asset.url);
+      toast.success("Imagen subida");
+    } catch {
+      toast.error("No se pudo procesar el archivo");
+    } finally {
+      setUploading(false);
+      event.target.value = "";
+    }
+  };
+
+  return (
+    <div className="grid gap-3">
+      <div className="flex items-center justify-between gap-2">
+        <Label>{label}</Label>
+        <Button
+          type="button"
+          size="small"
+          variant="secondary"
+          onClick={() => setPickerOpen((current) => !current)}
+        >
+          {pickerOpen ? "Cerrar" : "Biblioteca"}
+        </Button>
+      </div>
+      <div className="overflow-hidden rounded-lg border bg-ui-bg-subtle">
+        <div className="aspect-video bg-ui-bg-subtle">
+          {value ? (
+            <img
+              src={resolveAdminAssetPreviewUrl(value)}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center p-4">
+              <Text size="small" className="text-ui-fg-subtle">
+                Sin imagen
+              </Text>
+            </div>
+          )}
+        </div>
+        <div className="grid gap-2 border-t bg-ui-bg-base p-3">
+          <Input value={value} onChange={(event) => onChange(event.target.value)} />
+          <Label>
+            <span className="mb-2 block text-ui-fg-subtle">Subir imagen</span>
+            <Input
+              type="file"
+              accept="image/png,image/jpeg,image/svg+xml,image/webp"
+              disabled={uploading || uploadAsset.isPending}
+              onChange={handleUpload}
+            />
+          </Label>
+          {(uploading || uploadAsset.isPending) && (
+            <Text size="small" className="text-ui-fg-subtle">
+              Subiendo imagen...
+            </Text>
+          )}
+        </div>
+      </div>
+
+      {pickerOpen && (
+        <div className="rounded-lg border bg-ui-bg-base p-3">
+          {isPending ? (
+            <Text size="small" className="text-ui-fg-subtle">
+              Cargando assets...
+            </Text>
+          ) : assets.length ? (
+            <div className="grid grid-cols-2 gap-2">
+              {assets.map((asset) => (
+                <AssetTile
+                  key={asset.id || asset.url}
+                  asset={asset}
+                  selected={value === asset.url}
+                  onSelect={() => {
+                    onChange(asset.url);
+                    setPickerOpen(false);
+                  }}
+                />
+              ))}
+            </div>
+          ) : (
+            <Text size="small" className="text-ui-fg-subtle">
+              No hay assets para este tipo. Sube uno desde este bloque.
+            </Text>
+          )}
+        </div>
+      )}
     </div>
-  </Section>
+  );
+};
+
+const AssetTile = ({
+  asset,
+  selected,
+  onSelect,
+}: {
+  asset: AdminAsset;
+  selected: boolean;
+  onSelect: () => void;
+}) => (
+  <button
+    type="button"
+    onClick={onSelect}
+    className={[
+      "overflow-hidden rounded-lg border text-left transition hover:bg-ui-bg-component-hover",
+      selected ? "border-ui-border-interactive" : "border-ui-border-base",
+    ].join(" ")}
+  >
+    <div className="aspect-video bg-ui-bg-subtle">
+      <img
+        src={resolveAdminAssetPreviewUrl(asset.url)}
+        alt={asset.alt || asset.label}
+        className="h-full w-full object-cover"
+      />
+    </div>
+    <div className="p-2">
+      <Text size="xsmall" weight="plus" className="truncate">
+        {asset.label}
+      </Text>
+    </div>
+  </button>
 );
 
 const TextField = ({
@@ -578,6 +942,80 @@ const TextAreaField = ({
       value={value}
       onChange={(event) => onChange(event.target.value)}
     />
+  </div>
+);
+
+const PreviewCard = ({ form }: { form: HomepageContent }) => (
+  <div className="overflow-hidden rounded-lg border bg-ui-bg-base shadow-elevation-card-rest">
+    <div className="border-b p-4">
+      <Text size="small" weight="plus">
+        Preview home
+      </Text>
+      <Text size="small" className="text-ui-fg-subtle">
+        Resumen visual de lo que estas editando.
+      </Text>
+    </div>
+    <div className="grid gap-4 p-4">
+      <div className="overflow-hidden rounded-lg border">
+        <div className="aspect-video bg-ui-bg-subtle">
+          {form.heroImage ? (
+            <img
+              src={resolveAdminAssetPreviewUrl(form.heroImage)}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+          ) : null}
+        </div>
+        <div className="grid gap-2 p-3">
+          <div className="flex flex-wrap gap-2">
+            <Badge size="xsmall">{form.heroBadgePrimary}</Badge>
+            <Badge size="xsmall">{form.heroBadgeSecondary}</Badge>
+          </div>
+          <Text weight="plus">{form.heroTitle}</Text>
+          <Text size="small" className="text-ui-fg-subtle">
+            {form.heroBody}
+          </Text>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2">
+        {form.metrics.slice(0, 3).map((metric, index) => (
+          <div key={`${metric.value}-${index}`} className="rounded border p-2">
+            <Text size="small" weight="plus">
+              {metric.value}
+            </Text>
+            <Text size="xsmall" className="text-ui-fg-subtle">
+              {metric.label}
+            </Text>
+          </div>
+        ))}
+      </div>
+
+      <PreviewList
+        title="Bloques"
+        items={[
+          `${form.trustBlocks.length} confianza`,
+          `${form.capabilityBlocks.length} soluciones`,
+          `${form.detailBlocks.length} visuales`,
+          `${form.operations.length} puntos B2B`,
+        ]}
+      />
+    </div>
+  </div>
+);
+
+const PreviewList = ({ title, items }: { title: string; items: string[] }) => (
+  <div>
+    <Text size="small" weight="plus">
+      {title}
+    </Text>
+    <div className="mt-2 flex flex-wrap gap-2">
+      {items.map((item) => (
+        <Badge key={item} size="xsmall">
+          {item}
+        </Badge>
+      ))}
+    </div>
   </div>
 );
 
