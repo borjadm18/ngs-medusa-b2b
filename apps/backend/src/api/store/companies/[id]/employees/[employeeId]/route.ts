@@ -13,7 +13,7 @@ export const GET = async (
   req: MedusaRequest<StoreGetEmployeeParamsType>,
   res: MedusaResponse
 ) => {
-  const { employeeId } = req.params;
+  const employeeId = req.params.employeeId || req.params.employee_id;
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
 
   const {
@@ -38,7 +38,8 @@ export const POST = async (
   req: MedusaRequest<StoreUpdateEmployeeType>,
   res: MedusaResponse
 ) => {
-  const { id, employeeId } = req.params;
+  const { id } = req.params;
+  const employeeId = req.params.employeeId || req.params.employee_id;
   const { spending_limit, is_admin } = req.validatedBody;
   const query = req.scope.resolve(ContainerRegistrationKeys.QUERY);
 
@@ -71,7 +72,7 @@ export const POST = async (
 };
 
 export const DELETE = async (req: MedusaRequest, res: MedusaResponse) => {
-  const { employeeId } = req.params;
+  const employeeId = req.params.employeeId || req.params.employee_id;
 
   await deleteEmployeesWorkflow.run({
     input: [employeeId],

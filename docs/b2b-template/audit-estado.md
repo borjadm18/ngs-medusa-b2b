@@ -281,3 +281,43 @@ Siguiente accion:
 3. Crear simulador Admin para catalog rules por cliente/canal/region.
 4. Extender vertical packs con productos/categorias/seeds demo.
 5. Migrar Assets a storage externo persistente.
+
+## Auditoria De Robustez 2026-07-17
+
+### P0 Corregido
+
+- Rutas store de empresa tenian autenticacion, pero no comprobaban pertenencia a la empresa concreta.
+- `ensureRole` dependia de metadata global `provider_identity.user_metadata.role`, no de la relacion `customer -> employee -> company`.
+- `GET/POST/DELETE /store/companies/:id` y rutas de empleados podian quedar demasiado abiertas si un usuario autenticado conocia IDs.
+- Se anadio `ensureCompanyMember()` y se endurecio `ensureRole("company_admin")` para validar:
+  - customer autenticado;
+  - employee enlazado al customer;
+  - employee activo;
+  - employee perteneciente a `req.params.id`;
+  - rol/admin dentro de esa empresa.
+- Se cubrieron `DELETE /store/companies/:id` y `DELETE /store/companies/:id/employees/:employeeId`.
+- Se alineo el matcher `:employeeId` con la carpeta `[employeeId]` y se dejo fallback defensivo para `employee_id`.
+- Se mantuvo el onboarding funcional con un bootstrap acotado: solo permite crear el primer `company_admin` si la empresa no tiene empleados, el `customer_id` coincide con el customer autenticado y el body validado pide rol/admin activo.
+
+### Validacion Ejecutada
+
+- `validate:client-profiles`: OK, con warnings de assets placeholder en perfiles ejemplo/POC.
+- `validate:storefront-debug-logs`: OK.
+- `@b2b-starter/backend build`: OK tras fix.
+- `@b2b-starter/storefront build` con `NEXT_PUBLIC_B2B_CLIENT_PROFILE=starter-empty`: OK.
+
+### Riesgos Pendientes
+
+- `test:unit` no es fiable localmente: el runner de Medusa/Jest invoca pnpm 11 desde el runtime, fuerza comprobaciones de lockfile y puede dejar `node_modules` incompleto. Se restauro con `pnpm install --frozen-lockfile --prod=false`, pero la suite queda pendiente de CI estable.
+- `pnpm.overrides` debe mantenerse tambien en `pnpm-workspace.yaml` para compatibilidad con pnpm moderno.
+- Quedan 44 warnings de assets faltantes en perfiles no productivos (`example-audio`, `example-industrial`, `poc-packaging-demo`).
+- Hay credenciales demo en docs (`admin@test.com` / `supersecret`); aceptable para entorno demo, no para template publico final.
+- Quedan `console.log` accidentales en tests/componentes Admin que deben limpiarse antes de producto reusable.
+
+### Siguiente Hardening Recomendado
+
+1. Crear test HTTP especifico que pruebe que un customer de una empresa no puede leer/editar/borrar otra empresa.
+2. Preparar `.env.test` y Postgres local/CI para que `test:integration:http` sea obligatorio.
+3. Convertir warnings de assets a error solo para perfiles marcados como `productionReady`.
+4. Separar credenciales demo de docs publicas y moverlas a `.env.example`/runbooks privados.
+5. Anadir smoke remoto para rutas de company ownership cuando haya dos usuarios demo activos.
