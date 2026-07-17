@@ -2,6 +2,7 @@ import fs from "node:fs"
 import path from "node:path"
 import process from "node:process"
 import { spawnSync } from "node:child_process"
+import { createInterface } from "node:readline/promises"
 
 const rootDir = process.cwd()
 const profilesDir = path.join(rootDir, "profiles")
@@ -10,6 +11,8 @@ const templatesDir = path.join(rootDir, "templates")
 const usage = `Usage:
   pnpm create:client-profile -- --id <cliente> --name "Cliente"
   pnpm create:client-profile -- --id acme --name "ACME" --from ngs --accent "#d71920"
+  pnpm product:poc:wizard
+  pnpm product:poc:new -- --id acme --name "ACME" --vertical packaging --from-url https://acme.example
 
 Options:
   --id       Perfil slug en kebab-case. Ej: ngs, acme-industrial
@@ -17,10 +20,12 @@ Options:
   --legal    Nombre legal opcional
   --tagline  Tagline visible opcional
   --from     Perfil base existente en ./profiles o "template". Por defecto: template
+  --from-url URL publica del prospect. Genera brief de investigacion del POC
   --vertical Vertical pack: audio, packaging, hardware, electrical, spare-parts
   --accent   Color acento hex. Ej: "#d71920"
   --country  Pais por defecto. Por defecto: es
   --currency Moneda. Por defecto: EUR
+  --interactive Pregunta los campos clave por consola
   --force    Permite sobrescribir archivos existentes del perfil
   --no-sync  Crea archivos sin ejecutar sync-client-profile
   --dry-run  Muestra lo que se crearia sin escribir archivos
@@ -32,6 +37,7 @@ const parseArgs = () => {
     force: false,
     sync: true,
     dryRun: false,
+    interactive: false,
     from: "template",
     vertical: "industrial",
     country: "es",
@@ -60,12 +66,18 @@ const parseArgs = () => {
       continue
     }
 
+    if (arg === "--interactive") {
+      options.interactive = true
+      continue
+    }
+
     if (
       arg === "--id" ||
       arg === "--name" ||
       arg === "--legal" ||
       arg === "--tagline" ||
       arg === "--from" ||
+      arg === "--from-url" ||
       arg === "--vertical" ||
       arg === "--accent" ||
       arg === "--country" ||
@@ -93,6 +105,22 @@ const assertValidId = (profileId) => {
 const assertHexColor = (color, label) => {
   if (color && !/^#[0-9a-fA-F]{6}$/.test(color)) {
     throw new Error(`${label} must be a hex color like #d71920`)
+  }
+}
+
+const assertValidUrl = (value) => {
+  if (!value) {
+    return
+  }
+
+  try {
+    const parsed = new URL(value)
+
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      throw new Error("unsupported protocol")
+    }
+  } catch {
+    throw new Error("--from-url must be a valid http(s) URL")
   }
 }
 
@@ -313,6 +341,79 @@ const assertValidVertical = (vertical) => {
     throw new Error(
       `--vertical must be one of: ${Object.keys(verticalPacks).join(", ")}`
     )
+  }
+}
+
+const promptValue = async (rl, question, fallback) => {
+  const suffix = fallback ? ` [${fallback}]` : ""
+  const value = (await rl.question(`${question}${suffix}: `)).trim()
+
+  return value || fallback
+}
+
+const normalizeUrlToId = (value) => {
+  if (!value) {
+    return null
+  }
+
+  const hostname = new URL(value).hostname
+    .replace(/^www\./, "")
+    .split(".")
+    .slice(0, -1)
+    .join("-")
+
+  return hostname
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+}
+
+const titleFromUrl = (value) => {
+  const id = normalizeUrlToId(value)
+
+  return id ? titleCaseFromId(id) : null
+}
+
+const collectInteractiveOptions = async (options) => {
+  if (!options.interactive) {
+    return options
+  }
+
+  const rl = createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  })
+
+  try {
+    const fromUrl = await promptValue(
+      rl,
+      "URL del prospect opcional",
+      options["from-url"] || ""
+    )
+    const inferredId = fromUrl ? normalizeUrlToId(fromUrl) : options.id
+    const inferredName = fromUrl ? titleFromUrl(fromUrl) : options.name
+
+    options["from-url"] = fromUrl || undefined
+    options.id = await promptValue(rl, "Slug del perfil", options.id || inferredId)
+    options.name = await promptValue(
+      rl,
+      "Nombre comercial",
+      options.name || inferredName || titleCaseFromId(options.id || "cliente")
+    )
+    options.vertical = await promptValue(
+      rl,
+      `Vertical (${Object.keys(verticalPacks).join(", ")})`,
+      options.vertical
+    )
+    options.accent = await promptValue(rl, "Color acento hex", options.accent || "#d71920")
+    options.country = await promptValue(rl, "Pais por defecto", options.country)
+    options.currency = await promptValue(rl, "Moneda", options.currency)
+
+    return options
+  } finally {
+    rl.close()
   }
 }
 
@@ -595,12 +696,66 @@ NEXT_PUBLIC_B2B_CLIENT_PROFILE=${id}
 B2B_CLIENT_PROFILE=${id}
 `
 
+const buildProspectResearchBrief = ({ id, brandName, fromUrl, vertical }) => {
+  if (!fromUrl) {
+    return null
+  }
+
+  const host = new URL(fromUrl).hostname
+
+  return `# Brief de investigacion - ${brandName}
+
+Este archivo se genera desde \`--from-url\` para preparar un POC B2B adaptado al prospect.
+
+## Prospect
+
+- Perfil: \`${id}\`
+- Web: ${fromUrl}
+- Dominio: ${host}
+- Vertical inicial: \`${vertical}\`
+
+## Datos a confirmar
+
+- [ ] Logo principal y version para fondo claro/oscuro.
+- [ ] Paleta real de marca.
+- [ ] Categorias principales.
+- [ ] 4-10 productos representativos.
+- [ ] Reglas B2B: unidad/caja, minimo, multiplo, pallet, peso y dimensiones.
+- [ ] Sectores o tipos de cliente.
+- [ ] Argumentos comerciales reales.
+- [ ] Condiciones: precios privados, descuentos, regiones, canales y aprobaciones.
+
+## Archivos a rellenar despues de investigar
+
+- \`client-profile.json\`: marca, colores, menu, footer, SEO.
+- \`homepage-content.json\`: hero, categorias, CTAs, bloques comerciales.
+- \`product-catalog.csv\`: productos demo.
+- \`product-packaging.csv\`: reglas B2B por SKU.
+- \`assets/\`: logo e imagenes del POC.
+
+## Prompt sugerido para investigacion asistida
+
+Investiga ${fromUrl} y proponme un perfil ecommerce B2B industrial para Medusa. Necesito:
+
+1. Resumen del negocio y cliente objetivo.
+2. Paleta visual y tono de marca.
+3. Categorias principales para menu y catalogo.
+4. 4-10 productos demo plausibles con nombre, categoria, SKU, precio estimado e imagen sugerida.
+5. Reglas de packaging B2B: unidades/caja, minimo, multiplo, cajas/pallet, peso y dimensiones.
+6. Copy para hero, bloques de home y CTAs.
+7. Riesgos o supuestos que debo validar con el cliente.
+
+Devuelve el resultado en formato accionable para rellenar \`profiles/${id}\`.
+`
+}
+
 const createProfile = ({
   id,
   name,
   legal,
   tagline,
   from,
+  fromUrl,
   vertical,
   accent,
   country,
@@ -611,6 +766,7 @@ const createProfile = ({
 }) => {
   assertValidId(id)
   assertHexColor(accent, "--accent")
+  assertValidUrl(fromUrl)
   assertValidVertical(vertical)
 
   const brandName = name || titleCaseFromId(id)
@@ -761,6 +917,22 @@ Consulta \`activation-checklist.md\` para el checklist completo de activacion y 
     dryRun
   )
 
+  const prospectResearchBrief = buildProspectResearchBrief({
+    id,
+    brandName,
+    fromUrl,
+    vertical,
+  })
+
+  if (prospectResearchBrief) {
+    writeTextMaybe(
+      path.join(targetDir, "prospect-research.md"),
+      prospectResearchBrief,
+      force,
+      dryRun
+    )
+  }
+
   if (sync && !dryRun) {
     const syncResult = spawnSync(process.execPath, ["scripts/sync-client-profile.mjs"], {
       cwd: rootDir,
@@ -778,13 +950,16 @@ Consulta \`activation-checklist.md\` para el checklist completo de activacion y 
 }
 
 try {
-  const options = parseArgs()
+  const options = await collectInteractiveOptions(parseArgs())
 
   if (!options.id) {
     throw new Error(`Missing --id\n\n${usage}`)
   }
 
-  createProfile(options)
+  createProfile({
+    ...options,
+    fromUrl: options["from-url"],
+  })
 } catch (error) {
   console.error(error.message)
   process.exit(1)

@@ -64,6 +64,18 @@ Crear un nuevo POC:
 pnpm product:poc:new -- --id acme-industrial --name "ACME Industrial" --vertical industrial --accent "#d71920"
 ```
 
+Crear un nuevo POC desde una URL de prospect:
+
+```bash
+pnpm product:poc:new -- --id acme-packaging --name "ACME Packaging" --vertical packaging --from-url https://www.acme.example
+```
+
+Launcher guiado:
+
+```bash
+pnpm product:poc:wizard
+```
+
 Verticales disponibles:
 
 - `industrial`
@@ -113,6 +125,12 @@ Cuando se migre a Medusa Cloud:
 - Replicar variables `B2B_CLIENT_PROFILE`, CORS, auth secrets, database/redis gestionados por Cloud.
 - Ejecutar migraciones y seeds desde el entorno Cloud.
 - Validar Admin, Store API, login, PDP, carrito y presupuestos antes de cortar Render.
+
+Guia detallada:
+
+```txt
+docs/MEDUSA_CLOUD_MIGRATION.md
+```
 
 ## Checklist antes de demo externa
 

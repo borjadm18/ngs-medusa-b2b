@@ -11,6 +11,7 @@
     "create:client-profile": "node scripts/create-client-profile.mjs",
     "template:new": "node scripts/create-client-profile.mjs",
     "product:poc:new": "node scripts/create-client-profile.mjs",
+    "product:poc:wizard": "node scripts/create-client-profile.mjs --interactive",
     "product:demo:check": "node scripts/validate-client-profiles.mjs --id ngs && node scripts/smoke-demo-readiness.mjs",
     "product:starter:check": "node scripts/validate-client-profiles.mjs --id starter-empty && node scripts/sync-client-profile.mjs",
     "validate:client-profiles": "node scripts/validate-client-profiles.mjs",
