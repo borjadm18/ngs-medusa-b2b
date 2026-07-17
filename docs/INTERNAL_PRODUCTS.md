@@ -94,6 +94,12 @@ pnpm validate:client-profiles -- --id acme-industrial
 pnpm sync:client-profile
 ```
 
+**POC generado para validar el flujo:**
+
+```bash
+NEXT_PUBLIC_B2B_CLIENT_PROFILE=poc-packaging-demo pnpm --filter @b2b-starter/storefront build
+```
+
 **Siguiente evolucion:** convertir este flujo en un skill/launcher guiado que investigue cliente, proponga perfil, genere assets placeholder y prepare la demo.
 
 ## Separacion De Responsabilidades
@@ -133,6 +139,7 @@ pnpm sync:client-profile
 
 1. Mantener la demo NGS estable y corregir Render/GitHub.
 2. Usar `starter-empty` como contrato limpio de nuevos proyectos.
-3. Convertir `template:new` en launcher interactivo.
-4. Crear vertical packs con productos e imagenes placeholder mejores.
-5. Documentar flujo Medusa Cloud para pasar de Render/Vercel a entorno gestionado.
+3. Mantener `poc-packaging-demo` como fixture de POC generado.
+4. Convertir `template:new` en launcher interactivo.
+5. Crear vertical packs con productos e imagenes placeholder mejores.
+6. Documentar flujo Medusa Cloud para pasar de Render/Vercel a entorno gestionado.
