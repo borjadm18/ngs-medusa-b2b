@@ -34,7 +34,7 @@ const generatedBackendProfileDir = path.join(
   "apps",
   "backend",
   "src",
-  "migration-scripts",
+  "scripts",
   "generated-client-profiles"
 )
 const generatedBackendPackagingRegistryPath = path.join(

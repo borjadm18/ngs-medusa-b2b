@@ -174,8 +174,8 @@ El objetivo es que una demo nueva no requiera editar componentes React para camb
 Si el perfil incluye `product-packaging.csv`, el sync tambien genera:
 
 ```txt
-apps/backend/src/migration-scripts/generated-client-profiles/<cliente>-product-packaging.json
-apps/backend/src/migration-scripts/generated-client-profiles/product-packaging-registry.ts
+apps/backend/src/scripts/generated-client-profiles/<cliente>-product-packaging.json
+apps/backend/src/scripts/generated-client-profiles/product-packaging-registry.ts
 ```
 
 El seed `seed-product-packaging.ts` usa `B2B_CLIENT_PROFILE` o `NEXT_PUBLIC_B2B_CLIENT_PROFILE` para escoger las reglas activas.
@@ -183,8 +183,8 @@ El seed `seed-product-packaging.ts` usa `B2B_CLIENT_PROFILE` o `NEXT_PUBLIC_B2B_
 Si el perfil incluye `product-catalog.csv`, el sync tambien genera:
 
 ```txt
-apps/backend/src/migration-scripts/generated-client-profiles/<cliente>-product-catalog.json
-apps/backend/src/migration-scripts/generated-client-profiles/product-catalog-registry.ts
+apps/backend/src/scripts/generated-client-profiles/<cliente>-product-catalog.json
+apps/backend/src/scripts/generated-client-profiles/product-catalog-registry.ts
 ```
 
 El seed `seed-product-catalog.ts` usa el mismo perfil activo para escoger el catalogo a crear.

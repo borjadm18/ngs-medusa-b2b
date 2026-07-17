@@ -139,8 +139,8 @@ El sync genera:
 ```txt
 apps/storefront/src/lib/client-profile/profiles/<cliente>.json
 apps/storefront/src/lib/client-profile/profiles/<cliente>-homepage.json
-apps/backend/src/migration-scripts/generated-client-profiles/<cliente>-product-catalog.json
-apps/backend/src/migration-scripts/generated-client-profiles/<cliente>-product-packaging.json
+apps/backend/src/scripts/generated-client-profiles/<cliente>-product-catalog.json
+apps/backend/src/scripts/generated-client-profiles/<cliente>-product-packaging.json
 ```
 
 Validar build:
@@ -199,4 +199,3 @@ Una demo esta lista cuando:
 - Hay al menos 6 productos demo y 6 reglas de packaging.
 - No hay copy de NGS visible salvo que el perfil activo sea `ngs`.
 - El comprador puede recorrer home, catalogo, PDP, carrito y presupuesto sin errores 500.
-
