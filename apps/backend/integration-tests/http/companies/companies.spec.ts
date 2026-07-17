@@ -20,7 +20,7 @@ jest.setTimeout(60 * 1000);
 medusaIntegrationTestRunner({
   inApp: true,
   env: {
-    JWT_SECRET: "supersecret",
+    JWT_SECRET: process.env.JWT_SECRET || "test_jwt_secret_change_me",
   },
   testSuite: ({ api, getContainer }) => {
     let storeHeaders, cart, product, salesChannel, region, customer;

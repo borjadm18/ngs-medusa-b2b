@@ -309,6 +309,7 @@ Siguiente accion:
 - `@b2b-starter/storefront build` con `NEXT_PUBLIC_B2B_CLIENT_PROFILE=starter-empty`: OK.
 - `companies.spec.ts`: escrito/actualizado, pero no ejecutable en este equipo hasta configurar `apps/backend/.env.test` con PostgreSQL (`DATABASE_URL`, `DB_HOST`, `DB_USERNAME`, `DB_PASSWORD`, `DB_PORT`).
 - `.github/workflows/b2b-quality-gate.yml`: anadido para ejecutar validaciones, backend build y `companies.spec.ts` con PostgreSQL/Redis gestionados en GitHub Actions.
+- Primera ejecucion CI detecto mismatch de `JWT_SECRET` entre token admin de test y app Medusa; el spec se ajusto para usar `process.env.JWT_SECRET`.
 
 ### Riesgos Pendientes
 
