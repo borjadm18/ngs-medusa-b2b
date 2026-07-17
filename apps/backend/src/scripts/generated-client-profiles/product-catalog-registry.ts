@@ -2,11 +2,13 @@
 import exampleAudioProductCatalog from "./example-audio-product-catalog.json"
 import exampleIndustrialProductCatalog from "./example-industrial-product-catalog.json"
 import ngsProductCatalog from "./ngs-product-catalog.json"
+import pocPackagingDemoProductCatalog from "./poc-packaging-demo-product-catalog.json"
 import starterEmptyProductCatalog from "./starter-empty-product-catalog.json"
 
 export const generatedProductCatalogProfiles = {
   "example-audio": exampleAudioProductCatalog,
   "example-industrial": exampleIndustrialProductCatalog,
   "ngs": ngsProductCatalog,
+  "poc-packaging-demo": pocPackagingDemoProductCatalog,
   "starter-empty": starterEmptyProductCatalog,
 }

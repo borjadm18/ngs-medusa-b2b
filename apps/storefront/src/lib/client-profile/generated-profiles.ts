@@ -5,6 +5,8 @@ import exampleIndustrialProfile from "./profiles/example-industrial.json"
 import exampleIndustrialHomepage from "./profiles/example-industrial-homepage.json"
 import ngsProfile from "./profiles/ngs.json"
 import ngsHomepage from "./profiles/ngs-homepage.json"
+import pocPackagingDemoProfile from "./profiles/poc-packaging-demo.json"
+import pocPackagingDemoHomepage from "./profiles/poc-packaging-demo-homepage.json"
 import starterEmptyProfile from "./profiles/starter-empty.json"
 import starterEmptyHomepage from "./profiles/starter-empty-homepage.json"
 
@@ -20,6 +22,10 @@ export const generatedProfileBundles = {
   "ngs": {
     profile: ngsProfile,
     homepage: ngsHomepage,
+  },
+  "poc-packaging-demo": {
+    profile: pocPackagingDemoProfile,
+    homepage: pocPackagingDemoHomepage,
   },
   "starter-empty": {
     profile: starterEmptyProfile,

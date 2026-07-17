@@ -1,0 +1,6 @@
+sku,variant_id,sales_unit,minimum_order_quantity,quantity_increment,units_per_box,boxes_per_pallet,package_weight,package_dimensions
+SKU-BOX-KRAFT-300,,box,100,100,100,40,12.5,600 x 400 x 360 mm
+SKU-MAILER-BAG-250,,box,250,250,250,32,8.1,520 x 380 x 300 mm
+SKU-BUBBLE-ROLL-50M,,unit,1,1,1,24,3.8,500 x 500 x 1000 mm
+SKU-LABEL-A6-1000,,box,1000,1000,1000,60,6.4,320 x 240 x 220 mm
+SKU-TAPE-48MM-36,,box,36,36,36,72,9.6,420 x 320 x 280 mm
