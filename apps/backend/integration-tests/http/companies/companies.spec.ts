@@ -5,12 +5,6 @@ import {
   createStoreUser,
 } from "../../utils/admin";
 import {
-  cartSeeder,
-  productSeeder,
-  regionSeeder,
-  salesChannelSeeder,
-} from "../../utils/seeder";
-import {
   generatePublishableKey,
   generateStoreHeaders,
 } from "../../utils/store";
@@ -23,7 +17,7 @@ medusaIntegrationTestRunner({
     JWT_SECRET: process.env.JWT_SECRET || "test_jwt_secret_change_me",
   },
   testSuite: ({ api, getContainer }) => {
-    let storeHeaders, cart, product, salesChannel, region, customer;
+    let storeHeaders, customer;
 
     const companyPayload = (name = "Test Company") => ({
       name,
@@ -73,14 +67,6 @@ medusaIntegrationTestRunner({
       });
       headers.headers["Authorization"] = `Bearer ${storeUser.token}`;
 
-      if (salesChannel) {
-        await api.post(
-          `/admin/api-keys/${publishableKey.id}/sales-channels`,
-          { add: [salesChannel.id] },
-          adminHeaders
-        );
-      }
-
       return { headers, customer: storeUser.customer };
     };
 
@@ -92,37 +78,6 @@ medusaIntegrationTestRunner({
       const res = await createStoreUser({ api, storeHeaders });
       customer = res.customer;
       storeHeaders.headers["Authorization"] = `Bearer ${res.token}`;
-      region = await regionSeeder({ api, adminHeaders, data: {} });
-
-      salesChannel = await salesChannelSeeder({
-        api,
-        adminHeaders,
-        data: {},
-      });
-
-      product = await productSeeder({
-        api,
-        adminHeaders,
-        data: {
-          sales_channels: [{ id: salesChannel.id }],
-        },
-      });
-
-      await api.post(
-        `/admin/api-keys/${publishableKey.id}/sales-channels`,
-        { add: [salesChannel.id] },
-        adminHeaders
-      );
-
-      cart = await cartSeeder({
-        api,
-        storeHeaders,
-        data: {
-          region_id: region.id,
-          sales_channel_id: salesChannel.id,
-          items: [{ quantity: 1, variant_id: product.variants[0].id }],
-        },
-      });
     });
 
     describe("POST /store/companies", () => {
