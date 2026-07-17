@@ -5,6 +5,8 @@ import exampleIndustrialProfile from "./profiles/example-industrial.json"
 import exampleIndustrialHomepage from "./profiles/example-industrial-homepage.json"
 import ngsProfile from "./profiles/ngs.json"
 import ngsHomepage from "./profiles/ngs-homepage.json"
+import starterEmptyProfile from "./profiles/starter-empty.json"
+import starterEmptyHomepage from "./profiles/starter-empty-homepage.json"
 
 export const generatedProfileBundles = {
   "example-audio": {
@@ -18,5 +20,9 @@ export const generatedProfileBundles = {
   "ngs": {
     profile: ngsProfile,
     homepage: ngsHomepage,
+  },
+  "starter-empty": {
+    profile: starterEmptyProfile,
+    homepage: starterEmptyHomepage,
   },
 }

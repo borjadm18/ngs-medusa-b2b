@@ -53,6 +53,7 @@ An official Medusa starter for B2B ecommerce, built with [Medusa](https://medusa
 
 This fork is evolving into a reusable Medusa B2B commerce template for industrial ecommerce. The template layer documents the reusable architecture, client onboarding contract, packaging CSV format, homepage content format, and roadmap for turning the current NGS demo into a repeatable accelerator.
 
+- Internal product split: `docs/INTERNAL_PRODUCTS.md`
 - Template docs: `docs/b2b-template/README.md`
 - Client onboarding: `docs/b2b-template/client-onboarding.md`
 - Module catalog: `docs/b2b-template/module-catalog.md`
@@ -61,6 +62,7 @@ This fork is evolving into a reusable Medusa B2B commerce template for industria
 - Example client profile: `templates/client-profile.example.json`
 - Packaging CSV example: `templates/product-packaging.example.csv`
 - First real client profile: `profiles/ngs/README.md`
+- Clean starter profile: `profiles/starter-empty/README.md`
 
 Create a new reusable client profile:
 
@@ -84,6 +86,14 @@ Useful options:
 - `--no-sync`: skips artifact generation.
 
 Each generated profile includes `README.md`, `activation-checklist.md`, `.env.example`, `client-profile.json`, `homepage-content.json`, `product-packaging.csv`, and an `assets/` folder.
+
+Internal product commands:
+
+```bash
+pnpm product:demo:check
+pnpm product:starter:check
+pnpm product:poc:new -- --id acme-industrial --name "ACME Industrial" --vertical industrial
+```
 
 This creates `profiles/acme-industrial` with brand, homepage, packaging CSV and asset folders, then runs `pnpm sync:client-profile` to generate storefront/backend artifacts. Activate it with:
 

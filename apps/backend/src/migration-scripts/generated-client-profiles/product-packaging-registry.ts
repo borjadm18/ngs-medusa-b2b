@@ -2,9 +2,11 @@
 import exampleAudioPackaging from "./example-audio-product-packaging.json"
 import exampleIndustrialPackaging from "./example-industrial-product-packaging.json"
 import ngsPackaging from "./ngs-product-packaging.json"
+import starterEmptyPackaging from "./starter-empty-product-packaging.json"
 
 export const generatedProductPackagingProfiles = {
   "example-audio": exampleAudioPackaging,
   "example-industrial": exampleIndustrialPackaging,
   "ngs": ngsPackaging,
+  "starter-empty": starterEmptyPackaging,
 }
