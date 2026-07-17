@@ -27,6 +27,8 @@ import {
 } from "../components/quote-details";
 import { QuoteMessages } from "../components/quote-messages";
 import {
+  estimateFreightCost,
+  estimateShipmentMode,
   getQuotePackagingSummary,
 } from "../utils/b2b-packaging";
 
@@ -138,6 +140,8 @@ const QuoteDetails = () => {
   const packagingSummary = getQuotePackagingSummary(
     quote.draft_order?.items || []
   );
+  const shipmentMode = estimateShipmentMode(packagingSummary);
+  const estimatedFreight = estimateFreightCost(packagingSummary);
 
   return (
     <div className="flex flex-col gap-y-3">
@@ -211,7 +215,7 @@ const QuoteDetails = () => {
         <div className="mt-2 flex w-full max-w-[100%] flex-col gap-y-3 xl:mt-0 xl:max-w-[400px]">
           <Container className="divide-y p-0">
             <div className="flex items-center justify-between px-6 py-4">
-              <Heading level="h2">Packaging</Heading>
+              <Heading level="h2">Logistica B2B</Heading>
             </div>
             <div className="grid gap-3 px-6 py-4">
               <PackagingMetric
@@ -227,9 +231,29 @@ const QuoteDetails = () => {
                 value={`${packagingSummary.estimatedWeight.toFixed(1)} kg`}
               />
               <PackagingMetric
+                label="Volumen estimado"
+                value={`${packagingSummary.estimatedVolume.toFixed(3)} m3`}
+              />
+              <PackagingMetric
+                label="Peso facturable"
+                value={`${packagingSummary.billableWeight.toFixed(1)} kg`}
+              />
+              <PackagingMetric
                 label="Ocupacion pallet"
                 value={`${packagingSummary.palletShare.toFixed(2)} pallets`}
               />
+              <PackagingMetric label="Expedicion" value={shipmentMode} />
+              <PackagingMetric
+                label="Transporte demo"
+                value={formatAmount(
+                  estimatedFreight,
+                  quote.draft_order?.currency_code || "EUR"
+                )}
+              />
+              <Text size="xsmall" className="text-ui-fg-muted">
+                Estimacion basada en cajas, dimensiones, peso real y peso
+                volumetrico. Sustituible por tarifas reales de transportista.
+              </Text>
             </div>
           </Container>
 

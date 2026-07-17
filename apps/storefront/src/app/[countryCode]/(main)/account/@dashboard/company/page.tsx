@@ -6,7 +6,13 @@ import CompanyCard from "@/modules/account/components/company-card"
 import EmployeesCard from "@/modules/account/components/employees-card"
 import InviteEmployeeCard from "@/modules/account/components/invite-employee-card"
 import { Heading, Text } from "@medusajs/ui"
+import { Metadata } from "next"
 import { notFound } from "next/navigation"
+
+export const metadata: Metadata = {
+  title: "Empresa",
+  description: "Datos, usuarios y reglas de aprobacion de la empresa.",
+}
 
 export default async function Company() {
   const customer = await retrieveCustomer()

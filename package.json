@@ -12,7 +12,7 @@
     "template:new": "node scripts/create-client-profile.mjs",
     "product:poc:new": "node scripts/create-client-profile.mjs",
     "product:poc:wizard": "node scripts/create-client-profile.mjs --interactive",
-    "product:demo:check": "node scripts/validate-client-profiles.mjs --id ngs && node scripts/smoke-demo-readiness.mjs",
+    "product:demo:check": "node scripts/validate-client-profiles.mjs --id ngs && node scripts/smoke-demo-readiness.mjs && node scripts/smoke-playbook-p0.mjs",
     "product:starter:check": "node scripts/validate-client-profiles.mjs --id starter-empty && node scripts/sync-client-profile.mjs",
     "validate:client-profiles": "node scripts/validate-client-profiles.mjs",
     "validate:storefront-debug-logs": "node scripts/validate-storefront-debug-logs.mjs",
@@ -27,8 +27,10 @@
     "smoke:brand-profile": "node scripts/smoke-brand-profile.mjs",
     "smoke:assets": "node scripts/smoke-assets.mjs",
     "smoke:demo-readiness": "node scripts/smoke-demo-readiness.mjs",
+    "smoke:playbook-p0": "node scripts/smoke-playbook-p0.mjs",
     "smoke:storefront-account": "node scripts/smoke-storefront-account.mjs",
     "smoke:quote-acceptance": "node scripts/smoke-quote-acceptance.mjs",
+    "qa:playbook-visual": "node scripts/qa-playbook-visual.mjs",
     "test": "turbo run test",
     "test:integration:http": "turbo run test:integration:http",
     "test:integration:modules": "turbo run test:integration:modules",
@@ -39,6 +41,7 @@
     "@medusajs/eslint-plugin": "2.16.0",
     "eslint": "^9.13.0",
     "jiti": "^2.7.0",
+    "playwright": "1.51.1",
     "turbo": "^2.3.3"
   },
   "pnpm": {

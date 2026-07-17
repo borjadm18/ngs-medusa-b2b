@@ -22,12 +22,27 @@ export const AssetPickerField = ({
   onChange,
 }: AssetPickerFieldProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState("");
   const { data, isPending } = useAssets({
     client_profile_id: profileId,
     type: preferredType,
   });
 
   const assets = useMemo(() => data?.assets || [], [data?.assets]);
+  const filteredAssets = useMemo(() => {
+    const query = search.trim().toLowerCase();
+
+    if (!query) {
+      return assets;
+    }
+
+    return assets.filter((asset) =>
+      [asset.label, asset.url, asset.alt || "", asset.tags || "", asset.type]
+        .join(" ")
+        .toLowerCase()
+        .includes(query)
+    );
+  }, [assets, search]);
 
   return (
     <div className="grid gap-2">
@@ -46,42 +61,53 @@ export const AssetPickerField = ({
 
       {isOpen ? (
         <div className="grid gap-3 rounded-lg border bg-ui-bg-subtle p-3">
+          <Input
+            value={search}
+            placeholder="Buscar asset..."
+            onChange={(event) => setSearch(event.target.value)}
+          />
+
           {isPending ? (
             <Text size="small" className="text-ui-fg-subtle">
               Cargando assets...
             </Text>
           ) : null}
 
-          {!isPending && !assets.length ? (
+          {!isPending && !filteredAssets.length ? (
             <Text size="small" className="text-ui-fg-subtle">
-              No hay assets para este perfil y tipo.
+              No hay assets para este perfil, tipo o busqueda.
             </Text>
           ) : null}
 
-          {assets.length ? (
-            <div className="grid gap-2 small:grid-cols-2">
-              {assets.map((asset) => (
+          {filteredAssets.length ? (
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(116px,1fr))] gap-2">
+              {filteredAssets.map((asset) => (
                 <div
                   key={getAssetKey(asset)}
                   className="grid gap-2 rounded-lg border bg-ui-bg-base p-2"
                 >
-                  <div className="aspect-video overflow-hidden rounded-lg border bg-ui-bg-subtle">
+                  <div className="aspect-[4/3] overflow-hidden rounded-md border bg-ui-bg-subtle">
                     <img
                       src={resolveAdminAssetPreviewUrl(asset.url)}
                       alt={asset.alt || ""}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-contain p-1"
                     />
                   </div>
                   <div className="grid gap-1">
-                    <Text size="small" leading="compact" weight="plus">
+                    <Text
+                      size="xsmall"
+                      leading="compact"
+                      weight="plus"
+                      className="truncate"
+                    >
                       {asset.label}
                     </Text>
                     <Text
                       size="xsmall"
                       leading="compact"
-                      className="text-ui-fg-subtle"
+                      className="truncate text-ui-fg-subtle"
                     >
-                      {asset.type} - {asset.url}
+                      {asset.type}
                     </Text>
                   </div>
                   <Button

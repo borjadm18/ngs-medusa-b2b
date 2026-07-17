@@ -1,9 +1,15 @@
 import { fetchQuote, fetchQuotePreview } from "@/lib/data/quotes"
+import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import QuoteDetails from "../../components/quote-details"
 
 type Props = {
   params: Promise<{ id: string; countryCode: string }>
+}
+
+export const metadata: Metadata = {
+  title: "Detalle de presupuesto",
+  description: "Detalle, estado y acciones de un presupuesto B2B.",
 }
 
 export default async function QuoteDetailsPage(props: Props) {

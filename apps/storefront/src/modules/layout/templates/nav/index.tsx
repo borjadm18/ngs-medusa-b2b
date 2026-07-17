@@ -35,13 +35,13 @@ export async function NavigationHeader() {
 
   return (
     <div className="sticky inset-x-0 top-0 z-50 border-b border-neutral-200 bg-white/95 text-neutral-950 backdrop-blur">
-      <header className="content-container mx-auto flex min-h-[72px] w-full items-center justify-between gap-4">
-        <div className="flex items-center gap-5">
+      <header className="content-container mx-auto flex min-h-[72px] w-full min-w-0 items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3 medium:gap-5">
           <MobileNavigation categories={categories} profile={clientProfile} />
-          <div className="flex items-center gap-8">
+          <div className="flex min-w-0 items-center gap-8">
             <LocalizedClientLink className="flex w-fit items-center" href="/">
               <BrandLogo
-                className="h-16 w-[280px]"
+                className="h-14 w-[132px] medium:h-16 medium:w-[280px]"
                 imageClassName="scale-[1.45]"
                 name={clientProfile.brand.name}
                 logoUrl={clientProfile.brand.logo.dark}
@@ -122,7 +122,7 @@ export async function NavigationHeader() {
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex min-w-0 shrink-0 items-center justify-end gap-1.5 small:gap-2">
           <ProductSearchForm />
 
           <div className="hidden items-center gap-2 small:flex">

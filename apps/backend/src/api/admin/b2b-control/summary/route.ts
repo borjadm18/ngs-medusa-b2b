@@ -16,6 +16,59 @@ const countByStatus = (items: Array<{ status?: string }>) =>
     return acc;
   }, {});
 
+const parseDimensionsMm = (value: unknown) => {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const parts = value
+    .toLowerCase()
+    .replace(/mm|cm|m/g, "")
+    .split(/[x×*]/)
+    .map((part) => Number(part.trim().replace(",", ".")))
+    .filter((part) => Number.isFinite(part) && part > 0);
+
+  if (parts.length < 3) {
+    return undefined;
+  }
+
+  const [length, width, height] = parts;
+
+  return (length * width * height) / 1_000_000_000;
+};
+
+const estimateShipmentMode = (summary: {
+  boxes: number;
+  palletShare: number;
+  billableWeight: number;
+}) => {
+  if (summary.palletShare >= 0.75 || summary.billableWeight >= 120) {
+    return "Pallet / carga parcial";
+  }
+
+  if (summary.boxes >= 4 || summary.billableWeight >= 35) {
+    return "Paqueteria multi-bulto";
+  }
+
+  return "Paqueteria estandar";
+};
+
+const estimateFreightCost = (summary: {
+  boxes: number;
+  palletShare: number;
+  billableWeight: number;
+}) => {
+  if (summary.palletShare >= 0.75 || summary.billableWeight >= 120) {
+    return Math.round(85 + Math.ceil(summary.palletShare) * 45);
+  }
+
+  if (summary.boxes >= 4 || summary.billableWeight >= 35) {
+    return Math.round(18 + summary.boxes * 4 + summary.billableWeight * 0.22);
+  }
+
+  return Math.round(7.5 + Math.max(summary.boxes, 1) * 2.5);
+};
+
 export const GET = async (
   req: AuthenticatedMedusaRequest,
   res: MedusaResponse
@@ -105,7 +158,18 @@ export const GET = async (
     return now - createdAt > 1000 * 60 * 60 * 24 * 2;
   });
   const quoteTotals = quotes.reduce(
-    (acc: { value: number; units: number; boxes: number; weight: number }, quote: any) => {
+    (
+      acc: {
+        value: number;
+        units: number;
+        boxes: number;
+        weight: number;
+        volume: number;
+        billableWeight: number;
+        palletShare: number;
+      },
+      quote: any
+    ) => {
       acc.value += Number(quote.draft_order?.total || 0);
 
       for (const item of quote.draft_order?.items || []) {
@@ -115,17 +179,44 @@ export const GET = async (
         if (metadata.purchase_unit === "box") {
           const packageQuantity = Number(metadata.package_quantity || 0);
           const packageWeight = Number(metadata.package_weight || 0);
+          const unitsPerBox = Number(metadata.units_per_box || 0);
+          const packageVolume = parseDimensionsMm(metadata.package_dimensions) || 0;
+          const estimatedBoxes =
+            Number.isFinite(unitsPerBox) && unitsPerBox > 0
+              ? Number(item.quantity || 0) / unitsPerBox
+              : packageQuantity;
+          const estimatedWeight =
+            Number.isFinite(packageWeight) && Number.isFinite(estimatedBoxes)
+              ? estimatedBoxes * packageWeight
+              : 0;
+          const estimatedVolume =
+            Number.isFinite(estimatedBoxes) && packageVolume
+              ? estimatedBoxes * packageVolume
+              : 0;
+          const volumetricWeight = estimatedVolume * 250;
+          const boxesPerPallet = Number(metadata.boxes_per_pallet || 0);
           acc.boxes += Number.isFinite(packageQuantity) ? packageQuantity : 0;
-          acc.weight +=
-            Number.isFinite(packageQuantity) && Number.isFinite(packageWeight)
-              ? packageQuantity * packageWeight
+          acc.weight += estimatedWeight;
+          acc.volume += estimatedVolume;
+          acc.billableWeight += Math.max(estimatedWeight, volumetricWeight);
+          acc.palletShare +=
+            Number.isFinite(boxesPerPallet) && boxesPerPallet > 0
+              ? estimatedBoxes / boxesPerPallet
               : 0;
         }
       }
 
       return acc;
     },
-    { value: 0, units: 0, boxes: 0, weight: 0 }
+    {
+      value: 0,
+      units: 0,
+      boxes: 0,
+      weight: 0,
+      volume: 0,
+      billableWeight: 0,
+      palletShare: 0,
+    }
   );
   const activeRules = catalogRules.filter(
     (rule: any) => rule.status === "active"
@@ -162,6 +253,19 @@ export const GET = async (
         units: quoteTotals.units,
         boxes: quoteTotals.boxes,
         estimated_weight: Number(quoteTotals.weight.toFixed(1)),
+        estimated_volume: Number(quoteTotals.volume.toFixed(3)),
+        billable_weight: Number(quoteTotals.billableWeight.toFixed(1)),
+        pallet_share: Number(quoteTotals.palletShare.toFixed(2)),
+        shipment_mode: estimateShipmentMode({
+          boxes: quoteTotals.boxes,
+          palletShare: quoteTotals.palletShare,
+          billableWeight: quoteTotals.billableWeight,
+        }),
+        estimated_freight: estimateFreightCost({
+          boxes: quoteTotals.boxes,
+          palletShare: quoteTotals.palletShare,
+          billableWeight: quoteTotals.billableWeight,
+        }),
         conversion_rate: quotes.length
           ? Math.round(((quoteStatusCounts.accepted || 0) / quotes.length) * 100)
           : 0,

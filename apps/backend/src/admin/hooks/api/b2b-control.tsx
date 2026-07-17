@@ -22,6 +22,11 @@ export type B2BControlSummary = {
     units: number;
     boxes: number;
     estimated_weight: number;
+    estimated_volume: number;
+    billable_weight: number;
+    pallet_share: number;
+    shipment_mode: string;
+    estimated_freight: number;
     conversion_rate: number;
     average_value: number;
   };

@@ -132,7 +132,7 @@ const CartDrawer = ({
             className="relative inline-flex h-10 w-10 items-center justify-center rounded bg-white text-neutral-950 outline-none transition hover:bg-neutral-100"
           >
             <ShoppingBag className="h-5 w-5" />
-            <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-neutral-950 px-1 text-[11px] font-semibold text-white">
+            <span className="absolute right-0 top-0 flex h-4 min-w-4 translate-x-1/4 -translate-y-1/4 items-center justify-center rounded-full bg-neutral-950 px-1 text-[10px] font-semibold leading-none text-white">
               {totalItems}
             </span>
           </button>

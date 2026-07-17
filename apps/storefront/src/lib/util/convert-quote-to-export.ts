@@ -1,4 +1,6 @@
 import {
+  estimateFreightCost,
+  estimateShipmentMode,
   formatPackagingDetails,
   formatPackagingLine,
   getCartLinePackaging,
@@ -76,6 +78,8 @@ export const quoteToCsv = (
   const rows = getExportRows(quote, preview)
   const currencyCode = quote.draft_order?.currency_code || "eur"
   const summary = getQuoteExportPackagingSummary(quote, preview)
+  const shipmentMode = estimateShipmentMode(summary)
+  const freightCost = estimateFreightCost(summary)
   const header = [
     "Quote ID",
     "Display ID",
@@ -93,9 +97,13 @@ export const quoteToCsv = (
     "Units Per Box",
     "Total Units",
     "Estimated Weight Kg",
+    "Estimated Volume M3",
+    "Billable Weight Kg",
     "Package Dimensions",
     "Boxes Per Pallet",
     "Pallet Share",
+    "Shipment Mode",
+    "Estimated Freight",
   ]
 
   const body = rows.map(({ item, packaging, total }) => [
@@ -115,9 +123,18 @@ export const quoteToCsv = (
     packaging?.unitsPerBox ?? "",
     packaging?.unitQuantity ?? item.quantity,
     packaging?.totalWeight ? packaging.totalWeight.toFixed(1) : "",
+    packaging?.packageVolumeM3
+      ? (
+          packaging.packageVolumeM3 *
+          (packaging.unitQuantity / packaging.unitsPerBox)
+        ).toFixed(3)
+      : "",
+    packaging?.billableWeight ? packaging.billableWeight.toFixed(1) : "",
     packaging?.packageDimensions ?? "",
     packaging?.boxesPerPallet ?? "",
     packaging?.palletShare ? packaging.palletShare.toFixed(2) : "",
+    shipmentMode,
+    formatMoney(freightCost, currencyCode),
   ])
 
   const summaryRows = [
@@ -127,7 +144,11 @@ export const quoteToCsv = (
     ["Total units", summary.totalUnits],
     ["Loose units", summary.looseUnits],
     ["Estimated weight kg", summary.estimatedWeight.toFixed(1)],
+    ["Estimated volume m3", summary.estimatedVolume.toFixed(3)],
+    ["Billable weight kg", summary.billableWeight.toFixed(1)],
     ["Pallet share", summary.palletShare.toFixed(2)],
+    ["Shipment mode", shipmentMode],
+    ["Estimated freight", formatMoney(freightCost, currencyCode)],
   ]
 
   return [header, ...body, ...summaryRows]
@@ -155,6 +176,8 @@ export const quoteToPrintHtml = (
 ) => {
   const currencyCode = quote.draft_order?.currency_code || "eur"
   const summary = getQuoteExportPackagingSummary(quote, preview)
+  const shipmentMode = estimateShipmentMode(summary)
+  const freightCost = estimateFreightCost(summary)
   const rows = getExportRows(quote, preview)
   const createdAt = new Intl.DateTimeFormat("es-ES", {
     dateStyle: "medium",
@@ -229,7 +252,11 @@ export const quoteToPrintHtml = (
         <div class="box metric">Bultos<strong>${summary.boxes} cajas</strong></div>
         <div class="box metric">Unidades<strong>${summary.totalUnits} uds</strong></div>
         <div class="box metric">Peso estimado<strong>${summary.estimatedWeight.toFixed(1)} kg</strong></div>
+        <div class="box metric">Volumen<strong>${summary.estimatedVolume.toFixed(3)} m3</strong></div>
+        <div class="box metric">Peso facturable<strong>${summary.billableWeight.toFixed(1)} kg</strong></div>
         <div class="box metric">Ocupacion pallet<strong>${summary.palletShare.toFixed(2)}</strong></div>
+        <div class="box metric">Expedicion<strong>${escapeHtml(shipmentMode)}</strong></div>
+        <div class="box metric">Transporte demo<strong>${escapeHtml(formatMoney(freightCost, currencyCode))}</strong></div>
       </section>
 
       <h2>Lineas</h2>

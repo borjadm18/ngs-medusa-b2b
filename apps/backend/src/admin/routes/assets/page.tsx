@@ -103,8 +103,13 @@ const AssetsPage = () => {
     client_profile_id: profileId,
     type,
   });
+  const { data: allAssetsData } = useAssets({
+    client_profile_id: profileId,
+    type: "all",
+  });
 
   const assets = data?.assets || [];
+  const allAssets = allAssetsData?.assets || assets;
   const filteredAssets = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
 
@@ -132,12 +137,12 @@ const AssetsPage = () => {
     return assetTypes.reduce<Record<string, number>>((acc, assetType) => {
       acc[assetType] =
         assetType === "all"
-          ? assets.length
-          : assets.filter((asset) => asset.type === assetType).length;
+          ? allAssets.length
+          : allAssets.filter((asset) => asset.type === assetType).length;
 
       return acc;
     }, {});
-  }, [assets]);
+  }, [allAssets]);
 
   const upsertAsset = useUpsertAsset({
     onSuccess: () => {
@@ -310,7 +315,7 @@ const AssetsPage = () => {
                 </Text>
               </div>
             ) : filteredAssets.length ? (
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(136px,1fr))] gap-3">
                 {filteredAssets.map((asset) => {
                   const isDefault = asset.id?.startsWith("default-");
                   const isSelected =
@@ -335,7 +340,7 @@ const AssetsPage = () => {
                           : "shadow-elevation-card-rest"
                       }`}
                     >
-                      <div className="flex h-28 items-center justify-center border-b bg-ui-bg-component">
+                      <div className="flex h-24 items-center justify-center border-b bg-ui-bg-component">
                         {asset.url ? (
                           <img
                             src={resolveAdminAssetPreviewUrl(asset.url)}
@@ -348,7 +353,7 @@ const AssetsPage = () => {
                           </div>
                         )}
                       </div>
-                      <div className="grid gap-2 p-2.5">
+                      <div className="grid gap-2 p-2">
                         <div className="grid gap-1">
                           <div className="flex items-start justify-between gap-2">
                             <Text
@@ -429,7 +434,8 @@ const AssetsPage = () => {
                   {form.id ? "Editar asset" : "Nuevo asset"}
                 </Text>
                 <Text size="small" className="mt-1 text-ui-fg-subtle">
-                  Selecciona un asset del grid o sube uno nuevo desde tu equipo.
+                  Selecciona un asset, copia su ruta o sube uno nuevo. Los
+                  cambios se guardan en la biblioteca del perfil activo.
                 </Text>
               </div>
 

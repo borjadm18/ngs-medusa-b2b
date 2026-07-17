@@ -2,6 +2,10 @@
 
 import { acceptQuote, rejectQuote } from "@/lib/data/quotes"
 import { getQuoteExportPackagingSummary } from "@/lib/util/convert-quote-to-export"
+import {
+  estimateFreightCost,
+  estimateShipmentMode,
+} from "@/lib/util/b2b-packaging"
 import { formatAmount } from "@/modules/common/components/amount-cell"
 import Button from "@/modules/common/components/button"
 import LocalizedClientLink from "@/modules/common/components/localized-client-link"
@@ -37,6 +41,8 @@ const QuoteDetails: React.FC<QuoteDetailsProps> = ({
     () => getQuoteExportPackagingSummary(quote, preview),
     [quote, preview]
   )
+  const shipmentMode = estimateShipmentMode(logisticsSummary)
+  const estimatedFreight = estimateFreightCost(logisticsSummary)
   const originalItemsMap = useMemo(() => {
     return new Map<string, AdminOrderLineItem>(
       order?.items?.map((item: AdminOrderLineItem) => [item.id, item]) || []
@@ -215,13 +221,26 @@ const QuoteDetails: React.FC<QuoteDetailsProps> = ({
                 value={`${logisticsSummary.estimatedWeight.toFixed(1)} kg`}
               />
               <QuoteLogisticsRow
+                label="Volumen estimado"
+                value={`${logisticsSummary.estimatedVolume.toFixed(3)} m3`}
+              />
+              <QuoteLogisticsRow
+                label="Peso facturable"
+                value={`${logisticsSummary.billableWeight.toFixed(1)} kg`}
+              />
+              <QuoteLogisticsRow
                 label="Ocupacion pallet"
                 value={`${logisticsSummary.palletShare.toFixed(2)} pallets`}
               />
+              <QuoteLogisticsRow label="Expedicion" value={shipmentMode} />
+              <QuoteLogisticsRow
+                label="Coste transporte demo"
+                value={`~${formatAmount(estimatedFreight, currencyCode)}`}
+              />
             </div>
             <Text className="mt-3 text-xs text-ui-fg-muted">
-              Estimacion calculada desde las reglas de packaging guardadas en
-              las lineas del presupuesto.
+              Estimacion operativa calculada desde packaging, volumen y peso
+              facturable. No sustituye tarifas reales de transportista.
             </Text>
           </Container>
 

@@ -753,6 +753,7 @@ const ImageField = ({
   onChange: (value: string) => void;
 }) => {
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [assetSearch, setAssetSearch] = useState("");
   const [uploading, setUploading] = useState(false);
   const { data, isPending } = useAssets({
     client_profile_id: profileId,
@@ -764,6 +765,20 @@ const ImageField = ({
   });
 
   const assets = data?.assets || [];
+  const filteredAssets = useMemo(() => {
+    const query = assetSearch.trim().toLowerCase();
+
+    if (!query) {
+      return assets;
+    }
+
+    return assets.filter((asset) =>
+      [asset.label, asset.url, asset.alt || "", asset.tags || "", asset.type]
+        .join(" ")
+        .toLowerCase()
+        .includes(query)
+    );
+  }, [assetSearch, assets]);
 
   const handleUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -848,13 +863,20 @@ const ImageField = ({
 
       {pickerOpen && (
         <div className="rounded-lg border bg-ui-bg-base p-3">
+          <div className="mb-3">
+            <Input
+              value={assetSearch}
+              placeholder="Buscar en biblioteca..."
+              onChange={(event) => setAssetSearch(event.target.value)}
+            />
+          </div>
           {isPending ? (
             <Text size="small" className="text-ui-fg-subtle">
               Cargando assets...
             </Text>
-          ) : assets.length ? (
-            <div className="grid grid-cols-2 gap-2">
-              {assets.map((asset) => (
+          ) : filteredAssets.length ? (
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(112px,1fr))] gap-2">
+              {filteredAssets.map((asset) => (
                 <AssetTile
                   key={asset.id || asset.url}
                   asset={asset}
@@ -868,7 +890,7 @@ const ImageField = ({
             </div>
           ) : (
             <Text size="small" className="text-ui-fg-subtle">
-              No hay assets para este tipo. Sube uno desde este bloque.
+              No hay assets que coincidan. Ajusta la busqueda o sube uno nuevo.
             </Text>
           )}
         </div>
@@ -894,7 +916,7 @@ const AssetTile = ({
       selected ? "border-ui-border-interactive" : "border-ui-border-base",
     ].join(" ")}
   >
-    <div className="aspect-video bg-ui-bg-subtle">
+    <div className="aspect-[4/3] bg-ui-bg-subtle">
       <img
         src={resolveAdminAssetPreviewUrl(asset.url)}
         alt={asset.alt || asset.label}

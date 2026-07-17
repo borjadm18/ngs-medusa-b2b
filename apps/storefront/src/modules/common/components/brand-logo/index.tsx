@@ -15,6 +15,9 @@ const BrandLogo = ({
   name = clientProfile.brand.name,
   logoUrl,
 }: BrandLogoProps) => {
+  const safeLogoUrl =
+    logoUrl && !logoUrl.includes("/asset-files/") ? logoUrl : undefined
+
   return (
     <span
       className={clx(
@@ -22,9 +25,9 @@ const BrandLogo = ({
         className
       )}
     >
-      {logoUrl ? (
+      {safeLogoUrl ? (
         <Image
-          src={logoUrl}
+          src={safeLogoUrl}
           alt={name}
           fill
           sizes="188px"

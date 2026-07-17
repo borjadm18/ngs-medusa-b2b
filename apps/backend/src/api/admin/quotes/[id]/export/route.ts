@@ -36,6 +36,27 @@ const toNumber = (value: unknown) => {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
 };
 
+const parseDimensionsMm = (value: string | undefined) => {
+  if (!value) {
+    return undefined;
+  }
+
+  const parts = value
+    .toLowerCase()
+    .replace(/mm|cm|m/g, "")
+    .split(/[x×*]/)
+    .map((part) => Number(part.trim().replace(",", ".")))
+    .filter((part) => Number.isFinite(part) && part > 0);
+
+  if (parts.length < 3) {
+    return undefined;
+  }
+
+  const [length, width, height] = parts;
+
+  return (length * width * height) / 1_000_000_000;
+};
+
 const getPackaging = (item: QuoteLine) => {
   const metadata = item.metadata || {};
   const purchaseUnit = metadata.purchase_unit;
@@ -43,6 +64,11 @@ const getPackaging = (item: QuoteLine) => {
   const rawPackageQuantity = toNumber(metadata.package_quantity);
   const packageWeight = toNumber(metadata.package_weight);
   const boxesPerPallet = toNumber(metadata.boxes_per_pallet);
+  const packageDimensions =
+    typeof metadata.package_dimensions === "string"
+      ? metadata.package_dimensions
+      : "";
+  const packageVolumeM3 = parseDimensionsMm(packageDimensions);
 
   if ((purchaseUnit !== "box" && purchaseUnit !== "unit") || !unitsPerBox) {
     return {
@@ -73,19 +99,22 @@ const getPackaging = (item: QuoteLine) => {
   const totalUnits = item.quantity || 0;
   const packageQuantity = purchaseUnit === "box" ? rawPackageQuantity || 0 : "";
   const estimatedBoxes = totalUnits / unitsPerBox;
+  const estimatedWeight = packageWeight ? packageWeight * estimatedBoxes : 0;
+  const estimatedVolume = packageVolumeM3
+    ? packageVolumeM3 * estimatedBoxes
+    : 0;
+  const volumetricWeight = estimatedVolume * 250;
+  const billableWeight = Math.max(estimatedWeight, volumetricWeight);
 
   return {
     purchaseUnit,
     packageQuantity,
     unitsPerBox,
     totalUnits,
-    estimatedWeight: packageWeight
-      ? (packageWeight * estimatedBoxes).toFixed(1)
-      : "",
-    packageDimensions:
-      typeof metadata.package_dimensions === "string"
-        ? metadata.package_dimensions
-        : "",
+    estimatedWeight: estimatedWeight ? estimatedWeight.toFixed(1) : "",
+    estimatedVolume: estimatedVolume ? estimatedVolume.toFixed(3) : "",
+    billableWeight: billableWeight ? billableWeight.toFixed(1) : "",
+    packageDimensions,
     boxesPerPallet: boxesPerPallet || "",
     palletShare: boxesPerPallet
       ? (estimatedBoxes / boxesPerPallet).toFixed(2)
@@ -123,6 +152,8 @@ const buildQuoteCsv = (quote: any) => {
     "Unidades/caja",
     "Unidades totales",
     "Peso estimado kg",
+    "Volumen estimado m3",
+    "Peso facturable kg",
     "Dimensiones bulto",
     "Cajas/pallet",
     "Pallets estimados",
@@ -143,6 +174,8 @@ const buildQuoteCsv = (quote: any) => {
       packaging.unitsPerBox,
       packaging.totalUnits,
       packaging.estimatedWeight,
+      packaging.estimatedVolume,
+      packaging.billableWeight,
       packaging.packageDimensions,
       packaging.boxesPerPallet,
       packaging.palletShare,

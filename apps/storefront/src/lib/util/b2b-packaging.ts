@@ -25,7 +25,10 @@ export type CartLinePackaging = {
   boxesPerPallet?: number
   packageWeight?: number
   packageDimensions?: string
+  packageVolumeM3?: number
   totalWeight?: number
+  volumetricWeight?: number
+  billableWeight?: number
   palletShare?: number
 }
 
@@ -52,6 +55,32 @@ const toNumber = (value: unknown) => {
   return Number.isFinite(numberValue) && numberValue > 0
     ? Math.floor(numberValue)
     : undefined
+}
+
+const parseDimensionsMm = (value: string | undefined) => {
+  if (!value) {
+    return undefined
+  }
+
+  const parts = value
+    .toLowerCase()
+    .replace(/mm|cm|m/g, "")
+    .split(/[x×*]/)
+    .map((part) => Number(part.trim().replace(",", ".")))
+    .filter((part) => Number.isFinite(part) && part > 0)
+
+  if (parts.length < 3) {
+    return undefined
+  }
+
+  const [length, width, height] = parts
+
+  return {
+    length,
+    width,
+    height,
+    volumeM3: (length * width * height) / 1_000_000_000,
+  }
 }
 
 const readMetadataNumber = (
@@ -184,6 +213,14 @@ export const getCartLinePackaging = (
     purchaseUnit === "box" ? rawPackageQuantity ?? 0 : 0
   const unitQuantity = quantity
   const estimatedBoxes = unitQuantity / unitsPerBox
+  const dimensions = parseDimensionsMm(packageDimensions)
+  const packageVolumeM3 = dimensions?.volumeM3
+  const totalWeight = packageWeight ? packageWeight * estimatedBoxes : undefined
+  const totalVolumeM3 = packageVolumeM3
+    ? packageVolumeM3 * estimatedBoxes
+    : undefined
+  const volumetricWeight = totalVolumeM3 ? totalVolumeM3 * 250 : undefined
+  const billableWeight = Math.max(totalWeight || 0, volumetricWeight || 0) || undefined
 
   return {
     purchaseUnit,
@@ -193,7 +230,10 @@ export const getCartLinePackaging = (
     boxesPerPallet,
     packageWeight,
     packageDimensions,
-    totalWeight: packageWeight ? packageWeight * estimatedBoxes : undefined,
+    packageVolumeM3,
+    totalWeight,
+    volumetricWeight,
+    billableWeight,
     palletShare: boxesPerPallet ? estimatedBoxes / boxesPerPallet : undefined,
   }
 }
@@ -212,6 +252,9 @@ export const formatPackagingDetails = (packaging: CartLinePackaging) => {
       ? `${packaging.totalWeight.toFixed(1)} kg estimados`
       : null,
     packaging.packageDimensions,
+    packaging.packageVolumeM3
+      ? `${packaging.packageVolumeM3.toFixed(3)} m3/caja`
+      : null,
     packaging.boxesPerPallet
       ? `${packaging.boxesPerPallet} cajas/pallet`
       : null,
@@ -248,6 +291,10 @@ export const getCartPackagingSummary = (
       }
 
       summary.estimatedWeight += packaging.totalWeight ?? 0
+      summary.estimatedVolume +=
+        (packaging.packageVolumeM3 ?? 0) *
+        (packaging.unitQuantity / packaging.unitsPerBox)
+      summary.billableWeight += packaging.billableWeight ?? 0
 
       if (packaging.palletShare) {
         summary.palletShare += packaging.palletShare
@@ -261,7 +308,42 @@ export const getCartPackagingSummary = (
       looseUnits: 0,
       totalUnits: 0,
       estimatedWeight: 0,
+      estimatedVolume: 0,
+      billableWeight: 0,
       palletShare: 0,
     }
   )
+}
+
+export const estimateShipmentMode = (summary: {
+  boxes: number
+  palletShare: number
+  estimatedWeight: number
+  billableWeight: number
+}) => {
+  if (summary.palletShare >= 0.75 || summary.billableWeight >= 120) {
+    return "Pallet / carga parcial"
+  }
+
+  if (summary.boxes >= 4 || summary.billableWeight >= 35) {
+    return "Paqueteria multi-bulto"
+  }
+
+  return "Paqueteria estandar"
+}
+
+export const estimateFreightCost = (summary: {
+  boxes: number
+  palletShare: number
+  billableWeight: number
+}) => {
+  if (summary.palletShare >= 0.75 || summary.billableWeight >= 120) {
+    return Math.round(85 + Math.ceil(summary.palletShare) * 45)
+  }
+
+  if (summary.boxes >= 4 || summary.billableWeight >= 35) {
+    return Math.round(18 + summary.boxes * 4 + summary.billableWeight * 0.22)
+  }
+
+  return Math.round(7.5 + Math.max(summary.boxes, 1) * 2.5)
 }

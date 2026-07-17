@@ -28,7 +28,7 @@ function ProductCard({
   return (
     <LocalizedClientLink
       href={`/products/${product.handle}`}
-      className="group flex min-w-[240px] flex-col rounded-lg border border-neutral-200 bg-white p-4 transition hover:border-neutral-950 hover:shadow-[0_14px_35px_rgba(15,23,42,0.08)]"
+      className="group flex w-[min(240px,calc(100vw-64px))] flex-col rounded-lg border border-neutral-200 bg-white p-4 transition hover:border-neutral-950 hover:shadow-[0_14px_35px_rgba(15,23,42,0.08)] medium:w-auto"
     >
       <div className="relative aspect-[4/3] overflow-hidden rounded bg-neutral-100">
         {productImage ? (
@@ -89,9 +89,9 @@ export function FeaturedProducts({
           action="Ver todos los productos"
         />
         {products.length > 0 ? (
-          <div className="-mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2 medium:mx-0 medium:grid medium:grid-cols-5 medium:overflow-visible medium:px-0">
+          <div className="-mx-4 flex max-w-[100vw] snap-x gap-4 overflow-x-auto overflow-y-hidden px-4 pb-2 medium:mx-0 medium:grid medium:max-w-none medium:grid-cols-5 medium:overflow-visible medium:px-0">
             {products.slice(0, 5).map((product, index) => (
-              <div key={product.id} className="snap-start">
+              <div key={product.id} className="snap-start shrink-0 medium:shrink">
                 <ProductCard
                   product={product}
                   image={

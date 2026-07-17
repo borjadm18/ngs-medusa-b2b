@@ -123,6 +123,32 @@ const B2BControl = () => {
               value={`${summary?.quotes.estimated_weight || 0} kg`}
             />
             <Metric
+              label="Volumen estimado"
+              value={`${summary?.quotes.estimated_volume || 0} m3`}
+            />
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <Metric
+              label="Peso facturable"
+              value={`${summary?.quotes.billable_weight || 0} kg`}
+            />
+            <Metric
+              label="Ocupacion pallet"
+              value={`${summary?.quotes.pallet_share || 0}`}
+            />
+            <Metric
+              label="Expedicion sugerida"
+              value={summary?.quotes.shipment_mode || "-"}
+            />
+            <Metric
+              label="Transporte demo"
+              value={formatCurrency(summary?.quotes.estimated_freight || 0)}
+            />
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <Metric
               label="Empresas credito"
               value={
                 (summary?.companies.by_payment_terms?.net_30 || 0) +
