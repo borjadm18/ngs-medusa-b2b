@@ -23,7 +23,66 @@ medusaIntegrationTestRunner({
     JWT_SECRET: "supersecret",
   },
   testSuite: ({ api, getContainer }) => {
-    let storeHeaders, cart, product, salesChannel, region, customerToken;
+    let storeHeaders, cart, product, salesChannel, region, customer;
+
+    const companyPayload = (name = "Test Company") => ({
+      name,
+      email:
+        name === "Test Company"
+          ? "test@company.com"
+          : `${name.toLowerCase().replace(/\s+/g, "-")}@company.com`,
+      phone: "1234567890",
+      address: "123 Test St",
+      city: "Test City",
+      state: "Test State",
+      zip: "12345",
+      country: "Test Country",
+      logo_url: "http://test.com/logo.png",
+      currency_code: "USD",
+      spending_limit_reset_frequency: "monthly",
+    });
+
+    const createCompany = async (headers, name = "Test Company") => {
+      return (
+        await api.post("/store/companies", companyPayload(name), headers)
+      ).data.companies[0];
+    };
+
+    const bootstrapCompanyAdmin = async (headers, companyId, customerId) => {
+      return (
+        await api.post(
+          `/store/companies/${companyId}/employees`,
+          {
+            customer_id: customerId,
+            role: "company_admin",
+            is_admin: true,
+            status: "active",
+          },
+          headers
+        )
+      ).data.employee;
+    };
+
+    const createAuthenticatedStoreUser = async (email) => {
+      const publishableKey = await generatePublishableKey(getContainer());
+      const headers = generateStoreHeaders({ publishableKey });
+      const storeUser = await createStoreUser({
+        api,
+        storeHeaders: headers,
+        email,
+      });
+      headers.headers["Authorization"] = `Bearer ${storeUser.token}`;
+
+      if (salesChannel) {
+        await api.post(
+          `/admin/api-keys/${publishableKey.id}/sales-channels`,
+          { add: [salesChannel.id] },
+          adminHeaders
+        );
+      }
+
+      return { headers, customer: storeUser.customer };
+    };
 
     beforeEach(async () => {
       const container = getContainer();
@@ -31,10 +90,8 @@ medusaIntegrationTestRunner({
       const publishableKey = await generatePublishableKey(container);
       storeHeaders = generateStoreHeaders({ publishableKey });
       const res = await createStoreUser({ api, storeHeaders });
-      customerToken = res.token;
-      console.log("vic logs customerToken", customerToken);
-      storeHeaders.headers["Authorization"] = `Bearer ${customerToken}`;
-      console.log("vic logs storeHeaders", storeHeaders);
+      customer = res.customer;
+      storeHeaders.headers["Authorization"] = `Bearer ${res.token}`;
       region = await regionSeeder({ api, adminHeaders, data: {} });
 
       salesChannel = await salesChannelSeeder({
@@ -72,19 +129,7 @@ medusaIntegrationTestRunner({
       it("successfully creates a company", async () => {
         const response = await api.post(
           "/store/companies",
-          {
-            name: "Test Company",
-            email: "test@company.com",
-            phone: "1234567890",
-            address: "123 Test St",
-            city: "Test City",
-            state: "Test State",
-            zip: "12345",
-            country: "Test Country",
-            logo_url: "http://test.com/logo.png",
-            currency_code: "USD",
-            spending_limit_reset_frequency: "monthly",
-          },
+          companyPayload(),
           storeHeaders
         );
 
@@ -107,26 +152,11 @@ medusaIntegrationTestRunner({
 
     describe("GET /store/companies/:id", () => {
       it("successfully retrieves a company", async () => {
-        const response1 = await api.post(
-          "/store/companies",
-          {
-            name: "Test Company",
-            email: "test@company.com",
-            phone: "1234567890",
-            address: "123 Test St",
-            city: "Test City",
-            state: "Test State",
-            zip: "12345",
-            country: "Test Country",
-            logo_url: "http://test.com/logo.png",
-            currency_code: "USD",
-            spending_limit_reset_frequency: "monthly",
-          },
-          storeHeaders
-        );
+        const company = await createCompany(storeHeaders);
+        await bootstrapCompanyAdmin(storeHeaders, company.id, customer.id);
 
         const response2 = await api.get(
-          `/store/companies/${response1.data.companies[0].id}`,
+          `/store/companies/${company.id}`,
           storeHeaders
         );
 
@@ -150,9 +180,42 @@ medusaIntegrationTestRunner({
           .get(`/store/companies/does-not-exist`, storeHeaders)
           .catch((e) => e);
 
-        expect(response.data).toMatchObject({
-          type: "not_found",
-        });
+        expect(response.status).toEqual(403);
+      });
+
+      it("rejects access to another company's details", async () => {
+        const companyA = await createCompany(storeHeaders, "Company A");
+        await bootstrapCompanyAdmin(storeHeaders, companyA.id, customer.id);
+
+        const userB = await createAuthenticatedStoreUser("buyer-b@email.com");
+        const companyB = await createCompany(userB.headers, "Company B");
+        await bootstrapCompanyAdmin(
+          userB.headers,
+          companyB.id,
+          userB.customer.id
+        );
+
+        const getResponse = await api
+          .get(`/store/companies/${companyA.id}`, userB.headers)
+          .catch((e) => e);
+        const employeesResponse = await api
+          .get(`/store/companies/${companyA.id}/employees`, userB.headers)
+          .catch((e) => e);
+        const updateResponse = await api
+          .post(
+            `/store/companies/${companyA.id}`,
+            { name: "Hijacked Company" },
+            userB.headers
+          )
+          .catch((e) => e);
+        const deleteResponse = await api
+          .delete(`/store/companies/${companyA.id}`, userB.headers)
+          .catch((e) => e);
+
+        expect(getResponse.response.status).toEqual(403);
+        expect(employeesResponse.response.status).toEqual(403);
+        expect(updateResponse.response.status).toEqual(403);
+        expect(deleteResponse.response.status).toEqual(403);
       });
     });
 
@@ -160,25 +223,8 @@ medusaIntegrationTestRunner({
       let company1;
 
       beforeEach(async () => {
-        const response = await api.post(
-          "/store/companies",
-          {
-            name: "Test Company",
-            email: "test@company.com",
-            phone: "1234567890",
-            address: "123 Test St",
-            city: "Test City",
-            state: "Test State",
-            zip: "12345",
-            country: "Test Country",
-            logo_url: "http://test.com/logo.png",
-            currency_code: "USD",
-            spending_limit_reset_frequency: "monthly",
-          },
-          storeHeaders
-        );
-
-        company1 = response.data.companies[0];
+        company1 = await createCompany(storeHeaders);
+        await bootstrapCompanyAdmin(storeHeaders, company1.id, customer.id);
       });
 
       it("successfully updates a company", async () => {
@@ -224,36 +270,16 @@ medusaIntegrationTestRunner({
           )
           .catch((e) => e);
 
-        expect(response.data).toMatchObject({
-          type: "not_found",
-        });
+        expect(response.status).toEqual(403);
       });
     });
 
     describe("DELETE /store/companies/:id", () => {
-      console.log("vic logs storeHeaders", storeHeaders);
       let company1;
 
       beforeEach(async () => {
-        const response = await api.post(
-          "/store/companies",
-          {
-            name: "Test Company",
-            email: "test@company.com",
-            phone: "1234567890",
-            address: "123 Test St",
-            city: "Test City",
-            state: "Test State",
-            zip: "12345",
-            country: "Test Country",
-            logo_url: "http://test.com/logo.png",
-            currency_code: "USD",
-            spending_limit_reset_frequency: "monthly",
-          },
-          storeHeaders
-        );
-
-        company1 = response.data.companies[0];
+        company1 = await createCompany(storeHeaders);
+        await bootstrapCompanyAdmin(storeHeaders, company1.id, customer.id);
       });
 
       it("successfully deletes a company", async () => {
@@ -270,7 +296,7 @@ medusaIntegrationTestRunner({
           .delete(`/store/companies/does-not-exist`, storeHeaders)
           .catch((e) => e);
 
-        expect(response.status).toEqual(204);
+        expect(response.response.status).toEqual(403);
       });
     });
   },

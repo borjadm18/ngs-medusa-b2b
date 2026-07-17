@@ -298,6 +298,8 @@ Siguiente accion:
 - Se cubrieron `DELETE /store/companies/:id` y `DELETE /store/companies/:id/employees/:employeeId`.
 - Se alineo el matcher `:employeeId` con la carpeta `[employeeId]` y se dejo fallback defensivo para `employee_id`.
 - Se mantuvo el onboarding funcional con un bootstrap acotado: solo permite crear el primer `company_admin` si la empresa no tiene empleados, el `customer_id` coincide con el customer autenticado y el body validado pide rol/admin activo.
+- Se actualizo `integration-tests/http/companies/companies.spec.ts` para crear el primer admin de empresa y cubrir que un usuario de Empresa B no puede leer, listar empleados, editar ni borrar Empresa A.
+- Se eliminaron `console.log` accidentales en el spec de companies y componentes Admin.
 
 ### Validacion Ejecutada
 
@@ -305,6 +307,7 @@ Siguiente accion:
 - `validate:storefront-debug-logs`: OK.
 - `@b2b-starter/backend build`: OK tras fix.
 - `@b2b-starter/storefront build` con `NEXT_PUBLIC_B2B_CLIENT_PROFILE=starter-empty`: OK.
+- `companies.spec.ts`: escrito/actualizado, pero no ejecutable en este equipo hasta configurar `apps/backend/.env.test` con PostgreSQL (`DATABASE_URL`, `DB_HOST`, `DB_USERNAME`, `DB_PASSWORD`, `DB_PORT`).
 
 ### Riesgos Pendientes
 
@@ -312,12 +315,12 @@ Siguiente accion:
 - `pnpm.overrides` debe mantenerse tambien en `pnpm-workspace.yaml` para compatibilidad con pnpm moderno.
 - Quedan 44 warnings de assets faltantes en perfiles no productivos (`example-audio`, `example-industrial`, `poc-packaging-demo`).
 - Hay credenciales demo en docs (`admin@test.com` / `supersecret`); aceptable para entorno demo, no para template publico final.
-- Quedan `console.log` accidentales en tests/componentes Admin que deben limpiarse antes de producto reusable.
+- Quedan `console.log` aceptables en scripts/README de ejemplo; los logs accidentales detectados en companies/Admin se limpiaron.
 
 ### Siguiente Hardening Recomendado
 
-1. Crear test HTTP especifico que pruebe que un customer de una empresa no puede leer/editar/borrar otra empresa.
-2. Preparar `.env.test` y Postgres local/CI para que `test:integration:http` sea obligatorio.
+1. Preparar `.env.test` y Postgres local/CI para que `test:integration:http` sea obligatorio.
+2. Ejecutar `companies.spec.ts` en CI y bloquear merges si falla ownership entre empresas.
 3. Convertir warnings de assets a error solo para perfiles marcados como `productionReady`.
 4. Separar credenciales demo de docs publicas y moverlas a `.env.example`/runbooks privados.
 5. Anadir smoke remoto para rutas de company ownership cuando haya dos usuarios demo activos.
