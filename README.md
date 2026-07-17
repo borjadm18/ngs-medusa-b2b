@@ -228,6 +228,15 @@ pnpm --filter @b2b-starter/backend test:integration:http
 Update `apps/backend/.env.test` if your local PostgreSQL user, password, host, or port are different.
 The integration runner uses `DB_HOST`, `DB_USERNAME`, `DB_PASSWORD`, and `DB_PORT` to create temporary databases, and `DATABASE_URL` for the Medusa application connection.
 
+The B2B company isolation smoke test can be run on its own:
+
+```bash
+cd apps/backend
+corepack pnpm@9.15.0 --config.engine-strict=false exec node scripts/run-jest.mjs integration:http integration-tests/http/companies/companies.spec.ts
+```
+
+GitHub Actions runs this focused test with managed PostgreSQL and Redis in `.github/workflows/b2b-quality-gate.yml`.
+
 ## Resources
 
 - [Medusa Documentation](https://docs.medusajs.com)

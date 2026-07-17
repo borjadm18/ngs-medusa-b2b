@@ -308,6 +308,7 @@ Siguiente accion:
 - `@b2b-starter/backend build`: OK tras fix.
 - `@b2b-starter/storefront build` con `NEXT_PUBLIC_B2B_CLIENT_PROFILE=starter-empty`: OK.
 - `companies.spec.ts`: escrito/actualizado, pero no ejecutable en este equipo hasta configurar `apps/backend/.env.test` con PostgreSQL (`DATABASE_URL`, `DB_HOST`, `DB_USERNAME`, `DB_PASSWORD`, `DB_PORT`).
+- `.github/workflows/b2b-quality-gate.yml`: anadido para ejecutar validaciones, backend build y `companies.spec.ts` con PostgreSQL/Redis gestionados en GitHub Actions.
 
 ### Riesgos Pendientes
 
@@ -319,8 +320,8 @@ Siguiente accion:
 
 ### Siguiente Hardening Recomendado
 
-1. Preparar `.env.test` y Postgres local/CI para que `test:integration:http` sea obligatorio.
-2. Ejecutar `companies.spec.ts` en CI y bloquear merges si falla ownership entre empresas.
-3. Convertir warnings de assets a error solo para perfiles marcados como `productionReady`.
-4. Separar credenciales demo de docs publicas y moverlas a `.env.example`/runbooks privados.
-5. Anadir smoke remoto para rutas de company ownership cuando haya dos usuarios demo activos.
+1. Confirmar primera ejecucion de `B2B Quality Gate` en GitHub Actions y corregir cualquier ajuste de entorno.
+2. Convertir warnings de assets a error solo para perfiles marcados como `productionReady`.
+3. Separar credenciales demo de docs publicas y moverlas a `.env.example`/runbooks privados.
+4. Anadir smoke remoto para rutas de company ownership cuando haya dos usuarios demo activos.
+5. Ampliar quality gate con packaging/cart y quote acceptance HTTP.
