@@ -119,6 +119,7 @@ Estado 2026-07-20:
 
 - Priorizado en roadmap.
 - Plantilla CSV creada para alimentar el futuro modulo.
+- Especificacion tecnica creada en `docs/b2b-template/product-replacements-mvp.md`.
 - Pendiente implementacion backend: modulo `productReplacements`, workflows, Store API, Admin UI y UI PDP/PLP.
 
 ## Fase 3. Validacion B2B Robusta

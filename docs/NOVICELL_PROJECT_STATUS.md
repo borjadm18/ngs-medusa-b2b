@@ -37,7 +37,7 @@ El proyecto no es solo una demo NGS. La direccion correcta es construir tres pro
 - Asset library tipo mini DAM con busqueda, filtros y metadatos.
 - Editor de menu con orden, submenus/mega menu y activar/desactivar enlaces.
 - Reglas de catalogo con simulador para cliente/zona/canal/region.
-- Roadmap de sustitutos/recambios/equivalencias para convertir conocimiento tecnico en recomendacion de compra.
+- Roadmap y especificacion MVP de sustitutos/recambios/equivalencias para convertir conocimiento tecnico en recomendacion de compra.
 - Documentacion operativa y playbooks de demo.
 
 ## Que Aporta Medusa De Base
