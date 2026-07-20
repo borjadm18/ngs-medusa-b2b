@@ -10,30 +10,30 @@ Este documento resume el recorrido recomendado para una demo externa o reunion i
 
 ## Usuarios demo
 
-Password para todos los usuarios creados por seed: `Demo123!`
+Password storefront verificada: `Demo123!`
 
 Empresas demo:
 
 - Iberia Pro Installers
-  - Admin empresa: `compras+admin@iberia-pro-installers.demo`
-  - Comprador: `compras+buyer@iberia-pro-installers.demo`
-  - Aprobador: `compras+approver@iberia-pro-installers.demo`
+  - Comprador verificado: `compras+buyer@iberia-pro-installers.demo`
   - Estado: aprobada
   - Condiciones: credito 30 dias
 
 - Distribuciones Norte Audio
-  - Admin empresa: `pedidos+admin@dnaudio.demo`
-  - Comprador: `pedidos+buyer@dnaudio.demo`
-  - Aprobador: `pedidos+approver@dnaudio.demo`
+  - Comprador verificado: `pedidos+buyer@dnaudio.demo`
   - Estado: aprobada
   - Condiciones: credito 60 dias
 
 - Retail Campus Group
-  - Admin empresa: `it-procurement+admin@retail-campus.demo`
-  - Comprador: `it-procurement+buyer@retail-campus.demo`
-  - Aprobador: `it-procurement+approver@retail-campus.demo`
-  - Estado: pendiente
+  - Comprador verificado: `it-procurement+buyer@retail-campus.demo`
+  - Estado: aprobada
   - Condiciones: transferencia bancaria
+
+Backoffice Medusa:
+
+- URL: `https://ngs-medusa-backend.onrender.com/app`
+- Email verificado: `admin@test.com`
+- Password verificada: `supersecret`
 
 ## Flujo recomendado
 

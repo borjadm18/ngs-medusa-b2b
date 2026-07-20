@@ -18,13 +18,19 @@ Formula de cada bloque:
 
 ## Usuarios Demo
 
-Password comun: `Demo123!`
+Password storefront verificada: `Demo123!`
 
-| Empresa | Comprador | Aprobador | Contexto |
-| --- | --- | --- | --- |
-| Iberia Pro Installers | `compras+buyer@iberia-pro-installers.demo` | `compras+approver@iberia-pro-installers.demo` | Cliente aprobado, credito 30 dias |
-| Distribuciones Norte Audio | `pedidos+buyer@dnaudio.demo` | `pedidos+approver@dnaudio.demo` | Distribuidor aprobado, credito 60 dias |
-| Retail Campus Group | `it-procurement+buyer@retail-campus.demo` | `it-procurement+approver@retail-campus.demo` | Empresa pendiente, transferencia bancaria |
+| Empresa | Comprador verificado | Contexto |
+| --- | --- | --- |
+| Iberia Pro Installers | `compras+buyer@iberia-pro-installers.demo` | Cliente aprobado, credito 30 dias |
+| Distribuciones Norte Audio | `pedidos+buyer@dnaudio.demo` | Distribuidor aprobado, credito 60 dias |
+| Retail Campus Group | `it-procurement+buyer@retail-campus.demo` | Empresa aprobada, transferencia bancaria |
+
+Backoffice Medusa:
+
+- URL: `https://ngs-medusa-backend.onrender.com/app`
+- Email verificado: `admin@test.com`
+- Password verificada: `supersecret`
 
 ## Guion
 
