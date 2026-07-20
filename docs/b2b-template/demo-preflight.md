@@ -2,14 +2,38 @@
 
 Checklist operativa antes de ensenar el ecommerce B2B industrial.
 
-## Comando unico
+## Comando rapido sin admin
+
+```bash
+pnpm demo:preflight:public
+```
+
+Comprueba perfiles de cliente, usuarios demo, presupuestos abiertos, accept quote,
+playbook P0 y QA visual con Playwright. Es el comando recomendado cuando solo
+queremos saber si la demo publica esta lista.
+
+## Comando completo
 
 ```bash
 pnpm demo:preflight
 ```
 
-Comprueba perfiles de cliente, usuarios demo, presupuestos abiertos, homepage CMS,
-brand profile, asset library y QA visual con Playwright.
+Comprueba todo lo anterior y tambien homepage CMS, brand profile, asset library,
+packaging admin y reglas de catalogo desde el backoffice.
+
+Requiere credenciales admin configuradas:
+
+```bash
+$env:ADMIN_EMAIL="admin@..."
+$env:ADMIN_PASSWORD="..."
+pnpm demo:preflight
+```
+
+Si solo se quiere validar el bloque admin:
+
+```bash
+pnpm demo:preflight:admin
+```
 
 ## Reset demo
 
