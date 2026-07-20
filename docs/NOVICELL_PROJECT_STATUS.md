@@ -94,6 +94,12 @@ P4:
 Validacion publica rapida:
 
 ```bash
+pnpm demo:preflight:public:fast
+```
+
+Validacion publica con QA visual:
+
+```bash
 pnpm demo:preflight:public
 ```
 

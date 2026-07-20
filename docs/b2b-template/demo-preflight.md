@@ -12,6 +12,12 @@ Comprueba perfiles de cliente, usuarios demo, presupuestos abiertos, accept quot
 playbook P0 y QA visual con Playwright. Es el comando recomendado cuando solo
 queremos saber si la demo publica esta lista.
 
+Si hay poco tiempo, usa la variante sin screenshots:
+
+```bash
+pnpm demo:preflight:public:fast
+```
+
 ## Comando completo
 
 ```bash

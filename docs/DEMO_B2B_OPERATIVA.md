@@ -79,6 +79,8 @@ Empresas demo:
 
 ## Validaciones antes de demo
 
+- Ejecutar `pnpm demo:preflight:public:fast` para validar estado funcional.
+- Ejecutar `pnpm demo:preflight:public` si hay margen para QA visual con screenshots.
 - Storefront `/es/store` responde 200.
 - Backend `/health` responde 200.
 - Login con al menos un usuario demo funciona.
