@@ -1,5 +1,12 @@
 import { defineRouteConfig } from "@medusajs/admin-sdk";
-import { Photo, Plus, Trash } from "@medusajs/icons";
+import {
+  ArrowDownMini,
+  ArrowUpMini,
+  DocumentSeries,
+  Photo,
+  Plus,
+  Trash,
+} from "@medusajs/icons";
 import {
   Badge,
   Button,
@@ -8,6 +15,7 @@ import {
   IconButton,
   Input,
   Label,
+  Switch,
   Text,
   Textarea,
   Toaster,
@@ -81,6 +89,25 @@ const readFileAsBase64 = (file: File) =>
     reader.readAsDataURL(file);
   });
 
+const moveItem = <T,>(items: T[], from: number, to: number) => {
+  if (to < 0 || to >= items.length) {
+    return items;
+  }
+
+  const next = [...items];
+  const [item] = next.splice(from, 1);
+  next.splice(to, 0, item);
+
+  return next;
+};
+
+const insertAfter = <T,>(items: T[], index: number, item: T) => {
+  const next = [...items];
+  next.splice(index + 1, 0, item);
+
+  return next;
+};
+
 const Homepage = () => {
   const { data, isPending } = useHomepageContent();
   const { data: brandProfileData } = useBrandProfileContent();
@@ -114,7 +141,7 @@ const Homepage = () => {
   const updateMetric = (
     index: number,
     field: keyof HomepageContent["metrics"][number],
-    value: string
+    value: string | boolean
   ) => {
     setForm((current) => ({
       ...current,
@@ -138,11 +165,25 @@ const Homepage = () => {
     }));
   };
 
+  const duplicateMetric = (index: number) => {
+    setForm((current) => ({
+      ...current,
+      metrics: insertAfter(current.metrics, index, { ...current.metrics[index] }),
+    }));
+  };
+
+  const moveMetric = (index: number, direction: -1 | 1) => {
+    setForm((current) => ({
+      ...current,
+      metrics: moveItem(current.metrics, index, index + direction),
+    }));
+  };
+
   const updateImageBlock = (
     collection: "trustBlocks" | "capabilityBlocks" | "detailBlocks",
     index: number,
     field: keyof HomepageImageBlock,
-    value: string
+    value: string | boolean
   ) => {
     setForm((current) => ({
       ...current,
@@ -176,6 +217,29 @@ const Homepage = () => {
     }));
   };
 
+  const duplicateImageBlock = (
+    collection: "trustBlocks" | "capabilityBlocks" | "detailBlocks",
+    index: number
+  ) => {
+    setForm((current) => ({
+      ...current,
+      [collection]: insertAfter(current[collection], index, {
+        ...current[collection][index],
+      }),
+    }));
+  };
+
+  const moveImageBlock = (
+    collection: "trustBlocks" | "capabilityBlocks" | "detailBlocks",
+    index: number,
+    direction: -1 | 1
+  ) => {
+    setForm((current) => ({
+      ...current,
+      [collection]: moveItem(current[collection], index, index + direction),
+    }));
+  };
+
   const updateOperation = (index: number, value: string) => {
     setForm((current) => ({
       ...current,
@@ -198,6 +262,20 @@ const Homepage = () => {
       operations: current.operations.filter(
         (_, itemIndex) => itemIndex !== index
       ),
+    }));
+  };
+
+  const duplicateOperation = (index: number) => {
+    setForm((current) => ({
+      ...current,
+      operations: insertAfter(current.operations, index, current.operations[index]),
+    }));
+  };
+
+  const moveOperation = (index: number, direction: -1 | 1) => {
+    setForm((current) => ({
+      ...current,
+      operations: moveItem(current.operations, index, index + direction),
     }));
   };
 
@@ -374,7 +452,14 @@ const Homepage = () => {
                     <EditableCard
                       key={`metric-${index}`}
                       title={`Metrica ${index + 1}`}
+                      meta={`${metric.value} - ${metric.label}`}
+                      isHidden={metric.isHidden}
+                      onDuplicate={() => duplicateMetric(index)}
+                      onMoveUp={() => moveMetric(index, -1)}
+                      onMoveDown={() => moveMetric(index, 1)}
                       onRemove={() => removeMetric(index)}
+                      moveUpDisabled={index === 0}
+                      moveDownDisabled={index === form.metrics.length - 1}
                       removeDisabled={form.metrics.length === 1}
                     >
                       <div className="grid gap-3 small:grid-cols-[160px_1fr]">
@@ -393,6 +478,13 @@ const Homepage = () => {
                           }
                         />
                       </div>
+                      <VisibilityToggle
+                        checked={!metric.isHidden}
+                        label="Visible en la home"
+                        onCheckedChange={(checked) =>
+                          updateMetric(index, "isHidden", !checked)
+                        }
+                      />
                     </EditableCard>
                   ))}
                 </div>
@@ -407,6 +499,12 @@ const Homepage = () => {
                 profileId={activeProfileId}
                 onAdd={() => addImageBlock("trustBlocks")}
                 onRemove={(index) => removeImageBlock("trustBlocks", index)}
+                onDuplicate={(index) =>
+                  duplicateImageBlock("trustBlocks", index)
+                }
+                onMove={(index, direction) =>
+                  moveImageBlock("trustBlocks", index, direction)
+                }
                 onChange={(index, field, value) =>
                   updateImageBlock("trustBlocks", index, field, value)
                 }
@@ -443,6 +541,12 @@ const Homepage = () => {
                     profileId={activeProfileId}
                     onRemove={(index) =>
                       removeImageBlock("capabilityBlocks", index)
+                    }
+                    onDuplicate={(index) =>
+                      duplicateImageBlock("capabilityBlocks", index)
+                    }
+                    onMove={(index, direction) =>
+                      moveImageBlock("capabilityBlocks", index, direction)
                     }
                     onChange={(index, field, value) =>
                       updateImageBlock("capabilityBlocks", index, field, value)
@@ -499,6 +603,12 @@ const Homepage = () => {
                     items={form.detailBlocks}
                     profileId={activeProfileId}
                     onRemove={(index) => removeImageBlock("detailBlocks", index)}
+                    onDuplicate={(index) =>
+                      duplicateImageBlock("detailBlocks", index)
+                    }
+                    onMove={(index, direction) =>
+                      moveImageBlock("detailBlocks", index, direction)
+                    }
                     onChange={(index, field, value) =>
                       updateImageBlock("detailBlocks", index, field, value)
                     }
@@ -566,7 +676,15 @@ const Homepage = () => {
                       <EditableCard
                         key={`operation-${index}`}
                         title={`Punto ${index + 1}`}
+                        meta={operation}
+                        onDuplicate={() => duplicateOperation(index)}
+                        onMoveUp={() => moveOperation(index, -1)}
+                        onMoveDown={() => moveOperation(index, 1)}
                         onRemove={() => removeOperation(index)}
+                        moveUpDisabled={index === 0}
+                        moveDownDisabled={
+                          index === form.operations.length - 1
+                        }
                         removeDisabled={form.operations.length === 1}
                       >
                         <TextAreaField
@@ -631,28 +749,94 @@ const AddButton = ({ label, onClick }: { label: string; onClick: () => void }) =
 
 const EditableCard = ({
   title,
+  meta,
+  isHidden,
   children,
+  moveUpDisabled,
+  moveDownDisabled,
   removeDisabled,
+  onDuplicate,
+  onMoveUp,
+  onMoveDown,
   onRemove,
 }: {
   title: string;
+  meta?: string;
+  isHidden?: boolean;
   children: ReactNode;
+  moveUpDisabled?: boolean;
+  moveDownDisabled?: boolean;
   removeDisabled?: boolean;
+  onDuplicate?: () => void;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
   onRemove: () => void;
 }) => (
-  <div className="grid gap-3 rounded-lg border bg-ui-bg-base p-4 shadow-elevation-card-rest">
+  <div
+    className={[
+      "grid gap-3 rounded-lg border bg-ui-bg-base p-4 shadow-elevation-card-rest",
+      isHidden ? "opacity-65" : "",
+    ].join(" ")}
+  >
     <div className="flex items-center justify-between gap-3">
-      <Text size="small" leading="compact" weight="plus">
-        {title}
-      </Text>
-      <IconButton
-        size="small"
-        variant="transparent"
-        disabled={removeDisabled}
-        onClick={onRemove}
-      >
-        <Trash />
-      </IconButton>
+      <div className="min-w-0">
+        <Text size="small" leading="compact" weight="plus">
+          {title}
+        </Text>
+        {meta ? (
+          <Text size="xsmall" className="mt-1 truncate text-ui-fg-subtle">
+            {isHidden ? "Oculto - " : ""}
+            {meta}
+          </Text>
+        ) : null}
+      </div>
+      <div className="flex shrink-0 items-center gap-1">
+        {onMoveUp ? (
+          <IconButton
+            size="small"
+            variant="transparent"
+            disabled={moveUpDisabled}
+            onClick={onMoveUp}
+            type="button"
+            aria-label="Subir bloque"
+          >
+            <ArrowUpMini />
+          </IconButton>
+        ) : null}
+        {onMoveDown ? (
+          <IconButton
+            size="small"
+            variant="transparent"
+            disabled={moveDownDisabled}
+            onClick={onMoveDown}
+            type="button"
+            aria-label="Bajar bloque"
+          >
+            <ArrowDownMini />
+          </IconButton>
+        ) : null}
+        {onDuplicate ? (
+          <IconButton
+            size="small"
+            variant="transparent"
+            onClick={onDuplicate}
+            type="button"
+            aria-label="Duplicar bloque"
+          >
+            <DocumentSeries />
+          </IconButton>
+        ) : null}
+        <IconButton
+          size="small"
+          variant="transparent"
+          disabled={removeDisabled}
+          onClick={onRemove}
+          type="button"
+          aria-label="Eliminar bloque"
+        >
+          <Trash />
+        </IconButton>
+      </div>
     </div>
     {children}
   </div>
@@ -665,6 +849,8 @@ const ImageBlocksEditor = ({
   profileId,
   onAdd,
   onRemove,
+  onDuplicate,
+  onMove,
   onChange,
 }: {
   title: string;
@@ -673,10 +859,12 @@ const ImageBlocksEditor = ({
   profileId: string;
   onAdd: () => void;
   onRemove: (index: number) => void;
+  onDuplicate: (index: number) => void;
+  onMove: (index: number, direction: -1 | 1) => void;
   onChange: (
     index: number,
     field: keyof HomepageImageBlock,
-    value: string
+    value: string | boolean
   ) => void;
 }) => (
   <EditorPanel title={title} description={description} action={<AddButton label="Anadir bloque" onClick={onAdd} />}>
@@ -684,6 +872,8 @@ const ImageBlocksEditor = ({
       items={items}
       profileId={profileId}
       onRemove={onRemove}
+      onDuplicate={onDuplicate}
+      onMove={onMove}
       onChange={onChange}
     />
   </EditorPanel>
@@ -693,11 +883,15 @@ const BlockList = ({
   items,
   profileId,
   onRemove,
+  onDuplicate,
+  onMove,
   onChange,
 }: {
   items: HomepageImageBlock[];
   profileId: string;
   onRemove: (index: number) => void;
+  onDuplicate: (index: number) => void;
+  onMove: (index: number, direction: -1 | 1) => void;
   onChange: (
     index: number,
     field: keyof HomepageImageBlock,
@@ -709,7 +903,14 @@ const BlockList = ({
       <EditableCard
         key={`block-${index}`}
         title={`Bloque ${index + 1}`}
+        meta={item.title}
+        isHidden={item.isHidden}
+        onDuplicate={() => onDuplicate(index)}
+        onMoveUp={() => onMove(index, -1)}
+        onMoveDown={() => onMove(index, 1)}
         onRemove={() => onRemove(index)}
+        moveUpDisabled={index === 0}
+        moveDownDisabled={index === items.length - 1}
         removeDisabled={items.length === 1}
       >
         <div className="grid gap-4 small:grid-cols-[220px_1fr]">
@@ -731,6 +932,13 @@ const BlockList = ({
               value={item.body}
               rows={3}
               onChange={(value) => onChange(index, "body", value)}
+            />
+            <VisibilityToggle
+              checked={!item.isHidden}
+              label="Visible en la home"
+              onCheckedChange={(checked) =>
+                onChange(index, "isHidden", !checked)
+              }
             />
           </div>
         </div>
@@ -967,6 +1175,28 @@ const TextAreaField = ({
   </div>
 );
 
+const VisibilityToggle = ({
+  checked,
+  label,
+  onCheckedChange,
+}: {
+  checked: boolean;
+  label: string;
+  onCheckedChange: (checked: boolean) => void;
+}) => (
+  <div className="flex items-center justify-between gap-3 rounded-md border bg-ui-bg-subtle px-3 py-2">
+    <div>
+      <Text size="small" leading="compact" weight="plus">
+        {label}
+      </Text>
+      <Text size="xsmall" className="text-ui-fg-subtle">
+        {checked ? "Se muestra en storefront" : "Oculto sin borrar contenido"}
+      </Text>
+    </div>
+    <Switch checked={checked} onCheckedChange={onCheckedChange} />
+  </div>
+);
+
 const PreviewCard = ({ form }: { form: HomepageContent }) => (
   <div className="overflow-hidden rounded-lg border bg-ui-bg-base shadow-elevation-card-rest">
     <div className="border-b p-4">
@@ -1001,7 +1231,10 @@ const PreviewCard = ({ form }: { form: HomepageContent }) => (
       </div>
 
       <div className="grid grid-cols-3 gap-2">
-        {form.metrics.slice(0, 3).map((metric, index) => (
+        {form.metrics
+          .filter((metric) => !metric.isHidden)
+          .slice(0, 3)
+          .map((metric, index) => (
           <div key={`${metric.value}-${index}`} className="rounded border p-2">
             <Text size="small" weight="plus">
               {metric.value}
@@ -1016,9 +1249,9 @@ const PreviewCard = ({ form }: { form: HomepageContent }) => (
       <PreviewList
         title="Bloques"
         items={[
-          `${form.trustBlocks.length} confianza`,
-          `${form.capabilityBlocks.length} soluciones`,
-          `${form.detailBlocks.length} visuales`,
+          `${visibleCount(form.trustBlocks)}/${form.trustBlocks.length} confianza`,
+          `${visibleCount(form.capabilityBlocks)}/${form.capabilityBlocks.length} soluciones`,
+          `${visibleCount(form.detailBlocks)}/${form.detailBlocks.length} visuales`,
           `${form.operations.length} puntos B2B`,
         ]}
       />
@@ -1040,6 +1273,9 @@ const PreviewList = ({ title, items }: { title: string; items: string[] }) => (
     </div>
   </div>
 );
+
+const visibleCount = (items: Array<{ isHidden?: boolean }>) =>
+  items.filter((item) => !item.isHidden).length;
 
 export const config = defineRouteConfig({
   label: "Homepage",

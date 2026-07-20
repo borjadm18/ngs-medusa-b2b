@@ -1,12 +1,14 @@
 export type HomepageMetric = {
   value: string;
   label: string;
+  isHidden?: boolean;
 };
 
 export type HomepageImageBlock = {
   title: string;
   body: string;
   image: string;
+  isHidden?: boolean;
 };
 
 export type HomepageContent = {

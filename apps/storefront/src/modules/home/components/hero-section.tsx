@@ -7,6 +7,10 @@ import { Container } from "./container"
 const trustIcons = [ShieldCheck, CubeSolid, Tag, TruckFast]
 
 export function HeroSection({ content }: { content: HomepageContent }) {
+  const visibleTrustBlocks = content.trustBlocks
+    .filter((item) => !item.isHidden)
+    .slice(0, 4)
+
   return (
     <section className="bg-white pt-4">
       <Container>
@@ -54,7 +58,7 @@ export function HeroSection({ content }: { content: HomepageContent }) {
           </div>
 
           <div className="grid border-t border-neutral-800 bg-neutral-950 xsmall:grid-cols-2 small:grid-cols-4">
-            {content.trustBlocks.slice(0, 4).map((item, index) => {
+            {visibleTrustBlocks.map((item, index) => {
               const Icon = trustIcons[index % trustIcons.length]
 
               return (

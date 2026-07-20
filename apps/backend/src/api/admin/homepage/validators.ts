@@ -3,12 +3,14 @@ import { z } from "@medusajs/framework/zod";
 const HomepageMetric = z.object({
   value: z.string().min(1),
   label: z.string().min(1),
+  isHidden: z.boolean().optional(),
 });
 
 const HomepageImageBlock = z.object({
   title: z.string().min(1),
   body: z.string().min(1),
   image: z.string(),
+  isHidden: z.boolean().optional(),
 });
 
 export const AdminUpdateHomepage = z.object({
