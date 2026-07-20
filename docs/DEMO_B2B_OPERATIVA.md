@@ -84,6 +84,7 @@ Empresas demo:
 - Storefront `/es/store` responde 200.
 - Backend `/health` responde 200.
 - Login con al menos un usuario demo funciona.
+- El smoke `smoke:cart-packaging` crea un carrito demo, anade cajas y valida peso/pallet/metadata.
 - Admin abre `B2B Control`.
 - Hay quotes demo en estado pendiente de cliente/comercial.
 - Un producto permite ver unidad/caja sin scroll visual raro.

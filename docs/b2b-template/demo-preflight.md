@@ -9,14 +9,18 @@ pnpm demo:preflight:public
 ```
 
 Comprueba perfiles de cliente, usuarios demo, presupuestos abiertos, accept quote,
-playbook P0 y QA visual con Playwright. Es el comando recomendado cuando solo
-queremos saber si la demo publica esta lista.
+playbook P0, carrito con packaging B2B y QA visual con Playwright. Es el
+comando recomendado cuando solo queremos saber si la demo publica esta lista.
 
 Si hay poco tiempo, usa la variante sin screenshots:
 
 ```bash
 pnpm demo:preflight:public:fast
 ```
+
+Incluye una prueba real de carrito: login de comprador demo, resolucion por SKU,
+alta de linea por caja, metadata de cajas/pallet/peso y bloqueo de una cantidad
+invalida.
 
 ## Comando completo
 

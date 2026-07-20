@@ -27,6 +27,7 @@ El proyecto no es solo una demo NGS. La direccion correcta es construir tres pro
 - Ocultacion de precios para usuarios no autenticados.
 - Packaging por variante: unidad, caja, minimo, multiplo, pallet, peso/dimensiones.
 - Validacion de cantidades B2B en PDP, carrito y checkout.
+- Smoke publico de carrito con packaging: alta por cajas, peso, pallet y rechazo de cantidades invalidas.
 - Presupuestos/quotes con aceptacion validada.
 - Empresas demo, usuarios demo, reglas comerciales y pedidos historicos.
 - Onboarding de empresa con estado pendiente/aprobado/denegado.
