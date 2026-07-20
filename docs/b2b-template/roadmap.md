@@ -55,6 +55,7 @@ Antes de seguir profundizando launcher/deploy multi-cliente, la prioridad vuelve
 - Price lists reales conectadas con core Medusa.
 - Flujos de empresa: roles, limites, aprobaciones y compradores.
 - Busqueda por SKU/EAN/atributos tecnicos.
+- Sustitutos y recambios: buscar por referencia antigua, EAN, fabricante o producto descatalogado y recomendar alternativas compatibles.
 
 Estado 2026-07-14: `Quick order` ya resuelve SKUs, valida packaging y anade en bulk al carrito. Se anade resumen operativo de unidades, cajas, peso estimado y ocupacion de pallet para acercarlo a una herramienta real de compras B2B. El detalle de presupuesto tambien muestra logistica B2B visible y mantiene export CSV/PDF con packaging.
 - Las reglas `requires_quote` ya cambian el comportamiento de PDP: la compra directa pasa a CTA de presupuesto, con copy comercial especifico y sin CTA duplicado.
@@ -65,6 +66,60 @@ Estado 2026-07-14: `Quick order` ya resuelve SKUs, valida packaging y anade en b
 - Admin packaging permite aplicar a todas, copiar desde otra variante, usar plantillas rapidas, importar CSV con preview y exportar CSV.
 - Busqueda de catalogo activada en PLP por texto, SKU, EAN/GTIN/barcode/MPN y opciones de variante, compartiendo `q` entre buscador global, filtros, categorias y colecciones.
 - Pendiente: storage/CDN persistente, import/export dedicado y plantillas por cliente.
+
+## Fase 2.5. Sustitutos, Recambios Y Equivalencias
+
+Prioridad: alta para B2B industrial.
+
+Problema que resuelve:
+
+- El comprador busca una referencia antigua, descatalogada o de otro fabricante.
+- El comercial conoce el sustituto, pero ese conocimiento vive en emails, Excel o memoria del equipo.
+- En industria, la decision de compra depende de compatibilidad tecnica, stock, plazo y aprobacion.
+
+MVP demo:
+
+- Bloque en PDP: `Sustitutos y recambios compatibles`.
+- Badge en PLP/PDP: `Tiene sustituto` o `Recambio disponible`.
+- Busqueda por SKU antiguo, EAN, MPN, referencia de fabricante y aliases.
+- Si un producto esta sin stock o descatalogado, mostrar CTA `Ver sustituto recomendado`.
+- En carrito/quote, sugerir sustituto si una linea queda sin stock o requiere validacion comercial.
+
+Modelo de datos recomendado:
+
+- `source_product_id` / `source_variant_id`.
+- `replacement_product_id` / `replacement_variant_id`.
+- `relation_type`: `replacement`, `spare_part`, `compatible`, `upgrade`, `alternative`.
+- `compatibility`: `exact`, `partial`, `requires_validation`.
+- `reason`: descatalogado, sin stock, mejora tecnica, alternativa economica, contrato cliente.
+- `priority`: orden de recomendacion.
+- `notes`: nota tecnica/comercial.
+- `customer_group_id`, `company_id`, `region_id`, `sales_channel_id` opcionales para equivalencias por cuenta/canal.
+
+Admin:
+
+- CRUD de equivalencias.
+- Import/export CSV desde `templates/product-replacements.example.csv`.
+- Accion rapida desde producto: `Anadir sustituto`.
+- Simulador: `Ver sustitutos como cliente/canal/region`.
+
+Storefront:
+
+- PDP: bloque compacto debajo de compra o especificaciones.
+- PLP: badge discreto.
+- Buscador: si no encuentra SKU exacto, devolver coincidencias por aliases y sustitutos.
+- Quote/cart: sugerencia accionable, no reemplazo automatico salvo regla explicita.
+
+Resultado esperado:
+
+- La demo transmite que el ecommerce no es solo catalogo, sino inteligencia comercial y tecnica reutilizable.
+- Diferencial claro frente a SaaS generico cuando el cliente tiene referencias antiguas, equivalencias por fabricante y recambios.
+
+Estado 2026-07-20:
+
+- Priorizado en roadmap.
+- Plantilla CSV creada para alimentar el futuro modulo.
+- Pendiente implementacion backend: modulo `productReplacements`, workflows, Store API, Admin UI y UI PDP/PLP.
 
 ## Fase 3. Validacion B2B Robusta
 

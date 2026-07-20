@@ -1,0 +1,5 @@
+source_sku,replacement_sku,relation_type,compatibility,reason,priority,company_code,customer_group,region_code,sales_channel,notes
+NGS-WILD-BASH-COMPACT-BLK,NGS-WILD-SPACE-3-BLK,replacement,partial,sin stock,10,,,,,Alternativa con mas potencia y disponibilidad inmediata
+NGS-EVO-MOUSE-WHT,NGS-EVO-MOUSE-BLK,alternative,exact,color alternativo,20,,,,,Misma ficha tecnica en color negro
+NGS-XPRESSCAM-1080-WHT,NGS-XPRESSCAM-1080-BLK,compatible,exact,color alternativo,20,,,,,Compatible para el mismo puesto de trabajo
+NGS-GHX-600-WHT,NGS-GHX-600-BLK,spare_part,exact,recambio disponible,10,,,,,Recambio equivalente para auricular gaming
