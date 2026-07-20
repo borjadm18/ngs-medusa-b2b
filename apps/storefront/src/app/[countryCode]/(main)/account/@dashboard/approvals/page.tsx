@@ -21,18 +21,31 @@ export default async function Approvals({
 
   if (!customer?.employee?.is_admin) {
     return (
-      <div className="w-full rounded border border-neutral-200 bg-white p-6">
-        <Heading>Aprobaciones</Heading>
-        <Text className="mt-2 text-neutral-600">
-          Esta seccion esta disponible para administradores de empresa. Puedes
-          seguir comprando, solicitando presupuestos y revisando tus pedidos.
-        </Text>
+      <div className="grid w-full gap-4">
+        <ApprovalDemoIntro />
+        <div className="rounded border border-neutral-200 bg-white p-6">
+          <Heading>Aprobaciones</Heading>
+          <Text className="mt-2 text-neutral-600">
+            Esta seccion esta disponible para administradores de empresa. Para
+            ensenar el flujo completo, inicia sesion con el usuario aprobador
+            de la empresa demo.
+          </Text>
+          <div className="mt-4 rounded border border-neutral-200 bg-neutral-50 p-4 text-small-regular text-neutral-700">
+            Usuario demo aprobador:{" "}
+            <span className="font-semibold">
+              compras+approver@iberia-pro-installers.demo
+            </span>
+            <br />
+            Password: <span className="font-semibold">Demo123!</span>
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
     <div className="w-full flex flex-col gap-y-4">
+      <ApprovalDemoIntro />
       <Heading>Aprobaciones</Heading>
 
       <Heading level="h2" className="text-neutral-700">
@@ -55,6 +68,44 @@ export default async function Approvals({
       <Suspense fallback={<div>Cargando...</div>}>
         <RejectedApprovalRequestsAdminList searchParams={urlSearchParams} />
       </Suspense>
+    </div>
+  )
+}
+
+function ApprovalDemoIntro() {
+  return (
+    <section className="rounded border border-neutral-200 bg-white p-6">
+      <div className="grid gap-4 small:grid-cols-[1fr_280px] small:items-start">
+        <div>
+          <p className="text-small-semi uppercase tracking-normal text-red-700">
+            Flujo de aprobacion B2B
+          </p>
+          <Heading level="h2" className="mt-2">
+            Cuando el comprador supera su limite, el pedido se bloquea hasta
+            que aprueba un responsable.
+          </Heading>
+          <Text className="mt-3 text-neutral-600">
+            Este bloque muestra la diferencia clave frente a B2C: el comprador
+            puede preparar el pedido, pero la empresa decide quien autoriza el
+            gasto.
+          </Text>
+        </div>
+        <div className="grid gap-2 rounded border border-neutral-200 bg-neutral-50 p-3">
+          <ApprovalStep label="1. Comprador" value="Crea carrito o quote" />
+          <ApprovalStep label="2. Plataforma" value="Detecta limite" />
+          <ApprovalStep label="3. Aprobador" value="Aprueba o rechaza" />
+          <ApprovalStep label="4. Checkout" value="Pedido desbloqueado" />
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function ApprovalStep({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded border border-neutral-200 bg-white p-3">
+      <p className="text-small-semi text-neutral-950">{label}</p>
+      <p className="mt-1 text-small-regular text-neutral-600">{value}</p>
     </div>
   )
 }

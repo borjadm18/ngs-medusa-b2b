@@ -10,6 +10,40 @@ const B2BControl = () => {
   const quotePendingMerchant = summary?.quotes.pending_merchant || 0;
   const quotePendingCustomer = summary?.quotes.pending_customer || 0;
   const packagingCoverage = summary?.packaging.coverage || 0;
+  const approvedCompanies = summary?.companies.approved || 0;
+  const pendingCompanies = summary?.companies.pending || 0;
+  const acceptedQuotes = summary?.quotes.accepted || 0;
+  const activeRules = summary?.catalog_rules.active || 0;
+  const demoReadyItems = [
+    {
+      label: "Catalogo publico con precios privados",
+      ready: true,
+      detail: "Storefront y PDP publicos responden sin exponer tarifas.",
+    },
+    {
+      label: "Quote aceptable para demo",
+      ready: quotePendingCustomer > 0,
+      detail:
+        quotePendingCustomer > 0
+          ? `${quotePendingCustomer} presupuesto(s) esperando cliente`
+          : "Prepara un presupuesto pending_customer antes de la demo.",
+    },
+    {
+      label: "Empresa pendiente/aprobada",
+      ready: pendingCompanies > 0 && approvedCompanies > 0,
+      detail: `${approvedCompanies} aprobada(s), ${pendingCompanies} pendiente(s)`,
+    },
+    {
+      label: "Reglas comerciales activas",
+      ready: activeRules > 0,
+      detail: `${activeRules} regla(s) para precio, visibilidad o quote`,
+    },
+    {
+      label: "Packaging/logistica",
+      ready: packagingCoverage >= 80,
+      detail: `${packagingCoverage}% de variantes con reglas`,
+    },
+  ];
   const risks = [
     {
       label: "Presupuestos pendientes de comercial",
@@ -91,11 +125,11 @@ const B2BControl = () => {
         <>
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             <Metric label="Empresas B2B" value={summary?.companies.total || 0} />
-            <Metric label="Altas pendientes" value={summary?.companies.pending || 0} />
+            <Metric label="Altas pendientes" value={pendingCompanies} />
             <Metric label="Presupuestos" value={summary?.quotes.total || 0} />
             <Metric
               label="Reglas activas"
-              value={summary?.catalog_rules.active || 0}
+              value={activeRules}
             />
           </div>
 
@@ -156,6 +190,83 @@ const B2BControl = () => {
                 (summary?.companies.by_payment_terms?.credit || 0)
               }
             />
+          </div>
+
+          <div className="grid gap-3 xl:grid-cols-[1fr_420px]">
+            <Container className="divide-y p-0">
+              <div className="px-6 py-4">
+                <Text size="small" leading="compact" weight="plus">
+                  Demo readiness
+                </Text>
+                <Text
+                  size="small"
+                  leading="compact"
+                  className="text-ui-fg-subtle"
+                >
+                  Checklist para saber si el playbook puede demostrarse sin
+                  improvisar.
+                </Text>
+              </div>
+              <div className="grid gap-2 px-6 py-4">
+                {demoReadyItems.map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex flex-col gap-2 rounded-md border bg-ui-bg-component px-4 py-3 md:flex-row md:items-center md:justify-between"
+                  >
+                    <div>
+                      <Text size="small" leading="compact" weight="plus">
+                        {item.label}
+                      </Text>
+                      <Text
+                        size="small"
+                        leading="compact"
+                        className="mt-1 text-ui-fg-subtle"
+                      >
+                        {item.detail}
+                      </Text>
+                    </div>
+                    <Badge
+                      size="xsmall"
+                      color={item.ready ? "green" : "orange"}
+                    >
+                      {item.ready ? "Listo" : "Preparar"}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </Container>
+
+            <Container className="divide-y p-0">
+              <div className="px-6 py-4">
+                <Text size="small" leading="compact" weight="plus">
+                  Funnel quote
+                </Text>
+                <Text
+                  size="small"
+                  leading="compact"
+                  className="text-ui-fg-subtle"
+                >
+                  Lectura comercial rapida para cerrar la demo con negocio.
+                </Text>
+              </div>
+              <div className="grid gap-3 px-6 py-4">
+                <FunnelRow
+                  label="Pendiente comercial"
+                  value={quotePendingMerchant}
+                  total={summary?.quotes.total || 0}
+                />
+                <FunnelRow
+                  label="Esperando cliente"
+                  value={quotePendingCustomer}
+                  total={summary?.quotes.total || 0}
+                />
+                <FunnelRow
+                  label="Aceptados"
+                  value={acceptedQuotes}
+                  total={summary?.quotes.total || 0}
+                />
+              </div>
+            </Container>
           </div>
 
           <Container className="divide-y p-0">
@@ -222,6 +333,37 @@ const Metric = ({ label, value }: { label: string; value: string | number }) => 
     </div>
   </Container>
 );
+
+const FunnelRow = ({
+  label,
+  value,
+  total,
+}: {
+  label: string;
+  value: number;
+  total: number;
+}) => {
+  const percentage = total ? Math.round((value / total) * 100) : 0;
+
+  return (
+    <div className="grid gap-2">
+      <div className="flex items-center justify-between gap-3">
+        <Text size="small" leading="compact" className="text-ui-fg-subtle">
+          {label}
+        </Text>
+        <Text size="small" leading="compact" weight="plus">
+          {value} ({percentage}%)
+        </Text>
+      </div>
+      <div className="h-2 overflow-hidden rounded-full bg-ui-bg-subtle">
+        <div
+          className="h-full rounded-full bg-ui-bg-interactive"
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+    </div>
+  );
+};
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("es-ES", {

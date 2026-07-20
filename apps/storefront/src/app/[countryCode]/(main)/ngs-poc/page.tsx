@@ -60,6 +60,73 @@ const priceComparison = [
   },
 ]
 
+const workflowStages = [
+  {
+    title: "Solicitud",
+    body: "La empresa se registra con datos fiscales y comerciales.",
+    owner: "Cliente",
+  },
+  {
+    title: "Revision",
+    body: "El equipo valida CIF, sector, canal, riesgo y condiciones.",
+    owner: "Comercial",
+  },
+  {
+    title: "Tarifa",
+    body: "Se asigna precio, reglas de catalogo, pago y limites de compra.",
+    owner: "Admin",
+  },
+  {
+    title: "Acceso",
+    body: "El cliente ve precios privados, compra, solicita quotes y repite pedidos.",
+    owner: "Portal",
+  },
+]
+
+const approvalScenario = [
+  {
+    label: "Comprador",
+    value: "Prepara carrito y supera limite",
+  },
+  {
+    label: "Estado",
+    value: "Pedido pendiente de aprobacion",
+  },
+  {
+    label: "Aprobador",
+    value: "Revisa, aprueba o rechaza",
+  },
+  {
+    label: "Resultado",
+    value: "Checkout queda desbloqueado",
+  },
+]
+
+const quoteChecklist = [
+  "Hay 2 presupuestos pending_customer para aceptar en demo.",
+  "El smoke revisa preview y detalle antes de aceptar.",
+  "Aceptar una quote consume el escenario: resembrar o preparar otra antes de demo externa.",
+]
+
+const integrationSystems = [
+  {
+    name: "ERP",
+    responsibility: "Pedidos, facturacion, credito y stock maestro",
+  },
+  {
+    name: "CRM",
+    responsibility: "Cuenta, oportunidad, actividad comercial y seguimiento",
+  },
+  {
+    name: "PIM",
+    responsibility: "Catalogo enriquecido, atributos, fichas y documentacion",
+  },
+  {
+    name: "WMS",
+    responsibility: "Disponibilidad, preparacion, expediciones y tracking",
+  },
+]
+
 const demoSteps: DemoStep[] = [
   {
     number: "0",
@@ -157,7 +224,8 @@ const demoSteps: DemoStep[] = [
     focus: "Automatizar procesos.",
     show: ["Solicitud", "Aprobacion", "Tarifa asignada", "Acceso concedido"],
     say: "Lo importante no es unicamente digitalizar pantallas. Tambien es digitalizar procesos.",
-    status: "partial",
+    route: "/account/company",
+    status: "ready",
   },
   {
     number: "11",
@@ -165,7 +233,7 @@ const demoSteps: DemoStep[] = [
     focus: "El ecommerce forma parte del ecosistema.",
     show: ["ERP", "CRM", "PIM", "WMS"],
     say: "El ecommerce no sustituye a los sistemas existentes. Se conecta con ellos y cada sistema mantiene su responsabilidad.",
-    status: "concept",
+    status: "ready",
   },
   {
     number: "12",
@@ -367,6 +435,143 @@ export default async function NgsPocPage(props: {
         </div>
       </section>
 
+      <section className="content-container grid gap-6 py-10">
+        <div className="grid gap-3 small:grid-cols-[1fr_360px] small:items-end">
+          <div>
+            <p className="text-small-semi uppercase tracking-normal text-red-700">
+              Workflow de alta B2B
+            </p>
+            <h2 className="mt-1 text-2xl-semi">
+              Solicitud, aprobacion, tarifa y acceso en un solo proceso
+            </h2>
+            <p className="mt-3 max-w-3xl text-base-regular leading-7 text-neutral-700">
+              Este es el bloque que conecta storefront y backoffice. La demo no
+              vende una pantalla de registro: vende control comercial sin
+              volver al email.
+            </p>
+          </div>
+          <Link
+            href={`/${countryCode}/account?view=register`}
+            className="inline-flex w-fit rounded border border-neutral-950 bg-neutral-950 px-4 py-2 text-small-semi text-white"
+          >
+            Abrir registro
+          </Link>
+        </div>
+
+        <div className="grid gap-3 medium:grid-cols-4">
+          {workflowStages.map((stage, index) => (
+            <article
+              key={stage.title}
+              className="rounded-lg border border-neutral-200 bg-white p-4"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <span className="flex h-8 w-8 items-center justify-center rounded border border-neutral-200 bg-neutral-50 text-small-semi">
+                  {index + 1}
+                </span>
+                <span className="rounded border border-neutral-200 bg-neutral-50 px-2 py-1 text-[11px] font-semibold text-neutral-600">
+                  {stage.owner}
+                </span>
+              </div>
+              <h3 className="mt-4 text-large-semi">{stage.title}</h3>
+              <p className="mt-2 text-small-regular leading-6 text-neutral-600">
+                {stage.body}
+              </p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="border-y border-neutral-200 bg-neutral-50">
+        <div className="content-container grid gap-6 py-10 small:grid-cols-[1fr_1fr]">
+          <div className="rounded-lg border border-neutral-200 bg-white p-5">
+            <p className="text-small-semi uppercase tracking-normal text-red-700">
+              Roles y aprobaciones
+            </p>
+            <h2 className="mt-1 text-xl-semi">
+              Caso preparado para ensenar jerarquia de compra
+            </h2>
+            <div className="mt-5 grid gap-3">
+              {approvalScenario.map((item) => (
+                <div
+                  key={item.label}
+                  className="grid gap-2 rounded border border-neutral-200 bg-neutral-50 p-3 small:grid-cols-[130px_1fr]"
+                >
+                  <p className="text-small-semi text-neutral-950">
+                    {item.label}
+                  </p>
+                  <p className="text-small-regular text-neutral-600">
+                    {item.value}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <Link
+              href={`/${countryCode}/account/approvals`}
+              className="mt-5 inline-flex rounded border border-neutral-950 bg-neutral-950 px-4 py-2 text-small-semi text-white"
+            >
+              Abrir aprobaciones
+            </Link>
+          </div>
+
+          <div className="rounded-lg border border-neutral-200 bg-white p-5">
+            <p className="text-small-semi uppercase tracking-normal text-red-700">
+              Accept quote
+            </p>
+            <h2 className="mt-1 text-xl-semi">
+              Presupuesto listo para convertir a pedido
+            </h2>
+            <ul className="mt-5 grid gap-3">
+              {quoteChecklist.map((item) => (
+                <li
+                  key={item}
+                  className="rounded border border-neutral-200 bg-neutral-50 p-3 text-small-regular leading-6 text-neutral-700"
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <Link
+              href={`/${countryCode}/account/quotes`}
+              className="mt-5 inline-flex rounded border border-neutral-950 bg-neutral-950 px-4 py-2 text-small-semi text-white"
+            >
+              Abrir presupuestos
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="content-container grid gap-6 py-10">
+        <div>
+          <p className="text-small-semi uppercase tracking-normal text-red-700">
+            Integraciones
+          </p>
+          <h2 className="mt-1 text-2xl-semi">
+            El ecommerce se conecta al ecosistema, no lo sustituye
+          </h2>
+          <p className="mt-3 max-w-3xl text-base-regular leading-7 text-neutral-700">
+            Para demo no necesitamos integrar cada sistema. Necesitamos mostrar
+            que Medusa puede actuar como capa ecommerce entre sistemas que ya
+            existen en industria.
+          </p>
+        </div>
+
+        <div className="grid gap-3 medium:grid-cols-[1fr_180px_1fr]">
+          <div className="grid gap-3">
+            {integrationSystems.slice(0, 2).map((system) => (
+              <IntegrationCard key={system.name} {...system} />
+            ))}
+          </div>
+          <div className="flex items-center justify-center rounded-lg border border-neutral-950 bg-neutral-950 p-5 text-center text-large-semi text-white">
+            Medusa B2B
+          </div>
+          <div className="grid gap-3">
+            {integrationSystems.slice(2).map((system) => (
+              <IntegrationCard key={system.name} {...system} />
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="content-container pb-12">
         <div className="mb-5 flex flex-col gap-2 small:flex-row small:items-end small:justify-between">
           <div>
@@ -445,10 +650,10 @@ export default async function NgsPocPage(props: {
           <div className="rounded-lg border border-neutral-200 bg-white p-5">
             <h2 className="text-xl-semi">Prioridad despues de la demo</h2>
             <ul className="mt-3 grid gap-2 text-base-regular text-neutral-700">
-              <li>- Reorder visible desde historial de pedidos.</li>
-              <li>- Comparativa guiada de dos clientes con precios distintos.</li>
-              <li>- Workflow visual administrable para onboarding y tarifas.</li>
-              <li>- Pantalla conceptual de integraciones ERP/CRM/PIM/WMS.</li>
+              <li>- Ejecutar smoke de accept quote antes de ensenar.</li>
+              <li>- Mantener un presupuesto pendiente de cliente disponible.</li>
+              <li>- Entrar como comprador y aprobador antes de grabar.</li>
+              <li>- Usar B2B Control como cierre comercial de la demo.</li>
             </ul>
           </div>
         </div>
@@ -476,5 +681,22 @@ function ComparisonCard({ title, body }: { title: string; body: string }) {
         {body}
       </p>
     </div>
+  )
+}
+
+function IntegrationCard({
+  name,
+  responsibility,
+}: {
+  name: string
+  responsibility: string
+}) {
+  return (
+    <article className="rounded-lg border border-neutral-200 bg-white p-4">
+      <p className="text-large-semi">{name}</p>
+      <p className="mt-2 text-small-regular leading-6 text-neutral-600">
+        {responsibility}
+      </p>
+    </article>
   )
 }

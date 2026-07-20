@@ -98,7 +98,7 @@ Mostrar:
 Decir:
 No todas las personas pueden comprar lo mismo. Muchas empresas tienen limites, aprobaciones y responsabilidades distintas.
 
-Estado: listo para demo, requiere preparar un carrito que supere umbral.
+Estado: listo para demo guiada. La pagina de aprobaciones explica el flujo comprador > limite > aprobador > checkout desbloqueado. Conviene entrar previamente con comprador y aprobador.
 
 ### 5. Condiciones Comerciales
 
@@ -182,7 +182,7 @@ Cliente nuevo > Solicitud > Aprobacion > Tarifa asignada > Acceso concedido.
 Decir:
 Lo importante no es unicamente digitalizar pantallas. Tambien es digitalizar procesos.
 
-Estado: parcial. Existe logica y datos, falta una visualizacion clara.
+Estado: listo para demo guiada. `/es/ngs-poc` incluye timeline visual solicitud > revision > tarifa > acceso.
 
 ### 11. Integraciones
 
@@ -194,7 +194,7 @@ ERP/CRM/PIM/WMS > Ecommerce B2B.
 Decir:
 El ecommerce no sustituye a los sistemas existentes. Se conecta con ellos.
 
-Estado: conceptual. Falta pantalla simple de arquitectura/integraciones.
+Estado: listo para demo conceptual. `/es/ngs-poc` incluye mapa ERP/CRM/PIM/WMS alrededor de Medusa B2B.
 
 ### 12. Extensibilidad
 
@@ -223,8 +223,8 @@ Estado: listo a nivel explicacion tecnica y ejemplos ya construidos.
 
 - Pantalla comparativa de precios por cliente. Estado: implementada en `/es/ngs-poc`.
 - Reorder mas visible. Estado: implementado desde historial de pedidos.
-- Workflow visual de onboarding/tarifas.
-- Pantalla conceptual de integraciones.
+- Validar `accept quote` en dry-run antes de una demo externa.
+- Mantener preparado un carrito/pedido que supere limite para aprobaciones.
 
 ### P2 - Profundidad B2B industrial
 

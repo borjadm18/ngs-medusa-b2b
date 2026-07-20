@@ -13,7 +13,7 @@
     "product:poc:new": "node scripts/create-client-profile.mjs",
     "product:poc:wizard": "node scripts/create-client-profile.mjs --interactive",
     "product:demo:check": "node scripts/validate-client-profiles.mjs --id ngs && node scripts/smoke-demo-readiness.mjs && node scripts/smoke-homepage.mjs && node scripts/smoke-playbook-p0.mjs",
-    "demo:preflight": "pnpm product:demo:check && pnpm smoke:assets && pnpm smoke:brand-profile && pnpm qa:playbook-visual",
+    "demo:preflight": "pnpm product:demo:check && pnpm smoke:quote-acceptance && pnpm smoke:assets && pnpm smoke:brand-profile && pnpm qa:playbook-visual",
     "demo:reset": "pnpm seed:b2b-demo && pnpm approve:companies",
     "product:starter:check": "node scripts/validate-client-profiles.mjs --id starter-empty && node scripts/sync-client-profile.mjs",
     "validate:client-profiles": "node scripts/validate-client-profiles.mjs",
