@@ -1,4 +1,5 @@
 import {
+  estimateCarrierRates,
   estimateFreightCost,
   estimateShipmentMode,
   formatPackagingDetails,
@@ -80,6 +81,9 @@ export const quoteToCsv = (
   const summary = getQuoteExportPackagingSummary(quote, preview)
   const shipmentMode = estimateShipmentMode(summary)
   const freightCost = estimateFreightCost(summary)
+  const recommendedCarrier = estimateCarrierRates(summary).find(
+    (rate) => rate.recommended
+  )
   const header = [
     "Quote ID",
     "Display ID",
@@ -103,6 +107,7 @@ export const quoteToCsv = (
     "Boxes Per Pallet",
     "Pallet Share",
     "Shipment Mode",
+    "Recommended Carrier",
     "Estimated Freight",
   ]
 
@@ -134,6 +139,9 @@ export const quoteToCsv = (
     packaging?.boxesPerPallet ?? "",
     packaging?.palletShare ? packaging.palletShare.toFixed(2) : "",
     shipmentMode,
+    recommendedCarrier
+      ? `${recommendedCarrier.carrier} - ${recommendedCarrier.service}`
+      : "",
     formatMoney(freightCost, currencyCode),
   ])
 
@@ -148,6 +156,12 @@ export const quoteToCsv = (
     ["Billable weight kg", summary.billableWeight.toFixed(1)],
     ["Pallet share", summary.palletShare.toFixed(2)],
     ["Shipment mode", shipmentMode],
+    [
+      "Recommended carrier",
+      recommendedCarrier
+        ? `${recommendedCarrier.carrier} - ${recommendedCarrier.service}`
+        : "",
+    ],
     ["Estimated freight", formatMoney(freightCost, currencyCode)],
   ]
 
@@ -178,6 +192,8 @@ export const quoteToPrintHtml = (
   const summary = getQuoteExportPackagingSummary(quote, preview)
   const shipmentMode = estimateShipmentMode(summary)
   const freightCost = estimateFreightCost(summary)
+  const carrierRates = estimateCarrierRates(summary)
+  const recommendedCarrier = carrierRates.find((rate) => rate.recommended)
   const rows = getExportRows(quote, preview)
   const createdAt = new Intl.DateTimeFormat("es-ES", {
     dateStyle: "medium",
@@ -256,8 +272,37 @@ export const quoteToPrintHtml = (
         <div class="box metric">Peso facturable<strong>${summary.billableWeight.toFixed(1)} kg</strong></div>
         <div class="box metric">Ocupacion pallet<strong>${summary.palletShare.toFixed(2)}</strong></div>
         <div class="box metric">Expedicion<strong>${escapeHtml(shipmentMode)}</strong></div>
+        <div class="box metric">Transportista<strong>${escapeHtml(recommendedCarrier?.carrier || "-")}</strong></div>
         <div class="box metric">Transporte demo<strong>${escapeHtml(formatMoney(freightCost, currencyCode))}</strong></div>
       </section>
+
+      <h2>Transportistas simulados</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Transportista</th>
+            <th>Servicio</th>
+            <th>Transito</th>
+            <th class="number">Peso facturable</th>
+            <th class="number">Coste demo</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${carrierRates
+            .map(
+              (rate) => `
+                <tr>
+                  <td>${escapeHtml(rate.carrier)}${rate.recommended ? " (recomendada)" : ""}</td>
+                  <td>${escapeHtml(rate.service)}</td>
+                  <td>${escapeHtml(rate.transitDays)}</td>
+                  <td class="number">${escapeHtml(rate.billableWeight.toFixed(1))} kg</td>
+                  <td class="number">${escapeHtml(formatMoney(rate.estimatedCost, currencyCode))}</td>
+                </tr>
+              `
+            )
+            .join("")}
+        </tbody>
+      </table>
 
       <h2>Lineas</h2>
       <table>

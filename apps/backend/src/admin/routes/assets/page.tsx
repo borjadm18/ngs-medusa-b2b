@@ -48,6 +48,8 @@ const assetTypeLabels: Record<AssetType | "all", string> = {
   other: "Otros",
 };
 
+type ViewMode = "grid" | "list";
+
 const emptyAsset: AdminAsset = {
   label: "",
   url: "",
@@ -62,6 +64,75 @@ const createEmptyAsset = (profileId: string): AdminAsset => ({
   ...emptyAsset,
   client_profile_id: profileId,
 });
+
+const normalizeAssetKey = (value: string | null | undefined) =>
+  (value || "").trim().toLowerCase();
+
+const getDuplicateKeys = (assets: AdminAsset[]) => {
+  const nameCounts = new Map<string, number>();
+  const urlCounts = new Map<string, number>();
+
+  assets.forEach((asset) => {
+    const nameKey = normalizeAssetKey(asset.label);
+    const urlKey = normalizeAssetKey(asset.url);
+
+    if (nameKey) {
+      nameCounts.set(nameKey, (nameCounts.get(nameKey) || 0) + 1);
+    }
+
+    if (urlKey) {
+      urlCounts.set(urlKey, (urlCounts.get(urlKey) || 0) + 1);
+    }
+  });
+
+  return {
+    names: nameCounts,
+    urls: urlCounts,
+  };
+};
+
+const isDuplicateAsset = (
+  asset: AdminAsset,
+  duplicates: ReturnType<typeof getDuplicateKeys>
+) => {
+  const nameKey = normalizeAssetKey(asset.label);
+  const urlKey = normalizeAssetKey(asset.url);
+
+  return (
+    (!!nameKey && (duplicates.names.get(nameKey) || 0) > 1) ||
+    (!!urlKey && (duplicates.urls.get(urlKey) || 0) > 1)
+  );
+};
+
+const getAssetUsageLabel = (asset: AdminAsset) => {
+  if (asset.type === "logo") {
+    return "Header / footer";
+  }
+
+  if (asset.type === "hero") {
+    return "Hero home";
+  }
+
+  if (asset.type === "product") {
+    return "Producto / PDP";
+  }
+
+  if (asset.type === "category") {
+    return "Categoria";
+  }
+
+  if (asset.type === "document") {
+    return "Descarga";
+  }
+
+  const tags = normalizeAssetKey(asset.tags);
+
+  if (tags.includes("home") || tags.includes("homepage")) {
+    return "Homepage";
+  }
+
+  return "Sin uso asignado";
+};
 
 const fileToBase64 = (file: File) =>
   new Promise<string>((resolve, reject) => {
@@ -80,6 +151,7 @@ const AssetsPage = () => {
   const [profileId, setProfileId] = useState("ngs");
   const [type, setType] = useState<AssetType | "all">("all");
   const [search, setSearch] = useState("");
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [form, setForm] = useState<AdminAsset>(emptyAsset);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const activeProfileId = brandProfileData?.brand_profile?.id || "ngs";
@@ -143,6 +215,8 @@ const AssetsPage = () => {
       return acc;
     }, {});
   }, [allAssets]);
+
+  const duplicates = useMemo(() => getDuplicateKeys(allAssets), [allAssets]);
 
   const upsertAsset = useUpsertAsset({
     onSuccess: () => {
@@ -281,21 +355,39 @@ const AssetsPage = () => {
                 />
               </div>
 
-              <div className="mt-4 flex flex-wrap gap-2">
-                {assetTypes.map((assetType) => (
-                  <button
-                    key={assetType}
-                    type="button"
-                    onClick={() => setType(assetType)}
-                    className={`rounded border px-3 py-1.5 text-xs font-medium transition ${
-                      type === assetType
-                        ? "border-ui-border-interactive bg-ui-bg-interactive text-ui-fg-on-color"
-                        : "border-ui-border-base bg-ui-bg-base text-ui-fg-subtle hover:bg-ui-bg-base-hover"
-                    }`}
-                  >
-                    {assetTypeLabels[assetType]} ({typeCounts[assetType] || 0})
-                  </button>
-                ))}
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap gap-2">
+                  {assetTypes.map((assetType) => (
+                    <button
+                      key={assetType}
+                      type="button"
+                      onClick={() => setType(assetType)}
+                      className={`rounded border px-3 py-1.5 text-xs font-medium transition ${
+                        type === assetType
+                          ? "border-ui-border-interactive bg-ui-bg-interactive text-ui-fg-on-color"
+                          : "border-ui-border-base bg-ui-bg-base text-ui-fg-subtle hover:bg-ui-bg-base-hover"
+                      }`}
+                    >
+                      {assetTypeLabels[assetType]} ({typeCounts[assetType] || 0})
+                    </button>
+                  ))}
+                </div>
+                <div className="flex rounded border bg-ui-bg-base p-1">
+                  {(["grid", "list"] as ViewMode[]).map((mode) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => setViewMode(mode)}
+                      className={`rounded px-3 py-1 text-xs font-medium ${
+                        viewMode === mode
+                          ? "bg-ui-bg-interactive text-ui-fg-on-color"
+                          : "text-ui-fg-subtle hover:bg-ui-bg-base-hover"
+                      }`}
+                    >
+                      {mode === "grid" ? "Grid" : "Lista"}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -315,12 +407,15 @@ const AssetsPage = () => {
                 </Text>
               </div>
             ) : filteredAssets.length ? (
+              viewMode === "grid" ? (
               <div className="grid grid-cols-[repeat(auto-fill,minmax(136px,1fr))] gap-3">
                 {filteredAssets.map((asset) => {
                   const isDefault = asset.id?.startsWith("default-");
                   const isSelected =
                     (!!form.id && form.id === asset.id) ||
                     (!form.id && form.url === asset.url);
+                  const isDuplicate = isDuplicateAsset(asset, duplicates);
+                  const usageLabel = getAssetUsageLabel(asset);
 
                   return (
                     <article
@@ -365,6 +460,12 @@ const AssetsPage = () => {
                               {asset.label}
                             </Text>
                             <Badge size="xsmall">{asset.type}</Badge>
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            <Badge size="xsmall">{usageLabel}</Badge>
+                            {isDuplicate ? (
+                              <Badge size="xsmall">Duplicado</Badge>
+                            ) : null}
                           </div>
                           <Text
                             size="xsmall"
@@ -414,6 +515,75 @@ const AssetsPage = () => {
                   );
                 })}
               </div>
+              ) : (
+                <div className="overflow-hidden rounded-lg border bg-ui-bg-base">
+                  {filteredAssets.map((asset) => {
+                    const isDefault = asset.id?.startsWith("default-");
+                    const isSelected =
+                      (!!form.id && form.id === asset.id) ||
+                      (!form.id && form.url === asset.url);
+                    const isDuplicate = isDuplicateAsset(asset, duplicates);
+                    const usageLabel = getAssetUsageLabel(asset);
+
+                    return (
+                      <article
+                        key={`${asset.id || asset.url}-${asset.label}-row`}
+                        onClick={() => handleEdit(asset)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            handleEdit(asset);
+                          }
+                        }}
+                        role="button"
+                        tabIndex={0}
+                        className={`grid w-full grid-cols-[56px_minmax(0,1fr)_120px_120px_120px] items-center gap-3 border-b px-3 py-2 text-left transition last:border-b-0 hover:bg-ui-bg-base-hover ${
+                          isSelected ? "bg-ui-bg-component" : ""
+                        }`}
+                      >
+                        <div className="flex h-12 w-12 items-center justify-center rounded border bg-ui-bg-component">
+                          {asset.url ? (
+                            <img
+                              src={resolveAdminAssetPreviewUrl(asset.url)}
+                              alt={asset.alt || asset.label}
+                              className="max-h-full max-w-full object-contain p-1"
+                            />
+                          ) : (
+                            <Photo className="text-ui-fg-muted" />
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <Text size="small" weight="plus" className="truncate">
+                            {asset.label}
+                          </Text>
+                          <Text size="xsmall" className="truncate text-ui-fg-subtle">
+                            {asset.url}
+                          </Text>
+                        </div>
+                        <Badge size="xsmall">{asset.type}</Badge>
+                        <Text size="xsmall" className="truncate text-ui-fg-subtle">
+                          {usageLabel}
+                        </Text>
+                        <div className="flex items-center justify-end gap-1">
+                          {isDuplicate ? <Badge size="xsmall">Duplicado</Badge> : null}
+                          <IconButton
+                            size="small"
+                            variant="transparent"
+                            type="button"
+                            disabled={isDefault || !asset.id}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              asset.id && deleteAsset.mutate(asset.id);
+                            }}
+                          >
+                            <Trash />
+                          </IconButton>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              )
             ) : (
               <div className="rounded-lg border bg-ui-bg-base p-8 text-center">
                 <Photo className="mx-auto text-ui-fg-muted" />

@@ -108,6 +108,64 @@ const insertAfter = <T,>(items: T[], index: number, item: T) => {
   return next;
 };
 
+const isValidLink = (value: string | undefined) => {
+  if (!value) {
+    return true;
+  }
+
+  return value.startsWith("/") || value.startsWith("https://") || value.startsWith("http://");
+};
+
+const getHomepageValidationWarnings = (content: HomepageContent) => {
+  const warnings: string[] = [];
+
+  if (!content.heroImage) {
+    warnings.push("Hero sin imagen principal");
+  }
+
+  if (content.heroImage && !content.heroImageAlt) {
+    warnings.push("Hero sin alt text");
+  }
+
+  if (content.heroTitle.length > 82) {
+    warnings.push("Titulo hero largo: puede romper en movil");
+  }
+
+  if (content.heroBody.length > 180) {
+    warnings.push("Texto hero largo: revisa corte visual");
+  }
+
+  if (!isValidLink(content.primaryCtaHref)) {
+    warnings.push("CTA principal con enlace no valido");
+  }
+
+  if (!isValidLink(content.secondaryCtaHref)) {
+    warnings.push("CTA secundario con enlace no valido");
+  }
+
+  if (!isValidLink(content.detailCtaHref)) {
+    warnings.push("CTA del bloque visual con enlace no valido");
+  }
+
+  const visibleImageBlocks = [
+    ...content.trustBlocks,
+    ...content.capabilityBlocks,
+    ...content.detailBlocks,
+  ].filter((item) => !item.isHidden);
+
+  visibleImageBlocks.forEach((item) => {
+    if (!item.image) {
+      warnings.push(`Bloque visible sin imagen: ${item.title || "sin titulo"}`);
+    }
+
+    if (item.title.length > 54) {
+      warnings.push(`Titulo largo en bloque: ${item.title}`);
+    }
+  });
+
+  return warnings;
+};
+
 const Homepage = () => {
   const { data, isPending } = useHomepageContent();
   const { data: brandProfileData } = useBrandProfileContent();
@@ -116,6 +174,9 @@ const Homepage = () => {
     toFormState(DEFAULT_HOMEPAGE_CONTENT)
   );
   const activeProfileId = brandProfileData?.brand_profile?.id || "ngs";
+  const storefrontUrl =
+    import.meta.env.VITE_STOREFRONT_URL ||
+    "https://storefront-virid-three-41.vercel.app/es";
 
   const updateHomepage = useUpdateHomepageContent({
     onSuccess: () => toast.success("Homepage actualizada"),
@@ -132,6 +193,10 @@ const Homepage = () => {
   const activeLabel = useMemo(
     () => sectionNav.find((section) => section.key === activeSection)?.label,
     [activeSection]
+  );
+  const validationWarnings = useMemo(
+    () => getHomepageValidationWarnings(form),
+    [form]
   );
 
   const updateField = (field: keyof HomepageContent, value: string) => {
@@ -293,6 +358,10 @@ const Homepage = () => {
     updateHomepage.mutate(form);
   };
 
+  const handleOpenStorefront = () => {
+    window.open(storefrontUrl, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <>
       <Container className="flex flex-col overflow-hidden p-0">
@@ -306,7 +375,15 @@ const Homepage = () => {
             </Text>
           </div>
           <div className="flex items-center gap-2">
+            {validationWarnings.length ? (
+              <Badge>{validationWarnings.length} avisos</Badge>
+            ) : (
+              <Badge>OK visual</Badge>
+            )}
             <Badge>{activeLabel}</Badge>
+            <Button size="small" variant="secondary" onClick={handleOpenStorefront}>
+              Abrir home
+            </Button>
             <Button
               size="small"
               onClick={handleSubmit}
@@ -703,7 +780,7 @@ const Homepage = () => {
 
           <aside className="border-t bg-ui-bg-subtle p-4 small:border-l small:border-t-0">
             <div className="sticky top-4 grid gap-4">
-              <PreviewCard form={form} />
+              <PreviewCard form={form} warnings={validationWarnings} />
             </div>
           </aside>
         </div>
@@ -1197,7 +1274,13 @@ const VisibilityToggle = ({
   </div>
 );
 
-const PreviewCard = ({ form }: { form: HomepageContent }) => (
+const PreviewCard = ({
+  form,
+  warnings,
+}: {
+  form: HomepageContent;
+  warnings: string[];
+}) => (
   <div className="overflow-hidden rounded-lg border bg-ui-bg-base shadow-elevation-card-rest">
     <div className="border-b p-4">
       <Text size="small" weight="plus">
@@ -1255,6 +1338,30 @@ const PreviewCard = ({ form }: { form: HomepageContent }) => (
           `${form.operations.length} puntos B2B`,
         ]}
       />
+
+      <div className="rounded-md border bg-ui-bg-subtle p-3">
+        <div className="flex items-center justify-between gap-2">
+          <Text size="small" weight="plus">
+            Validacion rapida
+          </Text>
+          <Badge size="xsmall">{warnings.length ? `${warnings.length} avisos` : "OK"}</Badge>
+        </div>
+        {warnings.length ? (
+          <ul className="mt-2 grid gap-1">
+            {warnings.slice(0, 6).map((warning) => (
+              <li key={warning}>
+                <Text size="xsmall" className="text-ui-fg-subtle">
+                  {warning}
+                </Text>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <Text size="xsmall" className="mt-2 text-ui-fg-subtle">
+            Imagenes, CTAs y textos principales listos para revisar en web.
+          </Text>
+        )}
+      </div>
     </div>
   </div>
 );

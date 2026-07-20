@@ -60,6 +60,7 @@ export const saveUploadedAssetFileStep = createStep(
     const digest = createHash("sha1").update(buffer).digest("hex").slice(0, 10);
     const storedFilename = `${name}-${digest}-${randomUUID().slice(0, 8)}.${extension}`;
     const targetPath = path.join(UPLOAD_DIR, storedFilename);
+    const tags = [input.tags, `sha1:${digest}`].filter(Boolean).join(", ");
 
     await mkdir(UPLOAD_DIR, { recursive: true });
     await writeFile(targetPath, buffer);
@@ -73,7 +74,7 @@ export const saveUploadedAssetFileStep = createStep(
         alt: input.alt || null,
         type: input.type,
         client_profile_id: input.client_profile_id,
-        tags: input.tags || null,
+        tags: tags || null,
         sort_order: input.sort_order || 0,
         url: `${baseUrl}/asset-files/${storedFilename}`,
       },

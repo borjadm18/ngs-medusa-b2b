@@ -27,6 +27,17 @@ export type QuoteLinePackaging = {
   palletShare?: number;
 };
 
+export type CarrierRateEstimate = {
+  carrier: string;
+  service: string;
+  zone: string;
+  transitDays: string;
+  billableWeight: number;
+  estimatedCost: number;
+  notes: string;
+  recommended?: boolean;
+};
+
 const toNumber = (value: unknown) => {
   const numberValue = Number(value);
 
@@ -200,15 +211,97 @@ export const estimateFreightCost = (summary: {
   palletShare: number;
   billableWeight: number;
 }) => {
-  if (summary.palletShare >= 0.75 || summary.billableWeight >= 120) {
-    return Math.round(85 + Math.ceil(summary.palletShare) * 45);
+  return getRecommendedCarrierRate(summary)?.estimatedCost ?? 0;
+};
+
+export const estimateCarrierRates = (
+  summary: {
+    boxes: number;
+    palletShare: number;
+    estimatedWeight?: number;
+    billableWeight: number;
+  },
+  zone = "Peninsula"
+): CarrierRateEstimate[] => {
+  const billableWeight = Math.max(summary.billableWeight || 0, 1);
+  const boxes = Math.max(summary.boxes || 0, 1);
+  const palletCount = Math.max(Math.ceil(summary.palletShare || 0), 0);
+  const isPallet = summary.palletShare >= 0.75 || billableWeight >= 120;
+  const isMultiParcel = summary.boxes >= 4 || billableWeight >= 35;
+  const lowerZone = zone.toLowerCase();
+  const zoneMultiplier =
+    lowerZone.includes("canarias") || lowerZone.includes("internacional")
+      ? 1.85
+      : lowerZone.includes("baleares")
+        ? 1.35
+        : 1;
+
+  const rates: CarrierRateEstimate[] = [
+    {
+      carrier: "SEUR Industrial",
+      service: isPallet
+        ? "Pallet 24/48h"
+        : isMultiParcel
+          ? "Multi-bulto"
+          : "Paqueteria 24h",
+      zone,
+      transitDays: zoneMultiplier > 1.3 ? "48-96h" : "24-48h",
+      billableWeight,
+      estimatedCost: Math.round(
+        (9.5 + boxes * 3.2 + billableWeight * 0.28) * zoneMultiplier
+      ),
+      notes: "Mejor opcion para bulto pequeno y entregas rapidas.",
+      recommended: !isPallet && !isMultiParcel,
+    },
+    {
+      carrier: "DHL Freight",
+      service: isPallet ? "EuroConnect pallet" : "Parcel Connect B2B",
+      zone,
+      transitDays: zoneMultiplier > 1.3 ? "72-120h" : "48-72h",
+      billableWeight,
+      estimatedCost: Math.round(
+        (18 + boxes * 4.4 + billableWeight * 0.24) * zoneMultiplier
+      ),
+      notes: "Equilibrio para multi-bulto y entregas regionales.",
+      recommended: isMultiParcel && !isPallet,
+    },
+    {
+      carrier: "DB Schenker",
+      service: "Pallet System",
+      zone,
+      transitDays: zoneMultiplier > 1.3 ? "72-120h" : "48-96h",
+      billableWeight,
+      estimatedCost: Math.round(
+        (62 + Math.max(palletCount, 1) * 48 + billableWeight * 0.18) *
+          zoneMultiplier
+      ),
+      notes: "Recomendado para pallet, volumen alto o carga parcial.",
+      recommended: isPallet,
+    },
+  ];
+
+  if (!rates.some((rate) => rate.recommended)) {
+    const cheapest = rates.reduce((best, rate) =>
+      rate.estimatedCost < best.estimatedCost ? rate : best
+    );
+    cheapest.recommended = true;
   }
 
-  if (summary.boxes >= 4 || summary.billableWeight >= 35) {
-    return Math.round(18 + summary.boxes * 4 + summary.billableWeight * 0.22);
-  }
+  return rates.sort((left, right) => left.estimatedCost - right.estimatedCost);
+};
 
-  return Math.round(7.5 + Math.max(summary.boxes, 1) * 2.5);
+export const getRecommendedCarrierRate = (
+  summary: {
+    boxes: number;
+    palletShare: number;
+    estimatedWeight?: number;
+    billableWeight: number;
+  },
+  zone = "Peninsula"
+) => {
+  const rates = estimateCarrierRates(summary, zone);
+
+  return rates.find((rate) => rate.recommended) || rates[0];
 };
 
 const escapeCsv = (value: unknown) => {

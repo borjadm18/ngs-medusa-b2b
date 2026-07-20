@@ -27,6 +27,7 @@ import {
 } from "../components/quote-details";
 import { QuoteMessages } from "../components/quote-messages";
 import {
+  estimateCarrierRates,
   estimateFreightCost,
   estimateShipmentMode,
   getQuotePackagingSummary,
@@ -142,6 +143,7 @@ const QuoteDetails = () => {
   );
   const shipmentMode = estimateShipmentMode(packagingSummary);
   const estimatedFreight = estimateFreightCost(packagingSummary);
+  const carrierRates = estimateCarrierRates(packagingSummary);
 
   return (
     <div className="flex flex-col gap-y-3">
@@ -250,6 +252,33 @@ const QuoteDetails = () => {
                   quote.draft_order?.currency_code || "EUR"
                 )}
               />
+              <div className="grid gap-2 rounded-md border bg-ui-bg-subtle p-3">
+                <Text size="xsmall" weight="plus">
+                  Transportistas simulados
+                </Text>
+                {carrierRates.slice(0, 3).map((rate) => (
+                  <div
+                    key={rate.carrier}
+                    className="flex items-start justify-between gap-3"
+                  >
+                    <div>
+                      <Text size="small" weight="plus">
+                        {rate.carrier}
+                      </Text>
+                      <Text size="xsmall" className="text-ui-fg-subtle">
+                        {rate.service} - {rate.transitDays}
+                        {rate.recommended ? " - recomendada" : ""}
+                      </Text>
+                    </div>
+                    <Text size="small" weight="plus">
+                      {formatAmount(
+                        rate.estimatedCost,
+                        quote.draft_order?.currency_code || "EUR"
+                      )}
+                    </Text>
+                  </div>
+                ))}
+              </div>
               <Text size="xsmall" className="text-ui-fg-muted">
                 Estimacion basada en cajas, dimensiones, peso real y peso
                 volumetrico. Sustituible por tarifas reales de transportista.

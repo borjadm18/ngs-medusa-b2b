@@ -1,6 +1,7 @@
 import { B2BCart } from "@/types/global"
 import { HttpTypes } from "@medusajs/types"
 import {
+  estimateCarrierRates,
   formatPackagingDetails,
   formatPackagingLine,
   getCartLinePackaging,
@@ -29,6 +30,8 @@ const getLineTotal = (item: HttpTypes.StoreCartLineItem) =>
 export function cartToPrintHtml(cart: B2BCart) {
   const currencyCode = cart.currency_code ?? "eur"
   const summary = getCartPackagingSummary(cart.items)
+  const carrierRates = estimateCarrierRates(summary)
+  const recommendedCarrier = carrierRates.find((rate) => rate.recommended)
   const createdAt = new Intl.DateTimeFormat("es-ES", {
     dateStyle: "medium",
     timeStyle: "short",
@@ -173,7 +176,35 @@ export function cartToPrintHtml(cart: B2BCart) {
         <div class="box metric">Unidades<strong>${summary.totalUnits} uds</strong></div>
         <div class="box metric">Peso estimado<strong>${summary.estimatedWeight.toFixed(1)} kg</strong></div>
         <div class="box metric">Ocupacion pallet<strong>${summary.palletShare.toFixed(2)}</strong></div>
+        <div class="box metric">Peso facturable<strong>${summary.billableWeight.toFixed(1)} kg</strong></div>
+        <div class="box metric">Transportista<strong>${escapeHtml(recommendedCarrier?.carrier || "-")}</strong></div>
       </section>
+
+      <h2>Transportistas simulados</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Transportista</th>
+            <th>Servicio</th>
+            <th>Transito</th>
+            <th class="number">Coste demo</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${carrierRates
+            .map(
+              (rate) => `
+                <tr>
+                  <td>${escapeHtml(rate.carrier)}${rate.recommended ? " (recomendada)" : ""}</td>
+                  <td>${escapeHtml(rate.service)}</td>
+                  <td>${escapeHtml(rate.transitDays)}</td>
+                  <td class="number">${escapeHtml(formatMoney(rate.estimatedCost, currencyCode))}</td>
+                </tr>
+              `
+            )
+            .join("")}
+        </tbody>
+      </table>
 
       <h2>Lineas del presupuesto</h2>
       <table>

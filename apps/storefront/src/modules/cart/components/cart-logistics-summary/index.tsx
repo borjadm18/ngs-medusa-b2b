@@ -1,7 +1,10 @@
 "use client"
 
 import { useCart } from "@/lib/context/cart-context"
-import { getCartPackagingSummary } from "@/lib/util/b2b-packaging"
+import {
+  estimateCarrierRates,
+  getCartPackagingSummary,
+} from "@/lib/util/b2b-packaging"
 import { Text } from "@medusajs/ui"
 
 const CartLogisticsSummary = () => {
@@ -12,6 +15,7 @@ const CartLogisticsSummary = () => {
   }
 
   const summary = getCartPackagingSummary(cart.items)
+  const carrierRates = estimateCarrierRates(summary)
   const hasPackaging =
     summary.boxes > 0 || summary.estimatedWeight > 0 || summary.palletShare > 0
 
@@ -54,6 +58,31 @@ const CartLogisticsSummary = () => {
             <span className="font-medium text-neutral-950">{row.value}</span>
           </div>
         ))}
+      </div>
+      <div className="mt-3 border-t border-neutral-200 pt-3">
+        <Text className="mb-2 text-[11px] font-semibold uppercase tracking-normal text-neutral-950">
+          Transportistas demo
+        </Text>
+        <div className="grid gap-2">
+          {carrierRates.slice(0, 3).map((rate) => (
+            <div
+              key={rate.carrier}
+              className="flex items-start justify-between gap-3 text-xs text-neutral-700"
+            >
+              <div>
+                <span className="font-medium text-neutral-950">
+                  {rate.carrier}
+                </span>
+                <span className="block text-[11px] text-neutral-500">
+                  {rate.service} - {rate.transitDays}
+                </span>
+              </div>
+              <span className="whitespace-nowrap font-semibold text-neutral-950">
+                ~{rate.estimatedCost} EUR
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   )

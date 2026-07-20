@@ -3,6 +3,7 @@
 import { acceptQuote, rejectQuote } from "@/lib/data/quotes"
 import { getQuoteExportPackagingSummary } from "@/lib/util/convert-quote-to-export"
 import {
+  estimateCarrierRates,
   estimateFreightCost,
   estimateShipmentMode,
 } from "@/lib/util/b2b-packaging"
@@ -43,6 +44,7 @@ const QuoteDetails: React.FC<QuoteDetailsProps> = ({
   )
   const shipmentMode = estimateShipmentMode(logisticsSummary)
   const estimatedFreight = estimateFreightCost(logisticsSummary)
+  const carrierRates = estimateCarrierRates(logisticsSummary)
   const originalItemsMap = useMemo(() => {
     return new Map<string, AdminOrderLineItem>(
       order?.items?.map((item: AdminOrderLineItem) => [item.id, item]) || []
@@ -237,6 +239,28 @@ const QuoteDetails: React.FC<QuoteDetailsProps> = ({
                 label="Coste transporte demo"
                 value={`~${formatAmount(estimatedFreight, currencyCode)}`}
               />
+            </div>
+            <div className="mt-4 grid gap-2 border-t pt-3">
+              <Text className="text-xs font-semibold uppercase text-ui-fg-subtle">
+                Transportistas simulados
+              </Text>
+              {carrierRates.slice(0, 3).map((rate) => (
+                <div
+                  key={rate.carrier}
+                  className="rounded-md border bg-ui-bg-subtle p-2 text-sm"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <Text weight="plus">{rate.carrier}</Text>
+                    <Text weight="plus">
+                      ~{formatAmount(rate.estimatedCost, currencyCode)}
+                    </Text>
+                  </div>
+                  <Text className="text-xs text-ui-fg-subtle">
+                    {rate.service} - {rate.transitDays}
+                    {rate.recommended ? " - recomendada" : ""}
+                  </Text>
+                </div>
+              ))}
             </div>
             <Text className="mt-3 text-xs text-ui-fg-muted">
               Estimacion operativa calculada desde packaging, volumen y peso
