@@ -37,6 +37,9 @@ Empresas demo:
 
 ## Flujo recomendado
 
+Este guion esta pensado para navegar directamente por la tienda, sin usar
+`/es/ngs-poc`.
+
 1. Entrar al catalogo sin login.
    - Mostrar que el catalogo existe, pero los precios/compras requieren acceso B2B.
 
@@ -76,6 +79,49 @@ Empresas demo:
      - ticket medio
      - packaging
      - empresas con credito
+
+## Ruta De Demo Directa
+
+1. Abrir `https://storefront-virid-three-41.vercel.app/es`.
+2. Ir a `Productos` > `Ver catalogo completo`.
+3. Abrir una PDP y mostrar:
+   - precio oculto si no hay login
+   - variantes
+   - compra por unidad/caja
+   - informacion compacta de packaging
+4. Iniciar sesion con `compras+buyer@iberia-pro-installers.demo`.
+5. Repetir PDP para mostrar precio privado y add-to-cart.
+6. Entrar al carrito:
+   - lineas con cajas/unidades
+   - peso/pallet
+   - transportista/tarifa estimada demo
+   - export de presupuesto si aplica
+7. Ir a `Cuenta` > `Pedido rapido`:
+   - cargar ejemplo o pegar CSV
+   - resolver SKUs
+   - validar minimos/multiplos
+8. Ir a `Cuenta` > `Presupuestos`:
+   - abrir quote pendiente
+   - aceptar quote si se quiere demostrar conversion
+9. Ir a `Cuenta` > `Empresa`:
+   - datos fiscales
+   - condiciones de pago
+   - usuarios/roles
+   - estado de aprobacion
+10. Abrir backoffice:
+   - `B2B Control`
+   - `Companies`
+   - `Approvals`
+   - `Catalog Rules`
+   - `Assets`
+   - `Homepage`
+
+## Frases De Defensa
+
+- Medusa nos da el core ecommerce y la arquitectura extensible.
+- La capa Novicell convierte ese core en B2B industrial: empresa, packaging, quotes, aprobaciones, tarifas privadas y operativa comercial.
+- Shopify acelera mucho cuando el proceso encaja en SaaS. Medusa gana cuando el cliente necesita procesos propios, integraciones y control de modelo.
+- El proyecto ya demuestra venta, presupuesto, aprobacion, empresa y packaging; lo que falta para producto completo es pulir CMS, storage, logistica real y automatizacion de setup.
 
 ## Validaciones antes de demo
 

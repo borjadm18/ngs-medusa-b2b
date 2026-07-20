@@ -72,6 +72,7 @@ P0:
 - Validar login, cuenta, company, catalogo, PDP, carrito, quote accept y checkout demo.
 - Confirmar empresas/usuarios demo aprobados.
 - Confirmar que precios privados no aparecen sin login.
+- Usar `docs/DEMO_B2B_OPERATIVA.md` como guion directo si no se quiere navegar por `/es/ngs-poc`.
 
 P1:
 - Pulir UX del editor de home/assets/logo/menu.
