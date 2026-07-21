@@ -31,12 +31,8 @@ export default async function Approvals({
             de la empresa demo.
           </Text>
           <div className="mt-4 rounded border border-neutral-200 bg-neutral-50 p-4 text-small-regular text-neutral-700">
-            Usuario demo aprobador:{" "}
-            <span className="font-semibold">
-              compras+approver@iberia-pro-installers.demo
-            </span>
-            <br />
-            Password: <span className="font-semibold">Demo123!</span>
+            Usa una cuenta con rol aprobador o administrador de empresa para
+            revisar, aprobar o rechazar solicitudes pendientes.
           </div>
         </div>
       </div>
