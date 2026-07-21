@@ -766,11 +766,11 @@ const CatalogRulesPage = () => {
         <div className="flex items-center justify-between px-6 py-4 border-b">
           <div>
             <Heading className="font-sans font-medium h1-core">
-              Catalog rules
+              Reglas de catalogo
             </Heading>
             <Text size="small" className="text-ui-fg-subtle">
-              Customer, region, channel and zone rules for B2B pricing and
-              assortment.
+              Reglas por cliente, region, canal y zona para precios B2B y
+              surtidos.
             </Text>
           </div>
           <div className="flex items-center gap-x-2">
@@ -788,7 +788,7 @@ const CatalogRulesPage = () => {
               onClick={handleExportCsv}
             >
               <ArrowDownTray />
-              Export CSV
+              Exportar CSV
             </Button>
             <Button
               size="small"
@@ -796,11 +796,11 @@ const CatalogRulesPage = () => {
               onClick={() => importInputRef.current?.click()}
             >
               <ArrowUpTray />
-              Import CSV
+              Importar CSV
             </Button>
             <Button size="small" onClick={handleCreate}>
               <Plus />
-              New rule
+              Nueva regla
             </Button>
           </div>
         </div>
@@ -808,7 +808,7 @@ const CatalogRulesPage = () => {
         <div className="grid gap-4 p-6">
           <div className="grid gap-3 rounded-lg border p-4 medium:grid-cols-[repeat(5,minmax(0,1fr))]">
             <SelectFilter
-              label="Status"
+              label="Estado"
               value={filters.status || "all"}
               options={statusOptions}
               onChange={(value) =>
@@ -819,7 +819,7 @@ const CatalogRulesPage = () => {
               }
             />
             <SelectFilter
-              label="Rule type"
+              label="Tipo de regla"
               value={filters.rule_type || "all"}
               options={ruleTypeOptions}
               onChange={(value) =>
@@ -837,7 +837,7 @@ const CatalogRulesPage = () => {
               }
             />
             <TextField
-              label="Sales channel"
+              label="Canal"
               value={filters.sales_channel_id || ""}
               onChange={(value) =>
                 setFilters((current) => ({
@@ -847,7 +847,7 @@ const CatalogRulesPage = () => {
               }
             />
             <TextField
-              label="Zone"
+              label="Zona"
               value={filters.zone_code || ""}
               onChange={(value) =>
                 setFilters((current) => ({ ...current, zone_code: value }))
@@ -911,7 +911,7 @@ const CatalogRulesPage = () => {
                   </Text>
                   {isLoadingSimulatorOptions ? (
                     <Text size="small" className="text-ui-fg-subtle">
-                      Loading product options...
+                      Cargando opciones de producto...
                     </Text>
                   ) : simulatorOptions?.products.length ? (
                     <div className="grid gap-2">
@@ -947,14 +947,15 @@ const CatalogRulesPage = () => {
                     </div>
                   ) : (
                     <Text size="small" className="text-ui-fg-subtle">
-                      No products found. Use the manual ID fields below.
+                      No se han encontrado productos. Usa los campos manuales
+                      de ID.
                     </Text>
                   )}
                 </div>
 
                 <div className="grid gap-3">
                   <SimulatorOptionSection
-                    title="Company"
+                    title="Empresa"
                     options={simulatorOptions?.companies || []}
                     selectedId={simulationForm.company_id}
                     onSelect={(option) =>
@@ -962,7 +963,7 @@ const CatalogRulesPage = () => {
                     }
                   />
                   <SimulatorOptionSection
-                    title="Customer group"
+                    title="Grupo de clientes"
                     options={simulatorOptions?.customer_groups || []}
                     selectedId={simulationForm.customer_group_id}
                     onSelect={(option) =>
@@ -978,7 +979,7 @@ const CatalogRulesPage = () => {
                     }
                   />
                   <SimulatorOptionSection
-                    title="Sales channel"
+                    title="Canal"
                     options={simulatorOptions?.sales_channels || []}
                     selectedId={simulationForm.sales_channel_id}
                     onSelect={(option) =>
@@ -991,12 +992,12 @@ const CatalogRulesPage = () => {
 
             <div className="grid gap-3 medium:grid-cols-5">
               <TextField
-                label="Product ID"
+                label="ID de producto"
                 value={simulationForm.product_id}
                 onChange={(value) => updateSimulation("product_id", value)}
               />
               <TextField
-                label="Variant ID"
+                label="ID de variante"
                 value={simulationForm.variant_id}
                 onChange={(value) => updateSimulation("variant_id", value)}
               />
@@ -1006,12 +1007,12 @@ const CatalogRulesPage = () => {
                 onChange={(value) => updateSimulation("category_id", value)}
               />
               <TextField
-                label="Company ID"
+                label="ID de empresa"
                 value={simulationForm.company_id}
                 onChange={(value) => updateSimulation("company_id", value)}
               />
               <TextField
-                label="Customer group"
+                label="Grupo de clientes"
                 value={simulationForm.customer_group_id}
                 onChange={(value) =>
                   updateSimulation("customer_group_id", value)
@@ -1023,24 +1024,24 @@ const CatalogRulesPage = () => {
                 onChange={(value) => updateSimulation("region_id", value)}
               />
               <TextField
-                label="Sales channel"
+                label="Canal"
                 value={simulationForm.sales_channel_id}
                 onChange={(value) =>
                   updateSimulation("sales_channel_id", value)
                 }
               />
               <TextField
-                label="Zone"
+                label="Zona"
                 value={simulationForm.zone_code}
                 onChange={(value) => updateSimulation("zone_code", value)}
               />
               <TextField
-                label="Currency"
+                label="Moneda"
                 value={simulationForm.currency_code}
                 onChange={(value) => updateSimulation("currency_code", value)}
               />
               <TextField
-                label="Collection ID"
+                label="ID de coleccion"
                 value={simulationForm.collection_id}
                 onChange={(value) => updateSimulation("collection_id", value)}
               />
@@ -1050,7 +1051,7 @@ const CatalogRulesPage = () => {
               <div className="grid gap-2 rounded-lg border bg-ui-bg-subtle p-3">
                 <div className="flex items-center justify-between gap-3">
                   <Text size="small" leading="compact" weight="plus">
-                    Applicable rules
+                    Reglas aplicables
                   </Text>
                   <Badge size="small">
                     {simulateCatalogRules.data.applicable_rules.length}
@@ -1217,14 +1218,14 @@ const CatalogRulesPage = () => {
               onChange={(value) => updateForm("name", value)}
             />
             <TextAreaField
-              label="Description"
+              label="Descripcion"
               value={form.description || ""}
               rows={2}
               onChange={(value) => updateForm("description", value)}
             />
             <div className="grid gap-3 small:grid-cols-2">
               <SelectField
-                label="Status"
+                label="Estado"
                 value={form.status}
                 options={statusOptions.filter(
                   (option): option is CatalogRuleStatus => option !== "all"
@@ -1234,14 +1235,14 @@ const CatalogRulesPage = () => {
                 }
               />
               <NumberField
-                label="Priority"
+                label="Prioridad"
                 value={form.priority}
                 onChange={(value) => updateForm("priority", value)}
               />
             </div>
             <div className="grid gap-3 small:grid-cols-2">
               <SelectField
-                label="Rule type"
+                label="Tipo de regla"
                 value={form.rule_type}
                 options={ruleTypeOptions.filter(
                   (option): option is CatalogRuleType => option !== "all"
@@ -1251,7 +1252,7 @@ const CatalogRulesPage = () => {
                 }
               />
               <SelectField
-                label="Effect"
+                label="Efecto"
                 value={form.effect_type}
                 options={effectTypeOptions}
                 onChange={(value) =>
@@ -1261,7 +1262,7 @@ const CatalogRulesPage = () => {
             </div>
             <div className="grid gap-3 small:grid-cols-2">
               <SelectField
-                label="Target type"
+                label="Tipo de objetivo"
                 value={form.target_type}
                 options={targetTypeOptions}
                 onChange={(value) =>
@@ -1269,70 +1270,70 @@ const CatalogRulesPage = () => {
                 }
               />
               <TextField
-                label="Target id"
+                label="ID objetivo"
                 value={form.target_id || ""}
                 onChange={(value) => updateForm("target_id", value)}
               />
             </div>
             <div className="grid gap-3 small:grid-cols-2">
               <NumberField
-                label="Discount %"
+                label="Descuento %"
                 value={Number(form.discount_percentage || 0)}
                 disabled={form.effect_type !== "discount_percentage"}
                 onChange={(value) => updateForm("discount_percentage", value)}
               />
               <NumberField
-                label="Fixed price"
+                label="Precio fijo"
                 value={Number(form.fixed_price || 0)}
                 disabled={form.effect_type !== "fixed_price"}
                 onChange={(value) => updateForm("fixed_price", value)}
               />
             </div>
             <NumberField
-              label="Minimum quantity"
+              label="Cantidad minima"
               value={form.minimum_quantity}
               onChange={(value) => updateForm("minimum_quantity", value)}
             />
             <div className="grid gap-3 small:grid-cols-2">
               <TextField
-                label="Company id"
+                label="ID empresa"
                 value={form.company_id || ""}
                 onChange={(value) => updateForm("company_id", value)}
               />
               <TextField
-                label="Customer group id"
+                label="ID grupo de clientes"
                 value={form.customer_group_id || ""}
                 onChange={(value) => updateForm("customer_group_id", value)}
               />
               <TextField
-                label="Region id"
+                label="ID region"
                 value={form.region_id || ""}
                 onChange={(value) => updateForm("region_id", value)}
               />
               <TextField
-                label="Sales channel id"
+                label="ID canal"
                 value={form.sales_channel_id || ""}
                 onChange={(value) => updateForm("sales_channel_id", value)}
               />
               <TextField
-                label="Zone code"
+                label="Codigo de zona"
                 value={form.zone_code || ""}
                 onChange={(value) => updateForm("zone_code", value)}
               />
               <TextField
-                label="Currency code"
+                label="Codigo de moneda"
                 value={form.currency_code || ""}
                 onChange={(value) => updateForm("currency_code", value)}
               />
             </div>
             <div className="grid gap-3 small:grid-cols-2">
               <TextField
-                label="Starts at"
+                label="Inicio"
                 value={form.starts_at || ""}
                 onChange={(value) => updateForm("starts_at", value)}
               />
               <TextField
-                label="Ends at"
+                label="Fin"
                 value={form.ends_at || ""}
                 onChange={(value) => updateForm("ends_at", value)}
               />
@@ -1519,8 +1520,8 @@ const SimulationContextSummary = ({
   if (!activeEntries.length) {
     return (
       <Text size="small" className="text-ui-fg-subtle">
-        Select a product, company, region or channel to simulate a B2B buying
-        context.
+        Selecciona producto, empresa, region o canal para simular un contexto
+        de compra B2B.
       </Text>
     );
   }
@@ -1600,7 +1601,7 @@ const SimulatorOptionSection = ({
       </div>
     ) : (
       <Text size="small" className="text-ui-fg-subtle">
-        No options found.
+        No hay opciones.
       </Text>
     )}
   </div>

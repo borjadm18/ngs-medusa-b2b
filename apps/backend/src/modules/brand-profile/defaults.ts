@@ -113,7 +113,7 @@ export const DEFAULT_BRAND_PROFILE_CONTENT: BrandProfileContent = {
         ],
       },
       { label: "Empresa", href: "/account/company", enabled: true },
-      { label: "Recursos", href: "/ngs-poc", enabled: true },
+      { label: "Recursos", href: "/store", enabled: true },
       { label: "Soporte", href: "/account", enabled: true },
     ],
   },

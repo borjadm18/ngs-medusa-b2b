@@ -84,7 +84,7 @@ export function QuoteMessages({
   return (
     <Container className="divide-y divide-dashed p-0">
       <div className="flex items-center justify-between px-6 py-4">
-        <Heading level="h2">Messages</Heading>
+        <Heading level="h2">Mensajes</Heading>
       </div>
 
       <div>
@@ -129,9 +129,9 @@ export function QuoteMessages({
                   <Form.Item>
                     <div className="flex items-center gap-3">
                       <div className="flex-1">
-                        <Form.Label>Pick Quote Item</Form.Label>
+                        <Form.Label>Asociar a linea de presupuesto</Form.Label>
                         <Form.Hint>
-                          Select a quote item to write a message around
+                          Opcional: vincula el mensaje a un producto concreto.
                         </Form.Hint>
                       </div>
                       <div className="flex-1">
@@ -142,7 +142,7 @@ export function QuoteMessages({
                             value={field.value ?? undefined}
                           >
                             <Select.Trigger className="bg-ui-bg-base" ref={ref}>
-                              <Select.Value placeholder="Select Item" />
+                              <Select.Value placeholder="Seleccionar linea" />
                             </Select.Trigger>
                             <Select.Content>
                               {preview.items.map((l) => (
@@ -182,7 +182,7 @@ export function QuoteMessages({
               disabled={isCreatingMessage}
               onClick={() => handleCreateMessage}
             >
-              Send
+              Enviar
             </Button>
           </form>
         </Form>

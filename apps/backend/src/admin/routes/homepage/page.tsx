@@ -21,7 +21,7 @@ import {
   Toaster,
   toast,
 } from "@medusajs/ui";
-import { useEffect, useMemo, useState } from "react";
+import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent, ReactNode } from "react";
 import {
   DEFAULT_HOMEPAGE_CONTENT,
@@ -170,6 +170,7 @@ const Homepage = () => {
   const { data, isPending } = useHomepageContent();
   const { data: brandProfileData } = useBrandProfileContent();
   const [activeSection, setActiveSection] = useState<SectionKey>("hero");
+  const validationPanelRef = useRef<HTMLDivElement | null>(null);
   const [form, setForm] = useState<HomepageContent>(
     toFormState(DEFAULT_HOMEPAGE_CONTENT)
   );
@@ -362,6 +363,13 @@ const Homepage = () => {
     window.open(storefrontUrl, "_blank", "noopener,noreferrer");
   };
 
+  const handleShowWarnings = () => {
+    validationPanelRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  };
+
   return (
     <>
       <Container className="flex flex-col overflow-hidden p-0">
@@ -376,7 +384,13 @@ const Homepage = () => {
           </div>
           <div className="flex items-center gap-2">
             {validationWarnings.length ? (
-              <Badge>{validationWarnings.length} avisos</Badge>
+              <button
+                type="button"
+                onClick={handleShowWarnings}
+                className="rounded-md outline-none transition hover:opacity-80 focus-visible:shadow-borders-focus"
+              >
+                <Badge>{validationWarnings.length} avisos</Badge>
+              </button>
             ) : (
               <Badge>OK visual</Badge>
             )}
@@ -780,7 +794,11 @@ const Homepage = () => {
 
           <aside className="border-t bg-ui-bg-subtle p-4 small:border-l small:border-t-0">
             <div className="sticky top-4 grid gap-4">
-              <PreviewCard form={form} warnings={validationWarnings} />
+              <PreviewCard
+                ref={validationPanelRef}
+                form={form}
+                warnings={validationWarnings}
+              />
             </div>
           </aside>
         </div>
@@ -1274,14 +1292,17 @@ const VisibilityToggle = ({
   </div>
 );
 
-const PreviewCard = ({
-  form,
-  warnings,
-}: {
+const PreviewCard = forwardRef<
+  HTMLDivElement,
+  {
   form: HomepageContent;
   warnings: string[];
-}) => (
-  <div className="overflow-hidden rounded-lg border bg-ui-bg-base shadow-elevation-card-rest">
+  }
+>(({ form, warnings }, ref) => (
+  <div
+    ref={ref}
+    className="overflow-hidden rounded-lg border bg-ui-bg-base shadow-elevation-card-rest"
+  >
     <div className="border-b p-4">
       <Text size="small" weight="plus">
         Preview home
@@ -1364,7 +1385,9 @@ const PreviewCard = ({
       </div>
     </div>
   </div>
-);
+));
+
+PreviewCard.displayName = "PreviewCard";
 
 const PreviewList = ({ title, items }: { title: string; items: string[] }) => (
   <div>

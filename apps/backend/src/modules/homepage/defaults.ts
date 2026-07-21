@@ -49,7 +49,7 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
   heroBadgeSecondary: "Portal B2B",
   heroTitle: "Sonido profesional. Negocios que suenan mas alto.",
   heroBody:
-    "Altavoces disenados para impulsar tu marca, tus proyectos y tus espacios.",
+    "Altavoces diseñados para impulsar tu marca, tus proyectos y tus espacios.",
   primaryCtaLabel: "Explorar catalogo",
   primaryCtaHref: "/store",
   secondaryCtaLabel: "Solicitar asesoramiento",
