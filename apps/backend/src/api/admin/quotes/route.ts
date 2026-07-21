@@ -12,6 +12,7 @@ export const GET = async (
   const { data: quotes, metadata } = await query.graph({
     entity: "quote",
     fields,
+    filters: req.filterableFields,
     pagination: {
       ...pagination,
       skip: pagination.skip!,

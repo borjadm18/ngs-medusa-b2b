@@ -3,13 +3,10 @@ import {
   Buildings,
   ChartBar,
   CheckCircleSolid,
-  Clock,
   CurrencyDollar,
   ExclamationCircle,
-  Package,
-  Truck,
 } from "@medusajs/icons";
-import { Badge, Button, Container, Heading, ProgressTabs, Text } from "@medusajs/ui";
+import { Badge, Button, Container, Heading, Text } from "@medusajs/ui";
 import { Link } from "react-router-dom";
 import { useB2BControlSummary } from "../../hooks/api/b2b-control";
 
@@ -101,14 +98,14 @@ const B2BControl = () => {
       label: "Presupuestos pendientes de comercial",
       value: quotePendingMerchant,
       action: "Revisar quotes",
-      href: "/quotes",
+      href: "/quotes?quo_status=pending_merchant",
       status: quotePendingMerchant > 0 ? "attention" : "ok",
     },
     {
       label: "Presupuestos esperando cliente",
       value: quotePendingCustomer,
       action: "Ver seguimiento",
-      href: "/quotes",
+      href: "/quotes?quo_status=pending_customer",
       status: quotePendingCustomer > 0 ? "neutral" : "ok",
     },
     {
@@ -119,10 +116,10 @@ const B2BControl = () => {
       status: packagingCoverage < 90 ? "attention" : "ok",
     },
     {
-      label: "Quotes fuera de SLA",
+      label: "Presupuestos fuera de SLA",
       value: staleQuotes,
       action: "Priorizar seguimiento",
-      href: "/quotes",
+      href: "/quotes?quo_status=pending_merchant,pending_customer",
       status: staleQuotes > 0 ? "attention" : "ok",
     },
     {
@@ -150,12 +147,12 @@ const B2BControl = () => {
               </Heading>
               <Text size="small" leading="compact" className="mt-2 max-w-2xl text-neutral-300">
                 Vista ejecutiva para controlar empresas, presupuestos, reglas,
-                packaging y preparacion de demo industrial.
+                packaging y preparación de demo industrial.
               </Text>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button size="small" variant="secondary" asChild>
-                <Link to="/quotes">Quotes</Link>
+                <Link to="/quotes">Presupuestos</Link>
               </Button>
               <Button size="small" variant="secondary" asChild>
                 <Link to="/catalog-rules">Reglas</Link>
@@ -198,9 +195,9 @@ const B2BControl = () => {
                 icon={<ChartBar />}
               />
               <Metric
-                label="Demo readiness"
+                label="Preparación demo"
                 value={`${demoScore}/5`}
-                detail="Estado minimo para una demo guiada"
+                detail="Estado mínimo para una demo guiada"
                 tone={demoScore >= 4 ? "green" : "orange"}
                 icon={<CheckCircleSolid />}
               />
@@ -208,7 +205,7 @@ const B2BControl = () => {
 
             <div className="grid gap-3 lg:grid-cols-[1fr_1fr_1fr]">
               <SectionCard
-                title="Operacion comercial"
+                title="Operación comercial"
                 description="Lectura rapida del pipeline de presupuestos."
                 tone="blue"
               >
@@ -233,7 +230,7 @@ const B2BControl = () => {
               </SectionCard>
 
               <SectionCard
-                title="Packaging y logistica"
+                title="Packaging y logística"
                 description="Volumen, peso y expedicion sugerida para demo B2B."
                 tone="purple"
               >
@@ -248,7 +245,7 @@ const B2BControl = () => {
                     {summary?.quotes.shipment_mode || "-"}
                   </Text>
                   <Text size="small" leading="compact" className="text-violet-700">
-                    Ocupacion pallet {summary?.quotes.pallet_share || 0}
+                    Ocupación pallet {summary?.quotes.pallet_share || 0}
                   </Text>
                 </div>
               </SectionCard>
@@ -274,7 +271,7 @@ const B2BControl = () => {
               <Container className="divide-y p-0">
                 <div className="px-6 py-4">
                   <Text size="small" leading="compact" weight="plus">
-                    Demo readiness
+                    Preparación de demo
                   </Text>
                   <Text size="small" leading="compact" className="text-ui-fg-subtle">
                     Checklist para saber si el playbook puede demostrarse sin
@@ -294,14 +291,14 @@ const B2BControl = () => {
                     Resumen demo
                   </Text>
                   <Text size="small" leading="compact" className="text-ui-fg-subtle">
-                    Senales para abrir la reunion con datos.
+                    Señales para abrir la reunión con datos.
                   </Text>
                 </div>
                 <div className="grid gap-3 px-6 py-4">
                   <SummaryPill label="Pipeline" value={formatCurrency(summary?.quotes.value || 0)} tone="green" />
                   <SummaryPill label="SLA quote" value={staleQuotes > 0 ? `${staleQuotes} atrasados` : "Sin atrasos"} tone={staleQuotes > 0 ? "orange" : "green"} />
                   <SummaryPill label="Reglas B2B" value={`${activeRules} activas`} tone={activeRules > 0 ? "blue" : "orange"} />
-                  <SummaryPill label="Logistica" value={summary?.quotes.shipment_mode || "-"} tone="purple" />
+                  <SummaryPill label="Logística" value={summary?.quotes.shipment_mode || "-"} tone="purple" />
                 </div>
               </Container>
             </div>
@@ -312,7 +309,7 @@ const B2BControl = () => {
                   Prioridades operativas
                 </Text>
                 <Text size="small" leading="compact" className="text-ui-fg-subtle">
-                  Senales para saber que ensenar o cerrar antes de una demo B2B.
+                  Señales para saber qué enseñar o cerrar antes de una demo B2B.
                 </Text>
               </div>
               <div className="grid gap-2 px-6 py-4">
@@ -383,7 +380,7 @@ const SectionCard = ({
         </Text>
       </div>
       <Badge size="xsmall" color={badgeColor[tone]}>
-        Live
+        Activo
       </Badge>
     </div>
     <div className="grid gap-3 px-6 py-4">{children}</div>
@@ -439,7 +436,7 @@ const RiskItem = ({ risk }: { risk: any }) => {
             {risk.label}
           </Text>
           <Badge size="xsmall" color={risk.status === "attention" ? "orange" : "green"}>
-            {risk.status === "attention" ? "Atencion" : "OK"}
+            {risk.status === "attention" ? "Atención" : "OK"}
           </Badge>
         </div>
         <Text size="small" leading="compact" className="opacity-75">
@@ -541,7 +538,7 @@ const formatCurrency = (value: number) =>
 
 export const config = defineRouteConfig({
   label: "B2B Control",
-  icon: BuildingStorefront,
+  icon: Buildings,
 });
 
 export default B2BControl;

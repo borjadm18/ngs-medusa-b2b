@@ -17,6 +17,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import {
   AdminAsset,
+  AdminAssetUpload,
   AssetType,
   useAssets,
   useDeleteAsset,
@@ -145,6 +146,25 @@ const fileToBase64 = (file: File) =>
     reader.onerror = () => reject(reader.error);
     reader.readAsDataURL(file);
   });
+
+const mimeTypesByExtension: Record<string, AdminAssetUpload["mime_type"]> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  gif: "image/gif",
+  svg: "image/svg+xml",
+};
+
+const getUploadMimeType = (file: File) => {
+  if (file.type) {
+    return file.type as AdminAssetUpload["mime_type"];
+  }
+
+  const extension = file.name.split(".").pop()?.toLowerCase() || "";
+
+  return mimeTypesByExtension[extension];
+};
 
 const AssetsPage = () => {
   const { data: brandProfileData } = useBrandProfileContent();
@@ -304,6 +324,12 @@ const AssetsPage = () => {
     }
 
     const contentBase64 = await fileToBase64(selectedFile);
+    const mimeType = getUploadMimeType(selectedFile);
+
+    if (!mimeType) {
+      toast.error("Formato no soportado. Usa JPG, PNG, WEBP, GIF o SVG.");
+      return;
+    }
 
     uploadAsset.mutate({
       id: form.id,
@@ -314,7 +340,7 @@ const AssetsPage = () => {
       tags: form.tags || null,
       sort_order: Number(form.sort_order || 0),
       filename: selectedFile.name,
-      mime_type: selectedFile.type,
+      mime_type: mimeType,
       content_base64: contentBase64,
     });
   };
@@ -437,7 +463,7 @@ const AssetsPage = () => {
                     >
                       <div className="flex h-24 items-center justify-center border-b bg-ui-bg-component">
                         {asset.url ? (
-                          <img
+                          <AssetImage
                             src={resolveAdminAssetPreviewUrl(asset.url)}
                             alt={asset.alt || asset.label}
                             className="max-h-full max-w-full object-contain p-2"
@@ -543,7 +569,7 @@ const AssetsPage = () => {
                       >
                         <div className="flex h-12 w-12 items-center justify-center rounded border bg-ui-bg-component">
                           {asset.url ? (
-                            <img
+                            <AssetImage
                               src={resolveAdminAssetPreviewUrl(asset.url)}
                               alt={asset.alt || asset.label}
                               className="max-h-full max-w-full object-contain p-1"
@@ -611,7 +637,7 @@ const AssetsPage = () => {
 
               {form.url ? (
                 <div className="flex h-36 items-center justify-center overflow-hidden rounded-lg border bg-ui-bg-subtle">
-                  <img
+                  <AssetImage
                     src={resolveAdminAssetPreviewUrl(form.url)}
                     alt={form.alt || form.label}
                     className="max-h-full max-w-full object-contain p-3"
@@ -753,6 +779,38 @@ const TextField = ({
     />
   </div>
 );
+
+const AssetImage = ({
+  src,
+  alt,
+  className,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+}) => {
+  const [failed, setFailed] = useState(false);
+
+  if (!src || failed) {
+    return (
+      <div className="grid h-full w-full place-items-center p-2">
+        <div className="flex size-10 items-center justify-center rounded-md border bg-ui-bg-subtle">
+          <Photo className="text-ui-fg-muted" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      loading="lazy"
+      onError={() => setFailed(true)}
+    />
+  );
+};
 
 const NumberField = ({
   label,

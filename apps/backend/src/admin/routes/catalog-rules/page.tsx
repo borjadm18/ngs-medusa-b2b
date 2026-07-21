@@ -726,7 +726,7 @@ const CatalogRulesPage = () => {
       try {
         metadata = JSON.parse(form.metadataJson);
       } catch {
-        toast.error("Metadata must be valid JSON");
+        toast.error("El JSON de metadata no es valido");
         return;
       }
     }
@@ -856,24 +856,24 @@ const CatalogRulesPage = () => {
           </div>
 
           <div className="grid gap-3 small:grid-cols-3">
-            <Metric label="Total rules" value={data?.count || 0} />
-            <Metric label="Active rules" value={activeRules} />
-            <Metric label="Visible rows" value={catalogRules.length} />
+            <Metric label="Reglas totales" value={data?.count || 0} />
+            <Metric label="Reglas activas" value={activeRules} />
+            <Metric label="Filas visibles" value={catalogRules.length} />
           </div>
 
           <div className="grid gap-4 rounded-lg border bg-ui-bg-base p-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <Text size="small" leading="compact" weight="plus">
-                  Rule simulator
+                  Simulador de reglas
                 </Text>
                 <Text
                   size="small"
                   leading="compact"
                   className="text-ui-fg-subtle"
                 >
-                  Test which active rules apply for a product, customer context,
-                  region, channel and zone.
+                  Comprueba que reglas activas aplican por producto, empresa,
+                  region, canal y zona.
                 </Text>
               </div>
               <Button
@@ -882,14 +882,14 @@ const CatalogRulesPage = () => {
                 onClick={handleSimulate}
                 isLoading={simulateCatalogRules.isPending}
               >
-                Simulate
+                Simular
               </Button>
             </div>
 
             <div className="grid gap-3 rounded-lg border bg-ui-bg-subtle p-3">
               <div className="grid gap-2 medium:grid-cols-[minmax(0,1fr)_auto] medium:items-end">
                 <TextField
-                  label="Search catalog or company"
+                  label="Buscar producto o empresa"
                   value={simulatorSearch}
                   onChange={setSimulatorSearch}
                 />
@@ -898,7 +898,7 @@ const CatalogRulesPage = () => {
                   variant="secondary"
                   onClick={() => setSimulationForm(EMPTY_SIMULATION)}
                 >
-                  Clear context
+                  Limpiar contexto
                 </Button>
               </div>
 
@@ -907,7 +907,7 @@ const CatalogRulesPage = () => {
               <div className="grid gap-3 large:grid-cols-2">
                 <div className="grid gap-2">
                   <Text size="small" leading="compact" weight="plus">
-                    Product and variant
+                    Producto y variante
                   </Text>
                   {isLoadingSimulatorOptions ? (
                     <Text size="small" className="text-ui-fg-subtle">
@@ -1001,7 +1001,7 @@ const CatalogRulesPage = () => {
                 onChange={(value) => updateSimulation("variant_id", value)}
               />
               <TextField
-                label="Category ID"
+                label="ID de categoria"
                 value={simulationForm.category_id}
                 onChange={(value) => updateSimulation("category_id", value)}
               />
@@ -1083,7 +1083,7 @@ const CatalogRulesPage = () => {
                   </div>
                 ) : (
                   <Text size="small" className="text-ui-fg-subtle">
-                    No active catalog rules match this context.
+                    No hay reglas activas para este contexto.
                   </Text>
                 )}
               </div>
@@ -1191,7 +1191,7 @@ const CatalogRulesPage = () => {
                     <Table.Row>
                       <Table.Cell colSpan={8}>
                         <Text size="small" className="text-ui-fg-subtle">
-                          No catalog rules found.
+                          No hay reglas de catalogo.
                         </Text>
                       </Table.Cell>
                     </Table.Row>
@@ -1207,7 +1207,7 @@ const CatalogRulesPage = () => {
         <Drawer.Content>
           <Drawer.Header>
             <Drawer.Title>
-              {form.id ? "Edit catalog rule" : "New catalog rule"}
+              {form.id ? "Editar regla de catalogo" : "Nueva regla de catalogo"}
             </Drawer.Title>
           </Drawer.Header>
           <Drawer.Body className="flex flex-1 flex-col gap-y-4 overflow-auto p-4">
@@ -1352,7 +1352,7 @@ const CatalogRulesPage = () => {
                   variant="secondary"
                   disabled={upsertCatalogRule.isPending}
                 >
-                  Cancel
+                  Cancelar
                 </Button>
               </Drawer.Close>
               <Button
@@ -1360,7 +1360,7 @@ const CatalogRulesPage = () => {
                 onClick={handleSubmit}
                 isLoading={upsertCatalogRule.isPending}
               >
-                Save rule
+                Guardar regla
               </Button>
             </div>
           </Drawer.Footer>
@@ -1487,7 +1487,7 @@ const CatalogRulesPage = () => {
                   variant="secondary"
                   disabled={bulkUpsertCatalogRules.isPending}
                 >
-                  Cancel
+                  Cancelar
                 </Button>
               </Drawer.Close>
               <Button

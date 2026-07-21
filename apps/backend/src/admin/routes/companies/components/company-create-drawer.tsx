@@ -21,12 +21,12 @@ export function CompanyCreateDrawer() {
     <Drawer open={open} onOpenChange={setOpen}>
       <Drawer.Trigger asChild>
         <Button variant="secondary" size="small">
-          Create
+          Crear
         </Button>
       </Drawer.Trigger>
       <Drawer.Content>
         <Drawer.Header>
-          <Drawer.Title>Create Company</Drawer.Title>
+          <Drawer.Title>Crear empresa</Drawer.Title>
         </Drawer.Header>
         <CompanyForm
           handleSubmit={handleSubmit}

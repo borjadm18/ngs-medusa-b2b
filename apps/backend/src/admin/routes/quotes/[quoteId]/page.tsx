@@ -77,9 +77,9 @@ const QuoteDetails = () => {
 
   const handleSendQuote = async () => {
     const res = await prompt({
-      title: "Send quote?",
+      title: "¿Enviar presupuesto?",
       description:
-        "You are about to send this quote to the customer. Do you want to continue?",
+        "Vas a enviar este presupuesto al cliente. ¿Quieres continuar?",
       confirmText: t("actions.continue"),
       cancelText: t("actions.cancel"),
       variant: "confirmation",
@@ -89,7 +89,7 @@ const QuoteDetails = () => {
       await sendQuote(
         {},
         {
-          onSuccess: () => toast.success("Successfully sent quote to customer"),
+          onSuccess: () => toast.success("Presupuesto enviado al cliente"),
           onError: (e) => toast.error(e.message),
         }
       );
@@ -98,9 +98,9 @@ const QuoteDetails = () => {
 
   const handleRejectQuote = async () => {
     const res = await prompt({
-      title: "Reject quote?",
+      title: "¿Rechazar presupuesto?",
       description:
-        "You are about to reject this customer's quote. Do you want to continue?",
+        "Vas a rechazar este presupuesto del cliente. ¿Quieres continuar?",
       confirmText: t("actions.continue"),
       cancelText: t("actions.cancel"),
       variant: "confirmation",
@@ -109,7 +109,7 @@ const QuoteDetails = () => {
     if (res) {
       await rejectQuote(void 0, {
         onSuccess: () =>
-          toast.success("Successfully rejected customer's quote"),
+          toast.success("Presupuesto rechazado"),
         onError: (e) => toast.error(e.message),
       });
     }
@@ -188,7 +188,7 @@ const QuoteDetails = () => {
                   variant="secondary"
                   onClick={handleExportCsv}
                 >
-                  Export CSV
+                    Exportar CSV
                 </Button>
 
                 {showRejectQuote && (

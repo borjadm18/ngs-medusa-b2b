@@ -21,7 +21,7 @@ export const EmployeesActionsMenu = ({
   const handleDelete = async () => {
     await mutateDelete(employee.id, {
       onSuccess: () => {
-        toast.success(`Employee deleted successfully`);
+        toast.success("Usuario eliminado");
       },
     });
   };
@@ -40,7 +40,7 @@ export const EmployeesActionsMenu = ({
             onClick={() => setEditOpen(true)}
           >
             <PencilSquare />
-            Edit
+            Editar
           </DropdownMenu.Item>
           <DropdownMenu.Separator />
           <DropdownMenu.Item
@@ -48,7 +48,7 @@ export const EmployeesActionsMenu = ({
             onClick={() => setDeleteOpen(true)}
           >
             <Trash />
-            Delete
+            Eliminar
           </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu>

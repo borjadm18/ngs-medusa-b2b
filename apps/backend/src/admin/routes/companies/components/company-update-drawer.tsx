@@ -28,10 +28,10 @@ export function CompanyUpdateDrawer({
     await mutateAsync(formData, {
       onSuccess: async () => {
         setOpen(false);
-        toast.success(`Company ${formData.name} updated successfully`);
+        toast.success(`Empresa ${formData.name} actualizada`);
       },
       onError: (error) => {
-        toast.error("Failed to update company");
+        toast.error("No se pudo actualizar la empresa");
       },
     });
   };
@@ -40,7 +40,7 @@ export function CompanyUpdateDrawer({
     <Drawer open={open} onOpenChange={setOpen}>
       <Drawer.Content className="z-50">
         <Drawer.Header>
-          <Drawer.Title>Edit Company</Drawer.Title>
+          <Drawer.Title>Editar empresa</Drawer.Title>
         </Drawer.Header>
 
         <CompanyForm

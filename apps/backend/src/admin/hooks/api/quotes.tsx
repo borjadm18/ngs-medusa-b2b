@@ -39,7 +39,7 @@ export const useQuotes = (
   const { data, ...rest } = useQuery({
     ...options,
     queryFn: () => fetchQuotes(query)!,
-    queryKey: quoteQueryKey.list(),
+    queryKey: quoteQueryKey.list(query),
   });
 
   return { ...data, ...rest };

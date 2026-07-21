@@ -35,7 +35,7 @@ export function EmployeeCreateDrawer({ company }: { company: QueryCompany }) {
     });
 
     if (!customer?.id) {
-      toast.error("Failed to create customer");
+      toast.error("No se pudo crear el cliente");
       return;
     }
 
@@ -46,13 +46,13 @@ export function EmployeeCreateDrawer({ company }: { company: QueryCompany }) {
     });
 
     if (!employee) {
-      toast.error("Failed to create employee");
+      toast.error("No se pudo vincular el usuario a la empresa");
       return;
     }
 
     setOpen(false);
     toast.success(
-      `Employee ${customer?.first_name} ${customer?.last_name} created successfully`
+      `Usuario ${customer?.first_name} ${customer?.last_name} creado`
     );
   };
 
@@ -63,12 +63,12 @@ export function EmployeeCreateDrawer({ company }: { company: QueryCompany }) {
     <Drawer open={open} onOpenChange={setOpen}>
       <Drawer.Trigger asChild>
         <Button variant="secondary" size="small">
-          Add
+          Anadir
         </Button>
       </Drawer.Trigger>
       <Drawer.Content>
         <Drawer.Header>
-          <Drawer.Title>Add Company Customer</Drawer.Title>
+          <Drawer.Title>Anadir usuario a la empresa</Drawer.Title>
         </Drawer.Header>
         <EmployeesCreateForm
           handleSubmit={handleSubmit}

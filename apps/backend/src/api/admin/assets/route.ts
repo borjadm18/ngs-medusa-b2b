@@ -42,8 +42,17 @@ export const GET = async (
     return profileMatches && typeMatches;
   });
 
+  const customAssetKeys = new Set(
+    assets.map((asset: any) => `${asset.type}:${asset.url}`)
+  );
+
   res.json({
-    assets: assets.length ? assets : defaultAssets,
+    assets: [
+      ...assets,
+      ...defaultAssets.filter(
+        (asset) => !customAssetKeys.has(`${asset.type}:${asset.url}`)
+      ),
+    ],
   });
 };
 

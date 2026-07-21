@@ -35,10 +35,10 @@ export function CompanyApprovalSettingsDrawer({
       {
         onSuccess: async () => {
           setOpen(false);
-          toast.success("Company approval settings updated successfully");
+          toast.success("Reglas de aprobacion actualizadas");
         },
         onError: (error) => {
-          toast.error("Failed to update company approval settings");
+          toast.error("No se pudieron actualizar las reglas de aprobacion");
         },
       }
     );
@@ -48,7 +48,7 @@ export function CompanyApprovalSettingsDrawer({
     <Drawer open={open} onOpenChange={setOpen}>
       <Drawer.Content className="z-50">
         <Drawer.Header>
-          <Drawer.Title>Company Approval Settings</Drawer.Title>
+          <Drawer.Title>Reglas de aprobacion</Drawer.Title>
         </Drawer.Header>
         <Drawer.Body className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
@@ -56,8 +56,8 @@ export function CompanyApprovalSettingsDrawer({
               checked={requiresAdminApproval}
               onChange={() => setRequiresAdminApproval(!requiresAdminApproval)}
               fieldName="requires_admin_approval"
-              label="Requires Admin Approval"
-              description="Require company admin approval for all orders placed by this company."
+              label="Requiere aprobacion del administrador"
+              description="Los pedidos de esta empresa deben ser aprobados por un administrador de la empresa."
             />
           </div>
 
@@ -68,17 +68,17 @@ export function CompanyApprovalSettingsDrawer({
                 setRequiresSalesManagerApproval(!requiresSalesManagerApproval)
               }
               fieldName="requires_sales_manager_approval"
-              label="Requires Sales Manager Approval"
-              description="Require sales manager approval for all orders placed by this company."
+              label="Requiere aprobacion comercial"
+              description="Los pedidos de esta empresa deben ser revisados por el equipo comercial."
             />
           </div>
         </Drawer.Body>
         <Drawer.Footer>
           <Button variant="secondary" onClick={() => setOpen(false)}>
-            Cancel
+            Cancelar
           </Button>
           <Button onClick={handleSubmit} isLoading={isPending}>
-            Save
+            Guardar
           </Button>
         </Drawer.Footer>
       </Drawer.Content>

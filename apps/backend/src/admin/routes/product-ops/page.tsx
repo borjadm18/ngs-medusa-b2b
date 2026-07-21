@@ -66,9 +66,9 @@ const ProductOpsPage = () => {
   const bulkDeleteMutation = useMutation({
     mutationFn: async () => {
       const confirmed = await prompt({
-        title: "¿Eliminar productos seleccionados?",
+        title: "Eliminar productos seleccionados?",
         description:
-          "Esta acción eliminará los productos seleccionados del catálogo.",
+          "Esta accion eliminara los productos seleccionados del catalogo.",
       });
 
       if (!confirmed) {
@@ -109,7 +109,7 @@ const ProductOpsPage = () => {
                 Operativa productos
               </Heading>
               <Text className="text-ui-fg-subtle">
-                Selección múltiple para publicar, desactivar o borrar productos.
+                Seleccion multiple para publicar, desactivar o borrar productos.
               </Text>
             </div>
             <div className="flex flex-wrap items-center gap-2">

@@ -47,7 +47,7 @@ export function CompanyForm({
     <form>
       <Drawer.Body className="p-4">
         <div className="flex flex-col gap-2">
-          <Label size="xsmall">Company Name</Label>
+          <Label size="xsmall">Nombre de empresa</Label>
           <Input
             type="text"
             name="name"
@@ -55,7 +55,7 @@ export function CompanyForm({
             onChange={handleChange}
             placeholder="Medusa"
           />
-          <Label size="xsmall">Company Phone</Label>
+          <Label size="xsmall">Teléfono de empresa</Label>
           <Input
             type="text"
             name="phone"
@@ -63,7 +63,7 @@ export function CompanyForm({
             onChange={handleChange}
             placeholder="1234567890"
           />
-          <Label size="xsmall">Company Email</Label>
+          <Label size="xsmall">Email de empresa</Label>
           <Input
             type="email"
             name="email"
@@ -106,7 +106,7 @@ export function CompanyForm({
                 <Select.Content>
                   <Select.Item value="pending">Pendiente</Select.Item>
                   <Select.Item value="approved">Aprobada</Select.Item>
-                  <Select.Item value="rejected">Rechazada</Select.Item>
+                  <Select.Item value="rejected">Denegada</Select.Item>
                 </Select.Content>
               </Select>
             </div>
@@ -122,14 +122,14 @@ export function CompanyForm({
                 <Select.Content>
                   <Select.Item value="prepaid">Pago anticipado</Select.Item>
                   <Select.Item value="bank_transfer">Transferencia</Select.Item>
-                  <Select.Item value="net_30">Credito 30 dias</Select.Item>
-                  <Select.Item value="net_60">Credito 60 dias</Select.Item>
-                  <Select.Item value="credit">Credito comercial</Select.Item>
+                  <Select.Item value="net_30">Crédito 30 días</Select.Item>
+                  <Select.Item value="net_60">Crédito 60 días</Select.Item>
+                  <Select.Item value="credit">Crédito comercial</Select.Item>
                 </Select.Content>
               </Select>
             </div>
           </div>
-          <Label size="xsmall">Company Address</Label>
+          <Label size="xsmall">Dirección de empresa</Label>
           <Input
             type="text"
             name="address"
@@ -137,7 +137,7 @@ export function CompanyForm({
             onChange={handleChange}
             placeholder="1234 Main St"
           />
-          <Label size="xsmall">Company City</Label>
+          <Label size="xsmall">Ciudad</Label>
           <Input
             type="text"
             name="city"
@@ -145,7 +145,7 @@ export function CompanyForm({
             onChange={handleChange}
             placeholder="New York"
           />
-          <Label size="xsmall">Company State</Label>
+          <Label size="xsmall">Provincia / estado</Label>
           <Input
             type="text"
             name="state"
@@ -153,7 +153,7 @@ export function CompanyForm({
             onChange={handleChange}
             placeholder="NY"
           />
-          <Label size="xsmall">Company Zip</Label>
+          <Label size="xsmall">Código postal</Label>
           <Input
             type="text"
             name="zip"
@@ -163,7 +163,7 @@ export function CompanyForm({
           />
           <div className="flex gap-4 w-full">
             <div className="flex flex-col gap-2 w-1/2">
-              <Label size="xsmall">Company Country</Label>
+              <Label size="xsmall">País</Label>
               <Select
                 name="country"
                 value={formData.country || ""}
@@ -171,7 +171,7 @@ export function CompanyForm({
                 disabled={regionsLoading}
               >
                 <Select.Trigger disabled={regionsLoading}>
-                  <Select.Value placeholder="Select a country" />
+                  <Select.Value placeholder="Selecciona país" />
                 </Select.Trigger>
                 <Select.Content className="z-50">
                   {countries?.map((country) => (
@@ -186,7 +186,7 @@ export function CompanyForm({
               </Select>
             </div>
             <div className="flex flex-col gap-2 w-1/2">
-              <Label size="xsmall">Currency</Label>
+              <Label size="xsmall">Moneda</Label>
 
               <Select
                 name="currency_code"
@@ -196,7 +196,7 @@ export function CompanyForm({
                 disabled={regionsLoading}
               >
                 <Select.Trigger disabled={regionsLoading}>
-                  <Select.Value placeholder="Select a currency" />
+                  <Select.Value placeholder="Selecciona moneda" />
                 </Select.Trigger>
 
                 <Select.Content className="z-50">
@@ -209,8 +209,7 @@ export function CompanyForm({
               </Select>
             </div>
           </div>
-          {/* TODO: Add logo upload */}
-          <Label size="xsmall">Company Logo URL</Label>
+          <Label size="xsmall">URL del logo</Label>
           <Input
             type="text"
             name="logo_url"
@@ -222,13 +221,13 @@ export function CompanyForm({
       </Drawer.Body>
       <Drawer.Footer>
         <Drawer.Close asChild>
-          <Button variant="secondary">Cancel</Button>
+          <Button variant="secondary">Cancelar</Button>
         </Drawer.Close>
         <Button
           isLoading={loading}
           onClick={async () => await handleSubmit(formData)}
         >
-          Save
+          Guardar
         </Button>
         {error && (
           <Text className="txt-compact-small text-ui-fg-warning">

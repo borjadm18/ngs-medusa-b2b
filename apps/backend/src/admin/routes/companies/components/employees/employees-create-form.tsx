@@ -66,27 +66,27 @@ export function EmployeesCreateForm({
     <form onSubmit={onSubmit}>
       <Drawer.Body className="flex flex-col p-4 gap-6">
         <div className="flex flex-col gap-3">
-          <h2 className="h2-core">Details</h2>
+          <h2 className="h2-core">Datos del usuario</h2>
           <div className="flex flex-col gap-2">
             <Label size="xsmall" className="txt-compact-small font-medium">
-              First Name
+              Nombre
             </Label>
             <Input
               type="text"
               name="first_name"
               onChange={handleChange}
-              placeholder="John"
+              placeholder="Laura"
             />
           </div>
           <div className="flex flex-col gap-2">
             <Label size="xsmall" className="txt-compact-small font-medium">
-              Last Name
+              Apellidos
             </Label>
             <Input
               type="text"
               name="last_name"
               onChange={handleChange}
-              placeholder="Doe"
+              placeholder="Garcia"
             />
           </div>
           <div className="flex flex-col gap-2">
@@ -97,12 +97,12 @@ export function EmployeesCreateForm({
               type="email"
               name="email"
               onChange={handleChange}
-              placeholder="john.doe@example.com"
+              placeholder="laura.garcia@empresa.com"
             />
           </div>
           <div className="flex flex-col gap-2">
             <Label size="xsmall" className="txt-compact-small font-medium">
-              Phone
+              Telefono
             </Label>
             <Input
               type="text"
@@ -113,10 +113,10 @@ export function EmployeesCreateForm({
           </div>
         </div>
         <div className="flex flex-col gap-3">
-          <h2 className="h2-core">Permissions</h2>
+          <h2 className="h2-core">Permisos</h2>
           <div className="flex flex-col gap-2">
             <Label size="xsmall" className="txt-compact-small font-medium">
-              Spending Limit ({company.currency_code?.toUpperCase() || "USD"})
+              Limite de gasto ({company.currency_code?.toUpperCase() || "EUR"})
             </Label>
             <CurrencyInput
               symbol={currencySymbolMap[company.currency_code || "USD"]}
@@ -160,27 +160,27 @@ export function EmployeesCreateForm({
           </div>
           <div className="flex flex-col gap-2">
             <Label size="xsmall" className="txt-compact-small font-medium">
-              Admin Access
+              Acceso administrador
             </Label>
             <CoolSwitch
               fieldName="is_admin"
-              label="Is Admin"
-              description="Enable to grant admin access"
+              label="Es administrador"
+              description="Permite gestionar datos de empresa y permisos."
               checked={formData.is_admin || false}
               onChange={(checked) =>
                 setFormData({ ...formData, is_admin: checked })
               }
-              tooltip="Admins can manage the company's details and employee permissions."
+              tooltip="Los administradores pueden gestionar la empresa y los permisos de usuarios."
             />
           </div>
         </div>
       </Drawer.Body>
       <Drawer.Footer>
         <Drawer.Close asChild>
-          <Button variant="secondary">Cancel</Button>
+          <Button variant="secondary">Cancelar</Button>
         </Drawer.Close>
         <Button type="submit" disabled={loading}>
-          {loading ? "Saving..." : "Save"}
+          {loading ? "Guardando..." : "Guardar"}
         </Button>
         {error && <Text className="text-red-500">{error.message}</Text>}
       </Drawer.Footer>

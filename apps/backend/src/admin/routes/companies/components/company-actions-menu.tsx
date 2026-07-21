@@ -42,7 +42,7 @@ export const CompanyActionsMenu = ({
     mutateDelete(company.id, {
       onSuccess: () => {
         navigate("/companies");
-        toast.success(`Company ${company.name} deleted successfully`);
+        toast.success(`Empresa ${company.name} eliminada`);
       },
     });
   };
@@ -101,17 +101,17 @@ export const CompanyActionsMenu = ({
             actions: [
               {
                 icon: <PencilSquare />,
-                label: "Edit details",
+                label: "Editar datos",
                 onClick: () => setEditOpen(true),
               },
               {
                 icon: <Link />,
-                label: "Manage customer group",
+                label: "Gestionar grupo cliente",
                 onClick: () => setCustomerGroupOpen(true),
               },
               {
                 icon: <LockClosedSolid />,
-                label: "Approval settings",
+                label: "Reglas de aprobación",
                 onClick: () => setApprovalSettingsOpen(true),
               },
             ],
@@ -120,7 +120,7 @@ export const CompanyActionsMenu = ({
             actions: [
               {
                 icon: <Trash />,
-                label: "Delete",
+                label: "Eliminar",
                 onClick: () => setDeleteOpen(true),
               },
             ],

@@ -25,22 +25,22 @@ const Companies = () => {
     <>
       <Container className="flex flex-col p-0 overflow-hidden">
         <div className="p-6 flex justify-between">
-          <Heading className="font-sans font-medium h1-core">Companies</Heading>
+          <Heading className="font-sans font-medium h1-core">Empresas</Heading>
           <CompanyCreateDrawer />
         </div>
-        {isPending && <Text>Loading...</Text>}
+        {isPending && <Text>Cargando...</Text>}
         <Table>
           <Table.Header>
             <Table.Row>
               <Table.HeaderCell></Table.HeaderCell>
-              <Table.HeaderCell>Name</Table.HeaderCell>
-              <Table.HeaderCell>Phone</Table.HeaderCell>
+              <Table.HeaderCell>Nombre</Table.HeaderCell>
+              <Table.HeaderCell>Telefono</Table.HeaderCell>
               <Table.HeaderCell>Email</Table.HeaderCell>
               <Table.HeaderCell>Estado</Table.HeaderCell>
-              <Table.HeaderCell>Address</Table.HeaderCell>
-              <Table.HeaderCell>Employees</Table.HeaderCell>
-              <Table.HeaderCell>Customer Group</Table.HeaderCell>
-              <Table.HeaderCell>Actions</Table.HeaderCell>
+              <Table.HeaderCell>Direccion</Table.HeaderCell>
+              <Table.HeaderCell>Usuarios</Table.HeaderCell>
+              <Table.HeaderCell>Grupo cliente</Table.HeaderCell>
+              <Table.HeaderCell>Acciones</Table.HeaderCell>
             </Table.Row>
           </Table.Header>
           {data?.companies && (
@@ -105,7 +105,7 @@ const Companies = () => {
 };
 
 export const config = defineRouteConfig({
-  label: "Companies",
+  label: "Empresas",
   icon: BuildingStorefront,
 });
 

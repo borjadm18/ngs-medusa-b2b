@@ -51,9 +51,9 @@ export const QuotesTable = () => {
         orderBy={["id", "created_at"]}
         queryObject={raw}
         noRecords={{
-          title: "No quotes found",
+          title: "No hay presupuestos",
           message:
-            "There are currently no quotes. Create one from the storefront.",
+            "Todavia no hay presupuestos. Puedes crear uno desde el storefront.",
         }}
       />
     </div>
