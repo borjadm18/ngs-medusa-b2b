@@ -12,7 +12,7 @@ services:
     runtime: node
     plan: free
     region: frankfurt
-    repo: https://github.com/borjadm18/ngs-medusa-b2b
+    repo: https://github.com/Novicell-Spain/poc-medusa-b2b-industrial
     branch: main
     autoDeploy: true
     healthCheckPath: /health
