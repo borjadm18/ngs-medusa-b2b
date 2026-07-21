@@ -23,8 +23,8 @@ export const ApprovalActions = ({ cart }: { cart: Record<string, any> }) => {
   const approveCart = async () => {
     setIsApproving(true);
     const confirmed = await dialog({
-      title: "Are you sure you want to approve this cart?",
-      description: "This action cannot be undone.",
+      title: "¿Seguro que quieres aprobar este carrito?",
+      description: "Esta acción no se puede deshacer.",
     });
 
     if (confirmed) {
@@ -38,8 +38,8 @@ export const ApprovalActions = ({ cart }: { cart: Record<string, any> }) => {
   const rejectCart = async () => {
     setIsRejecting(true);
     const confirmed = await dialog({
-      title: "Are you sure you want to reject this cart?",
-      description: "This action cannot be undone.",
+      title: "¿Seguro que quieres rechazar este carrito?",
+      description: "Esta acción no se puede deshacer.",
     });
 
     if (confirmed) {

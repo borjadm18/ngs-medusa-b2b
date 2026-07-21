@@ -65,9 +65,21 @@ const LoginTemplate = ({ regions }: { regions: HttpTypes.StoreRegion[] }) => {
     router.push(`/${countryCode}/account?${nextParams.toString()}`)
   }
 
+  const isRegisterView = currentView === LOGIN_VIEW.REGISTER
+
   return (
-    <div className="grid grid-cols-1 small:grid-cols-2 gap-2 m-2 min-h-[80vh]">
-      <div className="flex justify-center items-center bg-neutral-100 p-6 small:p-0 h-full">
+    <div
+      className={clx(
+        "grid grid-cols-1 gap-2 m-2 min-h-[80vh]",
+        isRegisterView ? "small:grid-cols-[minmax(0,1.25fr)_minmax(360px,0.75fr)]" : "small:grid-cols-2"
+      )}
+    >
+      <div
+        className={clx(
+          "flex justify-center items-center bg-neutral-100 p-6 h-full",
+          isRegisterView ? "small:p-10" : "small:p-0"
+        )}
+      >
         {currentView === LOGIN_VIEW.LOG_IN ? (
           <Login
             setCurrentView={updateView}

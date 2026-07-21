@@ -101,6 +101,10 @@ const ProductPackagingWidget = ({
     useState<CsvImportPreview | null>(null);
   const importInputRef = useRef<HTMLInputElement | null>(null);
 
+  useEffect(() => {
+    return hideTechnicalProductSections();
+  }, []);
+
   const { data: productData, isLoading: isProductLoading } = useQuery({
     queryKey: ["admin-product-packaging-product", data.id],
     queryFn: () =>
@@ -1118,3 +1122,45 @@ export const config = defineWidgetConfig({
 });
 
 export default ProductPackagingWidget;
+
+const hideTechnicalProductSections = () => {
+  const hiddenSections = new Set<HTMLElement>();
+
+  const hide = () => {
+    document
+      .querySelectorAll<HTMLElement>("h2, h3, [role='heading']")
+      .forEach((heading) => {
+        const text = heading.textContent?.trim();
+
+        if (text !== "Metadata" && text !== "JSON") {
+          return;
+        }
+
+        const section =
+          heading.closest<HTMLElement>("[class*='shadow'], section") ||
+          heading.closest<HTMLElement>("div");
+
+        if (!section || hiddenSections.has(section)) {
+          return;
+        }
+
+        section.dataset.b2bHiddenTechnicalSection = "true";
+        section.style.display = "none";
+        hiddenSections.add(section);
+      });
+  };
+
+  hide();
+  const observer = new MutationObserver(hide);
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  return () => {
+    observer.disconnect();
+    hiddenSections.forEach((section) => {
+      if (section.dataset.b2bHiddenTechnicalSection === "true") {
+        section.style.display = "";
+        delete section.dataset.b2bHiddenTechnicalSection;
+      }
+    });
+  };
+};

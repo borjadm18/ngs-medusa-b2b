@@ -46,7 +46,7 @@ export default async function CheckoutForm({
         >
           <Button variant="secondary">
             <UTurnArrowRight />
-            Back to shopping cart
+            Volver al carrito
           </Button>
         </LocalizedClientLink>
 
@@ -55,9 +55,9 @@ export default async function CheckoutForm({
             Este carrito requiere presupuesto
           </p>
           <p className="mt-2 text-sm leading-6 text-neutral-600">
-            {quoteRequiredItems.length} linea
+            {quoteRequiredItems.length} línea
             {quoteRequiredItems.length === 1 ? "" : "s"} necesita
-            {quoteRequiredItems.length === 1 ? "" : "n"} validacion comercial
+            {quoteRequiredItems.length === 1 ? "" : "n"} validación comercial
             antes de finalizar compra. Vuelve al carrito y solicita el
             presupuesto para que el equipo comercial confirme condiciones.
           </p>
@@ -78,7 +78,7 @@ export default async function CheckoutForm({
         >
           <Button variant="secondary">
             <UTurnArrowRight />
-            Back to shopping cart
+            Volver al carrito
           </Button>
         </LocalizedClientLink>
 

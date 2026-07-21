@@ -11,7 +11,6 @@ import {
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { JsonViewSection } from "../../../components/common/json-view-section";
 import { useOrderPreview } from "../../../hooks/api";
 import {
   useQuote,
@@ -144,6 +143,14 @@ const QuoteDetails = () => {
   const shipmentMode = estimateShipmentMode(packagingSummary);
   const estimatedFreight = estimateFreightCost(packagingSummary);
   const carrierRates = estimateCarrierRates(packagingSummary);
+  const quoteCustomer = quote.draft_order?.customer || quote.customer;
+  const quoteEmployee = quoteCustomer?.employee || quote.customer?.employee;
+  const quoteCompany = quoteEmployee?.company;
+  const quoteCurrency =
+    (quoteCompany?.currency_code as string) ||
+    quote.draft_order?.currency_code ||
+    "EUR";
+  const spendingLimit = Number(quoteEmployee?.spending_limit || 0);
 
   return (
     <div className="flex flex-col gap-y-3">
@@ -210,8 +217,6 @@ const QuoteDetails = () => {
           </Container>
 
           <QuoteMessages quote={quote} preview={preview!} />
-
-          <JsonViewSection data={quote} />
         </div>
 
         <div className="mt-2 flex w-full max-w-[100%] flex-col gap-y-3 xl:mt-0 xl:max-w-[400px]">
@@ -288,7 +293,7 @@ const QuoteDetails = () => {
 
           <Container className="divide-y p-0">
             <div className="flex items-center justify-between px-6 py-4">
-              <Heading level="h2">Customer</Heading>
+              <Heading level="h2">Cliente</Heading>
             </div>
 
             <div className="text-ui-fg-subtle grid grid-cols-2 items-start px-6 py-4">
@@ -296,35 +301,40 @@ const QuoteDetails = () => {
                 Email
               </Text>
 
-              <Link
-                className="text-sm text-pretty text-blue-500"
-                to={`/customers/${quote.draft_order?.customer?.id}`}
-                onClick={(e) => e.stopPropagation()}
-              >
-                {quote.draft_order?.customer?.email}
-              </Link>
+              {quoteCustomer?.id ? (
+                <Link
+                  className="text-sm text-pretty text-blue-500"
+                  to={`/customers/${quoteCustomer.id}`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {quoteCustomer.email || "-"}
+                </Link>
+              ) : (
+                <Text size="small" leading="compact" className="text-pretty">
+                  {quoteCustomer?.email || "-"}
+                </Text>
+              )}
             </div>
 
             <div className="text-ui-fg-subtle grid grid-cols-2 items-start px-6 py-4">
               <Text size="small" weight="plus" leading="compact">
-                Phone
+                Telefono
               </Text>
 
               <Text size="small" leading="compact" className="text-pretty">
-                {quote.draft_order?.customer?.phone}
+                {quoteCustomer?.phone || "-"}
               </Text>
             </div>
 
             <div className="text-ui-fg-subtle grid grid-cols-2 items-start px-6 py-4">
               <Text size="small" weight="plus" leading="compact">
-                Spending Limit
+                Limite de gasto
               </Text>
 
               <Text size="small" leading="compact" className="text-pretty">
                 {formatAmount(
-                  quote?.customer?.employee?.spending_limit,
-                  (quote?.customer?.employee?.company
-                    ?.currency_code as string) || "USD"
+                  Number.isFinite(spendingLimit) ? spendingLimit : 0,
+                  quoteCurrency
                 )}
               </Text>
             </div>
@@ -332,21 +342,27 @@ const QuoteDetails = () => {
 
           <Container className="divide-y p-0">
             <div className="flex items-center justify-between px-6 py-4">
-              <Heading level="h2">Company</Heading>
+              <Heading level="h2">Empresa</Heading>
             </div>
 
             <div className="text-ui-fg-subtle grid grid-cols-2 items-start px-6 py-4">
               <Text size="small" weight="plus" leading="compact">
-                Name
+                Nombre
               </Text>
 
-              <Link
-                className="text-sm text-pretty text-blue-500"
-                to={`/companies/${quote?.customer?.employee?.company.id}`}
-                onClick={(e) => e.stopPropagation()}
-              >
-                {quote?.customer?.employee?.company?.name}
-              </Link>
+              {quoteCompany?.id ? (
+                <Link
+                  className="text-sm text-pretty text-blue-500"
+                  to={`/companies/${quoteCompany.id}`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {quoteCompany.name || "-"}
+                </Link>
+              ) : (
+                <Text size="small" leading="compact" className="text-pretty">
+                  {quoteCompany?.name || "-"}
+                </Text>
+              )}
             </div>
           </Container>
         </div>

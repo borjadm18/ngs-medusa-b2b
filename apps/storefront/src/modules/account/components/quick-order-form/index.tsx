@@ -9,15 +9,15 @@ import Button from "@/modules/common/components/button"
 import { StoreProduct, StoreProductVariant } from "@medusajs/types"
 import { toast } from "@medusajs/ui"
 import Link from "next/link"
-import { ChangeEvent, useMemo, useState, useTransition } from "react"
+import { useMemo, useState, useTransition } from "react"
 
 type PurchaseUnit = "unit" | "box"
 
 type QuickOrderDraftLine = {
+  id: string
   sku: string
   quantity: number
   purchaseUnit: PurchaseUnit
-  sourceLine: number
   resolved?: QuickOrderResolvedItem
   error?: string
 }
@@ -26,128 +26,40 @@ type QuickOrderFormProps = {
   regionId: string
 }
 
-type ParsedQuickOrder = {
-  lines: QuickOrderDraftLine[]
-  errors: string[]
-}
+const defaultLines: QuickOrderDraftLine[] = [
+  {
+    id: "line-1",
+    sku: "NGS-WILD-BASH-COMPACT-BLK",
+    quantity: 2,
+    purchaseUnit: "box",
+  },
+  {
+    id: "line-2",
+    sku: "NGS-EVO-MOUSE-WHT",
+    quantity: 24,
+    purchaseUnit: "unit",
+  },
+  {
+    id: "line-3",
+    sku: "",
+    quantity: 1,
+    purchaseUnit: "unit",
+  },
+]
 
-const templateCsv = `sku,quantity,purchase_unit
-NGS-WILD-BASH-COMPACT-BLK,2,box
-NGS-EVO-MOUSE-WHT,24,unit`
-
-const exampleCsv = `sku,quantity,purchase_unit
-NGS-WILD-BASH-COMPACT-BLK,2,box
-NGS-EVO-MOUSE-WHT,24,unit`
-
-const splitDelimitedLine = (line: string) => {
-  const delimiter = line.includes("\t")
-    ? "\t"
-    : line.split(";").length > line.split(",").length
-    ? ";"
-    : ","
-  const cells: string[] = []
-  let cell = ""
-  let quoted = false
-
-  for (let index = 0; index < line.length; index++) {
-    const char = line[index]
-    const nextChar = line[index + 1]
-
-    if (char === '"' && nextChar === '"') {
-      cell += '"'
-      index++
-      continue
-    }
-
-    if (char === '"') {
-      quoted = !quoted
-      continue
-    }
-
-    if (char === delimiter && !quoted) {
-      cells.push(cell.trim())
-      cell = ""
-      continue
-    }
-
-    cell += char
-  }
-
-  cells.push(cell.trim())
-
-  return cells
-}
-
-const normalizeHeader = (value: string) =>
-  value.trim().toLowerCase().replace(/[\s_-]/g, "")
-
-const looksLikeHeader = (cells: string[]) => {
-  const firstCell = normalizeHeader(cells[0] || "")
-  const quantityCell = normalizeHeader(cells[1] || "")
-
-  return (
-    ["sku", "ref", "referencia", "reference"].includes(firstCell) ||
-    ["quantity", "qty", "cantidad"].includes(quantityCell)
-  )
-}
-
-const parsePurchaseUnit = (value: string): PurchaseUnit => {
-  const normalized = normalizeHeader(value)
-
-  if (["box", "caja", "cajas", "case", "pack"].includes(normalized)) {
-    return "box"
-  }
-
-  return "unit"
-}
-
-const parseLines = (value: string): ParsedQuickOrder => {
-  const errors: string[] = []
-  const lines = value
-    .split(/\r?\n/)
-    .map((line, index) => ({
-      value: line.trim(),
-      sourceLine: index + 1,
-    }))
-    .filter((line) => line.value)
-    .reduce<QuickOrderDraftLine[]>((acc, line, index) => {
-      const [sku = "", quantity = "1", purchaseUnit = "unit"] =
-        splitDelimitedLine(line.value)
-
-      if (index === 0 && looksLikeHeader([sku, quantity, purchaseUnit])) {
-        return acc
-      }
-
-      const normalizedSku = sku.trim().toUpperCase()
-      const parsedQuantity = Number.parseInt(quantity, 10)
-
-      if (!normalizedSku) {
-        errors.push(`Linea ${line.sourceLine}: falta SKU`)
-        return acc
-      }
-
-      if (!Number.isFinite(parsedQuantity) || parsedQuantity < 1) {
-        errors.push(`Linea ${line.sourceLine}: cantidad invalida`)
-      }
-
-      acc.push({
-        sku: normalizedSku,
-        quantity: Math.max(parsedQuantity || 1, 1),
-        purchaseUnit: parsePurchaseUnit(purchaseUnit),
-        sourceLine: line.sourceLine,
-      })
-
-      return acc
-    }, [])
-
-  return {
-    lines,
-    errors,
-  }
-}
+const createLine = (): QuickOrderDraftLine => ({
+  id: `line-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+  sku: "",
+  quantity: 1,
+  purchaseUnit: "unit",
+})
 
 const validateLine = (line: QuickOrderDraftLine) => {
   const packaging = line.resolved?.packaging
+
+  if (!line.sku.trim()) {
+    return undefined
+  }
 
   if (!line.resolved) {
     return "SKU no encontrado"
@@ -246,13 +158,15 @@ const buildMetadata = (line: QuickOrderDraftLine) => {
 }
 
 const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
-  const [rawInput, setRawInput] = useState(exampleCsv)
-  const [lines, setLines] = useState<QuickOrderDraftLine[]>([])
+  const [lines, setLines] = useState<QuickOrderDraftLine[]>(defaultLines)
   const [missingSkus, setMissingSkus] = useState<string[]>([])
-  const [parseErrors, setParseErrors] = useState<string[]>([])
   const [isPending, startTransition] = useTransition()
   const [isAdding, setIsAdding] = useState(false)
 
+  const activeLines = useMemo(
+    () => lines.filter((line) => line.sku.trim()),
+    [lines]
+  )
   const validLines = useMemo(
     () => lines.filter((line) => line.resolved && !line.error),
     [lines]
@@ -286,29 +200,72 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
     [validLines]
   )
   const errorLines = useMemo(
-    () => lines.filter((line) => line.error).length + parseErrors.length,
-    [lines, parseErrors]
+    () => lines.filter((line) => line.sku.trim() && line.error).length,
+    [lines]
   )
 
+  const updateLine = (
+    id: string,
+    patch: Partial<Pick<QuickOrderDraftLine, "sku" | "quantity" | "purchaseUnit">>
+  ) => {
+    setLines((current) =>
+      current.map((line) => {
+        if (line.id !== id) {
+          return line
+        }
+
+        const skuChanged = patch.sku !== undefined && patch.sku !== line.sku
+        const nextLine = {
+          ...line,
+          ...patch,
+          sku: (patch.sku ?? line.sku).toUpperCase().trim(),
+          quantity: Math.max(
+            Number.parseInt(String(patch.quantity ?? line.quantity), 10) || 1,
+            1
+          ),
+          resolved: skuChanged ? undefined : line.resolved,
+        }
+
+        return {
+          ...nextLine,
+          error: skuChanged ? undefined : validateLine(nextLine),
+        }
+      })
+    )
+  }
+
+  const addLine = () => {
+    setLines((current) => [...current, createLine()])
+  }
+
+  const removeLine = (id: string) => {
+    setLines((current) =>
+      current.length > 1 ? current.filter((line) => line.id !== id) : current
+    )
+  }
+
+  const clearLines = () => {
+    setLines([createLine(), createLine(), createLine()])
+    setMissingSkus([])
+  }
+
   const handleResolve = () => {
-    const parsed = parseLines(rawInput)
-    const draftLines = parsed.lines
+    const skus = Array.from(
+      new Set(activeLines.map((line) => line.sku.trim().toUpperCase()))
+    )
 
-    setParseErrors(parsed.errors)
-
-    if (!draftLines.length) {
+    if (!skus.length) {
       toast.error("Introduce al menos un SKU")
       return
     }
 
     startTransition(async () => {
-      const result = await resolveQuickOrderSkus(
-        draftLines.map((line) => line.sku),
-        regionId
-      ).catch((error) => {
-        toast.error(error.message || "No se pudo resolver el pedido rapido")
-        return null
-      })
+      const result = await resolveQuickOrderSkus(skus, regionId).catch(
+        (error) => {
+          toast.error(error.message || "No se pudo validar el pedido rapido")
+          return null
+        }
+      )
 
       if (!result) {
         return
@@ -317,11 +274,20 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
       const resolvedBySku = new Map(
         result.items.map((item) => [item.sku.toUpperCase(), item])
       )
+      const nextMissingSkus = result.missing_skus || []
 
-      setMissingSkus(result.missing_skus || [])
-      setLines(
-        draftLines.map((line) => {
-          const resolved = resolvedBySku.get(line.sku)
+      setMissingSkus(nextMissingSkus)
+      setLines((current) =>
+        current.map((line) => {
+          if (!line.sku.trim()) {
+            return {
+              ...line,
+              resolved: undefined,
+              error: undefined,
+            }
+          }
+
+          const resolved = resolvedBySku.get(line.sku.trim().toUpperCase())
           const nextLine = {
             ...line,
             resolved,
@@ -333,72 +299,9 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
           }
         })
       )
+
+      toast.success("SKUs validados")
     })
-  }
-
-  const updateLine = (
-    index: number,
-    patch: Partial<Pick<QuickOrderDraftLine, "quantity" | "purchaseUnit">>
-  ) => {
-    setLines((current) =>
-      current.map((line, lineIndex) => {
-        if (lineIndex !== index) {
-          return line
-        }
-
-        const nextLine = {
-          ...line,
-          ...patch,
-          quantity: Math.max(
-            Number.parseInt(String(patch.quantity ?? line.quantity), 10) || 1,
-            1
-          ),
-        }
-
-        return {
-          ...nextLine,
-          error: validateLine(nextLine),
-        }
-      })
-    )
-  }
-
-  const removeLine = (index: number) => {
-    setLines((current) => current.filter((_, lineIndex) => lineIndex !== index))
-  }
-
-  const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-
-    if (!file) {
-      return
-    }
-
-    if (file.name.toLowerCase().endsWith(".xlsx")) {
-      toast.error("Sube CSV/TSV o pega columnas desde Excel")
-      event.target.value = ""
-      return
-    }
-
-    const content = await file.text()
-    setRawInput(content)
-    setLines([])
-    setMissingSkus([])
-    setParseErrors([])
-    toast.success(`${file.name} cargado`)
-    event.target.value = ""
-  }
-
-  const downloadTemplate = () => {
-    const blob = new Blob([templateCsv], {
-      type: "text/csv;charset=utf-8",
-    })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = url
-    link.download = "quick-order-template.csv"
-    link.click()
-    URL.revokeObjectURL(url)
   }
 
   const handleAddToCart = () => {
@@ -427,93 +330,190 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="rounded-lg border border-neutral-200 bg-white p-4">
-        <label className="block text-sm font-semibold text-neutral-950">
-          Pedido rapido por SKU
-        </label>
-        <p className="mt-1 text-xs text-neutral-500">
-          Pega columnas desde Excel o sube CSV/TSV con SKU, cantidad y unidad de
-          compra.
-        </p>
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
-          <label className="inline-flex cursor-pointer items-center rounded-md border border-neutral-200 bg-neutral-50 px-3 py-2 font-medium text-neutral-800 transition hover:border-neutral-950">
-            Subir CSV/TSV
-            <input
-              type="file"
-              accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values"
-              className="sr-only"
-              onChange={handleFileUpload}
-            />
-          </label>
-          <button
-            type="button"
-            onClick={downloadTemplate}
-            className="rounded-md border border-neutral-200 px-3 py-2 font-medium text-neutral-800 transition hover:border-neutral-950"
-          >
-            Descargar plantilla
-          </button>
-          <button
-            type="button"
-            onClick={() => setRawInput(exampleCsv)}
-            className="rounded-md border border-neutral-200 px-3 py-2 font-medium text-neutral-800 transition hover:border-neutral-950"
-          >
-            Cargar ejemplo
-          </button>
+    <div className="grid gap-5">
+      <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 px-4 py-4">
+          <div>
+            <p className="text-base font-semibold text-neutral-950">
+              Introduce referencias
+            </p>
+            <p className="mt-1 text-sm text-neutral-500">
+              Anade SKU, elige si compras por unidad o caja y confirma la
+              cantidad. La validacion aplica minimos y multiplos B2B.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={addLine}
+              className="rounded-md border border-neutral-200 px-3 py-2 text-sm font-medium text-neutral-800 transition hover:border-neutral-950"
+            >
+              Anadir linea
+            </button>
+            <button
+              type="button"
+              onClick={clearLines}
+              className="rounded-md border border-neutral-200 px-3 py-2 text-sm font-medium text-neutral-800 transition hover:border-neutral-950"
+            >
+              Limpiar
+            </button>
+          </div>
         </div>
-        <textarea
-          value={rawInput}
-          onChange={(event) => setRawInput(event.target.value)}
-          className="mt-3 min-h-[150px] w-full rounded-md border border-neutral-200 bg-white p-3 font-mono text-sm outline-none focus:border-neutral-950"
-          spellCheck={false}
-        />
-        <div className="mt-3 flex flex-wrap gap-2">
-          <Button onClick={handleResolve} disabled={isPending}>
-            {isPending ? "Resolviendo..." : "Resolver SKUs"}
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setRawInput("")
-              setLines([])
-              setMissingSkus([])
-              setParseErrors([])
-            }}
-          >
-            Limpiar
-          </Button>
-        </div>
-      </div>
 
-      {parseErrors.length ? (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-          <p className="font-semibold">Errores de formato</p>
-          <ul className="mt-1 list-disc pl-5">
-            {parseErrors.map((error) => (
-              <li key={error}>{error}</li>
-            ))}
-          </ul>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[880px] text-left text-sm">
+            <thead className="bg-neutral-50 text-xs uppercase text-neutral-500">
+              <tr>
+                <th className="px-4 py-3">SKU</th>
+                <th className="px-4 py-3">Compra</th>
+                <th className="px-4 py-3">Cantidad</th>
+                <th className="px-4 py-3">Producto</th>
+                <th className="px-4 py-3">Total uds</th>
+                <th className="px-4 py-3">Regla B2B</th>
+                <th className="px-4 py-3">Estado</th>
+                <th className="px-4 py-3"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {lines.map((line) => {
+                const packaging = line.resolved?.packaging
+                return (
+                  <tr key={line.id} className="border-t border-neutral-100">
+                    <td className="px-4 py-3">
+                      <input
+                        value={line.sku}
+                        onChange={(event) =>
+                          updateLine(line.id, { sku: event.target.value })
+                        }
+                        placeholder="NGS-SKU-001"
+                        className="w-full min-w-[220px] rounded-md border border-neutral-200 bg-white px-3 py-2 font-mono text-sm outline-none transition focus:border-neutral-950"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <select
+                        value={line.purchaseUnit}
+                        onChange={(event) =>
+                          updateLine(line.id, {
+                            purchaseUnit: event.target.value as PurchaseUnit,
+                          })
+                        }
+                        className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm outline-none transition focus:border-neutral-950"
+                      >
+                        <option value="unit">Unidad</option>
+                        <option value="box">Caja</option>
+                      </select>
+                    </td>
+                    <td className="px-4 py-3">
+                      <input
+                        type="number"
+                        min={1}
+                        value={line.quantity}
+                        onChange={(event) =>
+                          updateLine(line.id, {
+                            quantity: Number(event.target.value),
+                          })
+                        }
+                        className="w-24 rounded-md border border-neutral-200 px-3 py-2 outline-none transition focus:border-neutral-950"
+                      />
+                    </td>
+                    <td className="px-4 py-3">
+                      <p className="font-medium text-neutral-950">
+                        {line.resolved?.product.title || "-"}
+                      </p>
+                      <p className="text-xs text-neutral-500">
+                        {line.resolved?.variant.title || ""}
+                      </p>
+                    </td>
+                    <td className="px-4 py-3 font-medium">
+                      {line.resolved ? getTotalUnits(line) : "-"}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-neutral-500">
+                      {packaging ? (
+                        <>
+                          <span>
+                            Caja {packaging.units_per_box} uds / min.{" "}
+                            {packaging.minimum_order_quantity} / multiplo{" "}
+                            {packaging.quantity_increment}
+                          </span>
+                          {line.purchaseUnit === "box" ? (
+                            <p className="mt-1 text-[11px] text-neutral-400">
+                              {line.quantity} cajas x {packaging.units_per_box}{" "}
+                              uds = {getTotalUnits(line)} uds
+                            </p>
+                          ) : null}
+                        </>
+                      ) : (
+                        "Valida el SKU"
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      {line.error ? (
+                        <span className="inline-flex rounded-md border border-red-200 bg-red-50 px-2 py-1 text-xs font-medium text-red-700">
+                          {line.error}
+                        </span>
+                      ) : line.resolved ? (
+                        <span className="inline-flex rounded-md border border-green-200 bg-green-50 px-2 py-1 text-xs font-medium text-green-700">
+                          Listo
+                        </span>
+                      ) : line.sku.trim() ? (
+                        <span className="inline-flex rounded-md border border-neutral-200 bg-neutral-50 px-2 py-1 text-xs font-medium text-neutral-600">
+                          Pendiente
+                        </span>
+                      ) : (
+                        <span className="text-xs text-neutral-400">-</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        type="button"
+                        onClick={() => removeLine(line.id)}
+                        className="text-xs font-medium text-neutral-500 underline hover:text-neutral-950"
+                      >
+                        Quitar
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
         </div>
-      ) : null}
 
-      {missingSkus.length ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-          SKUs no encontrados: {missingSkus.join(", ")}
+        <div className="grid gap-3 border-t border-neutral-200 bg-neutral-50 px-4 py-4 small:grid-cols-6">
+          <QuickOrderMetric label="Lineas validas" value={validLines.length} />
+          <QuickOrderMetric label="Unidades" value={totalUnits || "-"} />
+          <QuickOrderMetric label="Cajas" value={quickOrderSummary.boxes || "-"} />
+          <QuickOrderMetric
+            label="Peso estimado"
+            value={
+              quickOrderSummary.estimatedWeight
+                ? `${quickOrderSummary.estimatedWeight.toFixed(1)} kg`
+                : "-"
+            }
+          />
+          <QuickOrderMetric
+            label="Ocupacion pallet"
+            value={
+              quickOrderSummary.palletShare
+                ? quickOrderSummary.palletShare.toFixed(2)
+                : "-"
+            }
+          />
+          <QuickOrderMetric
+            label="Requiere presupuesto"
+            value={quickOrderSummary.quoteRequiredLines || "-"}
+          />
         </div>
-      ) : null}
 
-      {lines.length ? (
-        <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 px-4 py-3">
-            <div>
-              <p className="text-sm font-semibold text-neutral-950">
-                Pedido rapido
-              </p>
-              <p className="text-xs text-neutral-500">
-                {validLines.length} validas / {errorLines} con revision /{" "}
-                {totalUnits} unidades
-              </p>
-            </div>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 px-4 py-3">
+          <p className="text-xs text-neutral-500">
+            {activeLines.length} lineas introducidas / {errorLines} con revision
+            {missingSkus.length ? ` / no encontrados: ${missingSkus.join(", ")}` : ""}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" onClick={handleResolve} disabled={isPending}>
+              {isPending ? "Validando..." : "Validar SKUs"}
+            </Button>
             <Button
               onClick={handleAddToCart}
               disabled={isAdding || !validLines.length}
@@ -521,157 +521,18 @@ const QuickOrderForm = ({ regionId }: QuickOrderFormProps) => {
               {isAdding ? "Anadiendo..." : "Anadir al carrito"}
             </Button>
           </div>
-          <div className="grid gap-3 border-b border-neutral-200 bg-neutral-50 px-4 py-4 small:grid-cols-6">
-            <QuickOrderMetric label="Lineas validas" value={validLines.length} />
-            <QuickOrderMetric label="Unidades" value={totalUnits} />
-            <QuickOrderMetric label="Cajas" value={quickOrderSummary.boxes} />
-            <QuickOrderMetric
-              label="Peso estimado"
-              value={
-                quickOrderSummary.estimatedWeight
-                  ? `${quickOrderSummary.estimatedWeight.toFixed(1)} kg`
-                  : "-"
-              }
-            />
-            <QuickOrderMetric
-              label="Ocupacion pallet"
-              value={
-                quickOrderSummary.palletShare
-                  ? `${quickOrderSummary.palletShare.toFixed(2)}`
-                : "-"
-              }
-            />
-            <QuickOrderMetric
-              label="Presupuesto"
-              value={quickOrderSummary.quoteRequiredLines}
-            />
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-left text-sm">
-              <thead className="bg-neutral-50 text-xs uppercase text-neutral-500">
-                <tr>
-                  <th className="px-4 py-3">SKU</th>
-                  <th className="px-4 py-3">Producto</th>
-                  <th className="px-4 py-3">Compra</th>
-                  <th className="px-4 py-3">Cantidad</th>
-                  <th className="px-4 py-3">Total uds</th>
-                  <th className="px-4 py-3">Regla</th>
-                  <th className="px-4 py-3">Estado</th>
-                  <th className="px-4 py-3"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {lines.map((line, index) => {
-                  const packaging = line.resolved?.packaging
-                  return (
-                    <tr
-                      key={`${line.sku}-${index}`}
-                      className="border-t border-neutral-100"
-                    >
-                      <td className="px-4 py-3 font-mono text-xs">
-                        {line.sku}
-                        <p className="mt-1 text-[11px] text-neutral-400">
-                          Linea {line.sourceLine}
-                        </p>
-                      </td>
-                      <td className="px-4 py-3">
-                        <p className="font-medium text-neutral-950">
-                          {line.resolved?.product.title || "-"}
-                        </p>
-                        <p className="text-xs text-neutral-500">
-                          {line.resolved?.variant.title || ""}
-                        </p>
-                      </td>
-                      <td className="px-4 py-3">
-                        <select
-                          value={line.purchaseUnit}
-                          onChange={(event) =>
-                            updateLine(index, {
-                              purchaseUnit: event.target.value as PurchaseUnit,
-                            })
-                          }
-                          className="rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm"
-                        >
-                          <option value="unit">Unidades</option>
-                          <option value="box">Cajas</option>
-                        </select>
-                      </td>
-                      <td className="px-4 py-3">
-                        <input
-                          type="number"
-                          min={1}
-                          value={line.quantity}
-                          onChange={(event) =>
-                            updateLine(index, {
-                              quantity: Number(event.target.value),
-                            })
-                          }
-                          className="w-24 rounded-md border border-neutral-200 px-3 py-2"
-                        />
-                      </td>
-                      <td className="px-4 py-3 font-medium">
-                        {getTotalUnits(line)}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-neutral-500">
-                        {packaging
-                          ? `Caja ${packaging.units_per_box} uds / min. ${packaging.minimum_order_quantity} / multiplo ${packaging.quantity_increment}${
-                              packaging.boxes_per_pallet
-                                ? ` / pallet ${packaging.boxes_per_pallet} cajas`
-                                : ""
-                            }`
-                          : "Sin regla"}
-                        {line.purchaseUnit === "box" && packaging ? (
-                          <p className="mt-1 text-[11px] text-neutral-400">
-                            {line.quantity} cajas x {packaging.units_per_box}{" "}
-                            uds = {getTotalUnits(line)} uds
-                          </p>
-                        ) : null}
-                        {lineRequiresQuote(line) ? (
-                          <span className="mt-2 inline-flex rounded-md border border-neutral-200 bg-neutral-50 px-2 py-1 text-[11px] font-semibold text-neutral-700">
-                            Requiere presupuesto
-                          </span>
-                        ) : null}
-                      </td>
-                      <td className="px-4 py-3">
-                        {line.error ? (
-                          <span className="inline-flex rounded-md border border-red-200 bg-red-50 px-2 py-1 text-xs font-medium text-red-700">
-                            {line.error}
-                          </span>
-                        ) : (
-                          <span className="inline-flex rounded-md border border-green-200 bg-green-50 px-2 py-1 text-xs font-medium text-green-700">
-                            Listo
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <button
-                          type="button"
-                          onClick={() => removeLine(index)}
-                          className="text-xs font-medium text-neutral-500 underline hover:text-neutral-950"
-                        >
-                          Quitar
-                        </button>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 px-4 py-3">
-            <p className="text-xs text-neutral-500">
-              El carrito conservara unidades, cajas, peso y ocupacion de pallet
-              para presupuesto y validacion de checkout.
-            </p>
-            <Link
-              href="/cart"
-              className="text-xs font-semibold text-neutral-950 underline"
-            >
-              Revisar carrito y presupuesto
-            </Link>
-          </div>
         </div>
-      ) : null}
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-neutral-200 bg-white px-4 py-3">
+        <p className="text-sm text-neutral-500">
+          El carrito conserva unidades, cajas, peso y ocupacion de pallet para
+          presupuesto y validacion de checkout.
+        </p>
+        <Link href="/cart" className="text-sm font-semibold text-neutral-950 underline">
+          Revisar carrito
+        </Link>
+      </div>
     </div>
   )
 }

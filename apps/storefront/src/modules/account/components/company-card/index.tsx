@@ -30,12 +30,12 @@ const CompanyCard = ({
   const handleSave = async () => {
     setIsSaving(true)
     await updateCompany(companyData).catch(() => {
-      toast.error("Error updating company")
+      toast.error("No se pudo actualizar la empresa")
     })
     setIsSaving(false)
     setIsEditing(false)
 
-    toast.success("Company updated")
+    toast.success("Empresa actualizada")
   }
 
   const currenciesInRegions = Array.from(
@@ -67,9 +67,9 @@ const CompanyCard = ({
           }}
         >
           <div className="flex flex-col gap-y-2">
-            <Text className="font-medium text-neutral-950">Company Name</Text>
+            <Text className="font-medium text-neutral-950">Empresa</Text>
             <Input
-              label="Company Name"
+              label="Empresa"
               name="name"
               value={companyData.name || ""}
               onChange={(e) =>
@@ -89,9 +89,9 @@ const CompanyCard = ({
             />
           </div>
           <div className="flex flex-col gap-y-2">
-            <Text className="font-medium text-neutral-950">Phone</Text>
+            <Text className="font-medium text-neutral-950">Teléfono</Text>
             <Input
-              label="Phone"
+              label="Teléfono"
               name="phone"
               value={companyData.phone || ""}
               onChange={(e) =>
@@ -100,9 +100,9 @@ const CompanyCard = ({
             />
           </div>
           <div className="flex flex-col gap-y-2">
-            <Text className="font-medium text-neutral-950">Address</Text>
+            <Text className="font-medium text-neutral-950">Dirección</Text>
             <Input
-              label="Address"
+              label="Dirección"
               name="address"
               value={companyData.address || ""}
               onChange={(e) =>
@@ -111,9 +111,9 @@ const CompanyCard = ({
             />
           </div>
           <div className="flex flex-col gap-y-2">
-            <Text className="font-medium text-neutral-950">City</Text>
+            <Text className="font-medium text-neutral-950">Ciudad</Text>
             <Input
-              label="City"
+              label="Ciudad"
               name="city"
               value={companyData.city || ""}
               onChange={(e) =>
@@ -122,9 +122,9 @@ const CompanyCard = ({
             />
           </div>
           <div className="flex flex-col gap-y-2">
-            <Text className="font-medium text-neutral-950">State</Text>
+            <Text className="font-medium text-neutral-950">Provincia</Text>
             <Input
-              label="State"
+              label="Provincia"
               name="state"
               value={companyData.state || ""}
               onChange={(e) =>
@@ -133,9 +133,9 @@ const CompanyCard = ({
             />
           </div>
           <div className="flex flex-col gap-y-2">
-            <Text className="font-medium text-neutral-950">Zip</Text>
+            <Text className="font-medium text-neutral-950">Código postal</Text>
             <Input
-              label="Zip"
+              label="Código postal"
               name="zip"
               value={companyData.zip || ""}
               onChange={(e) =>
@@ -144,7 +144,7 @@ const CompanyCard = ({
             />
           </div>
           <div className="flex flex-col gap-y-2">
-            <Text className="font-medium text-neutral-950">Country</Text>
+            <Text className="font-medium text-neutral-950">País</Text>
             <Select
               name="country"
               value={companyData.country || ""}
@@ -160,7 +160,7 @@ const CompanyCard = ({
             </Select>
           </div>
           <div className="flex flex-col gap-y-2">
-            <Text className="font-medium text-neutral-950">Currency</Text>
+            <Text className="font-medium text-neutral-950">Moneda</Text>
             <Select
               name="currency_code"
               value={companyData.currency_code || ""}
@@ -180,7 +180,7 @@ const CompanyCard = ({
           </div>
           <div className="flex flex-col gap-y-2">
             <Text className="font-medium text-neutral-950">
-              Frecuencia de reinicio del limite
+              Frecuencia de reinicio del límite
             </Text>
             <Select
               name="spending_limit_reset_frequency"
@@ -196,7 +196,7 @@ const CompanyCard = ({
               {Object.values(ModuleCompanySpendingLimitResetFrequency).map(
                 (value) => (
                   <option key={value} value={value}>
-                    {value.charAt(0).toUpperCase() + value.slice(1)}
+                    {formatResetFrequency(value)}
                   </option>
                 )
               )}
@@ -221,11 +221,11 @@ const CompanyCard = ({
             <Text className=" text-neutral-500">{company.email}</Text>
           </div>
           <div className="flex flex-col gap-y-2">
-            <Text className="font-medium text-neutral-950">Telefono</Text>
+            <Text className="font-medium text-neutral-950">Teléfono</Text>
             <Text className=" text-neutral-500">{company.phone}</Text>
           </div>
           <div className="flex flex-col gap-y-2">
-            <Text className="font-medium text-neutral-950">Direccion</Text>
+            <Text className="font-medium text-neutral-950">Dirección</Text>
             <Text className=" text-neutral-500">
               {company.address}, {company.city}, {company.state}, {company.zip},{" "}
               {company.country?.toUpperCase()}
@@ -240,11 +240,10 @@ const CompanyCard = ({
           </div>
           <div className="flex flex-col gap-y-2">
             <Text className="font-medium text-neutral-950">
-              Frecuencia de reinicio del limite
+              Frecuencia de reinicio del límite
             </Text>
             <Text className=" text-neutral-500">
-              {company.spending_limit_reset_frequency?.charAt(0).toUpperCase() +
-                company.spending_limit_reset_frequency?.slice(1)}
+              {formatResetFrequency(company.spending_limit_reset_frequency)}
             </Text>
           </div>
         </div>
@@ -257,19 +256,19 @@ const CompanyCard = ({
                 onClick={() => setIsEditing(false)}
                 disabled={isSaving}
               >
-                Cancel
+                Cancelar
               </Button>
               <Button
                 variant="primary"
                 onClick={handleSave}
                 isLoading={isSaving}
               >
-                Save
+                Guardar
               </Button>
             </>
           ) : (
             <Button variant="secondary" onClick={() => setIsEditing(true)}>
-              Edit
+              Editar
             </Button>
           )}
         </div>
@@ -279,3 +278,18 @@ const CompanyCard = ({
 }
 
 export default CompanyCard
+
+const formatResetFrequency = (
+  value?: ModuleCompanySpendingLimitResetFrequency | string | null
+) => {
+  switch (value) {
+    case ModuleCompanySpendingLimitResetFrequency.MONTHLY:
+      return "Mensual"
+    case ModuleCompanySpendingLimitResetFrequency.YEARLY:
+      return "Anual"
+    case ModuleCompanySpendingLimitResetFrequency.NEVER:
+      return "Nunca"
+    default:
+      return "Sin definir"
+  }
+}

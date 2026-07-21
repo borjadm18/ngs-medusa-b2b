@@ -1,11 +1,12 @@
 "use client"
 
 import { inviteEmployee } from "@/lib/data/companies"
+import { currencySymbolMap } from "@/lib/constants"
 import Button from "@/modules/common/components/button"
 import Input from "@/modules/common/components/input"
 import { ModuleEmployeeRole } from "@/types/company/module"
 import { QueryCompany } from "@/types"
-import { Container, Select, Text, toast } from "@medusajs/ui"
+import { Container, CurrencyInput, Select, Text, toast } from "@medusajs/ui"
 import { useState, useTransition } from "react"
 
 const InviteEmployeeCard = ({ company }: { company: QueryCompany }) => {
@@ -38,7 +39,7 @@ const InviteEmployeeCard = ({ company }: { company: QueryCompany }) => {
           role: form.role,
           spending_limit: Number(form.spending_limit || 0),
         })
-        toast.success("Invitacion creada")
+        toast.success("Invitación creada")
         setForm({
           first_name: "",
           last_name: "",
@@ -47,7 +48,7 @@ const InviteEmployeeCard = ({ company }: { company: QueryCompany }) => {
           spending_limit: "0",
         })
       } catch (error: any) {
-        toast.error(error?.message || "No se pudo crear la invitacion")
+        toast.error(error?.message || "No se pudo crear la invitación")
       }
     })
   }
@@ -108,13 +109,19 @@ const InviteEmployeeCard = ({ company }: { company: QueryCompany }) => {
           </Select>
         </div>
         <div className="flex flex-col gap-y-2">
-          <Text className="font-medium text-neutral-950">Limite</Text>
-          <Input
+          <Text className="font-medium text-neutral-950">Límite de gasto</Text>
+          <CurrencyInput
+            symbol={currencySymbolMap[company.currency_code || "eur"] || "€"}
+            code={company.currency_code || "eur"}
+            className="bg-white rounded-md"
             name="spending_limit"
-            label="Limite de gasto"
-            type="number"
             value={form.spending_limit}
-            onChange={(event) => setField("spending_limit", event.target.value)}
+            onChange={(event) =>
+              setField(
+                "spending_limit",
+                event.target.value.replace(/[^0-9.]/g, "")
+              )
+            }
           />
         </div>
       </div>

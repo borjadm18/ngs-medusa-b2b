@@ -37,6 +37,26 @@ const parseDimensionsMm = (value: unknown) => {
   return (length * width * height) / 1_000_000_000;
 };
 
+const toPositiveNumber = (value: unknown) => {
+  const numberValue = Number(value);
+
+  return Number.isFinite(numberValue) && numberValue > 0 ? numberValue : 0;
+};
+
+const getItemQuantity = (item: any) =>
+  toPositiveNumber(item.quantity) || toPositiveNumber(item.detail?.quantity);
+
+const getLineValue = (item: any, quantity: number) =>
+  toPositiveNumber(item.total) ||
+  toPositiveNumber(item.subtotal) ||
+  toPositiveNumber(item.unit_price) * quantity;
+
+const getQuoteValue = (quote: any) =>
+  toPositiveNumber(quote.draft_order?.total) ||
+  toPositiveNumber(quote.draft_order?.subtotal) ||
+  toPositiveNumber(quote.draft_order?.item_total) ||
+  toPositiveNumber(quote.draft_order?.original_total);
+
 const estimateShipmentMode = (summary: {
   boxes: number;
   palletShare: number;
@@ -97,7 +117,14 @@ export const GET = async (
         "status",
         "created_at",
         "draft_order.total",
+        "draft_order.subtotal",
+        "draft_order.item_total",
+        "draft_order.original_total",
         "draft_order.items.quantity",
+        "draft_order.items.detail.quantity",
+        "draft_order.items.total",
+        "draft_order.items.subtotal",
+        "draft_order.items.unit_price",
         "draft_order.items.metadata",
       ],
       pagination: { take: 500, skip: 0 },
@@ -170,39 +197,79 @@ export const GET = async (
       },
       quote: any
     ) => {
-      acc.value += Number(quote.draft_order?.total || 0);
+      const items = quote.draft_order?.items || [];
+      const lineValue = items.reduce((sum: number, item: any) => {
+        const quantity = getItemQuantity(item);
 
-      for (const item of quote.draft_order?.items || []) {
+        return sum + getLineValue(item, quantity);
+      }, 0);
+
+      acc.value += getQuoteValue(quote) || lineValue;
+
+      for (const item of items) {
         const metadata = item.metadata || {};
-        acc.units += Number(item.quantity || 0);
+        const itemQuantity = getItemQuantity(item);
+        const unitsPerBox = toPositiveNumber(metadata.units_per_box);
+        const packageQuantity = toPositiveNumber(metadata.package_quantity);
+        const metadataUnitQuantity = toPositiveNumber(metadata.unit_quantity);
+        const totalUnits =
+          metadata.purchase_unit === "box" && packageQuantity && unitsPerBox
+            ? packageQuantity * unitsPerBox
+            : metadataUnitQuantity || itemQuantity;
+
+        acc.units += totalUnits;
 
         if (metadata.purchase_unit === "box") {
-          const packageQuantity = Number(metadata.package_quantity || 0);
-          const packageWeight = Number(metadata.package_weight || 0);
-          const unitsPerBox = Number(metadata.units_per_box || 0);
+          const packageWeight = toPositiveNumber(metadata.package_weight);
           const packageVolume = parseDimensionsMm(metadata.package_dimensions) || 0;
           const estimatedBoxes =
-            Number.isFinite(unitsPerBox) && unitsPerBox > 0
-              ? Number(item.quantity || 0) / unitsPerBox
-              : packageQuantity;
+            packageQuantity ||
+            (unitsPerBox
+              ? totalUnits / unitsPerBox
+              : 0);
           const estimatedWeight =
-            Number.isFinite(packageWeight) && Number.isFinite(estimatedBoxes)
+            packageWeight && estimatedBoxes
               ? estimatedBoxes * packageWeight
               : 0;
           const estimatedVolume =
-            Number.isFinite(estimatedBoxes) && packageVolume
+            estimatedBoxes && packageVolume
               ? estimatedBoxes * packageVolume
               : 0;
           const volumetricWeight = estimatedVolume * 250;
-          const boxesPerPallet = Number(metadata.boxes_per_pallet || 0);
-          acc.boxes += Number.isFinite(packageQuantity) ? packageQuantity : 0;
+          const boxesPerPallet = toPositiveNumber(metadata.boxes_per_pallet);
+
+          acc.boxes += estimatedBoxes;
           acc.weight += estimatedWeight;
           acc.volume += estimatedVolume;
           acc.billableWeight += Math.max(estimatedWeight, volumetricWeight);
-          acc.palletShare +=
-            Number.isFinite(boxesPerPallet) && boxesPerPallet > 0
-              ? estimatedBoxes / boxesPerPallet
+          acc.palletShare += boxesPerPallet
+            ? estimatedBoxes / boxesPerPallet
+            : 0;
+        } else if (unitsPerBox) {
+          const estimatedBoxes = totalUnits / unitsPerBox;
+          const packageWeight = toPositiveNumber(metadata.package_weight);
+          const packageVolume = parseDimensionsMm(metadata.package_dimensions) || 0;
+          const estimatedWeight =
+            packageWeight && estimatedBoxes
+              ? estimatedBoxes * packageWeight
               : 0;
+          const estimatedVolume =
+            estimatedBoxes && packageVolume
+              ? estimatedBoxes * packageVolume
+              : 0;
+          const volumetricWeight = estimatedVolume * 250;
+          const boxesPerPallet = toPositiveNumber(metadata.boxes_per_pallet);
+
+          acc.boxes += estimatedBoxes;
+          acc.weight += estimatedWeight;
+          acc.volume += estimatedVolume;
+          acc.billableWeight += Math.max(estimatedWeight, volumetricWeight);
+          acc.palletShare += boxesPerPallet
+            ? estimatedBoxes / boxesPerPallet
+            : 0;
+        } else if (itemQuantity) {
+          acc.boxes += 1;
+          acc.billableWeight += 1;
         }
       }
 

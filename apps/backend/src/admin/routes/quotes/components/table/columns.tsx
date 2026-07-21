@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { DateCell } from "../../../../components/common/table/table-cells/date-cell";
 import { TextCell } from "../../../../components/common/table/table-cells/text-cell";
 import QuoteStatusBadge from "../quote-status-badge";
+import { formatAmount } from "../../../../utils";
 
 const columnHelper = createColumnHelper<any>();
 
@@ -31,9 +32,20 @@ export const useQuotesTableColumns = () => {
       columnHelper.accessor("draft_order.total", {
         header: t("fields.total"),
         cell: ({ getValue, row }) => {
-          <TextCell
-            text={`${row.original.draft_order.currency_code.toUpperCase()} ${getValue()}`}
-          />;
+          const total =
+            getValue() ??
+            row.original.draft_order?.subtotal ??
+            row.original.draft_order?.item_total ??
+            0;
+
+          return (
+            <TextCell
+              text={formatAmount(
+                Number(total) || 0,
+                row.original.draft_order?.currency_code || "eur"
+              )}
+            />
+          );
         },
       }),
 

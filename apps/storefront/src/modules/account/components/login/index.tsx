@@ -24,7 +24,7 @@ const Login = ({ setCurrentView, countryCode, redirectTo }: Props) => {
       <Text className="text-4xl text-neutral-950 text-left">
         Accede para comprar
         <br />
-        mas rapido.
+        más rápido.
       </Text>
       <form className="w-full" action={formAction}>
         <input type="hidden" name="redirect_country_code" value={countryCode} />
@@ -36,13 +36,13 @@ const Login = ({ setCurrentView, countryCode, redirectTo }: Props) => {
             label="Email"
             name="email"
             type="email"
-            title="Enter a valid email address."
+            title="Introduce un email válido."
             autoComplete="email"
             required
             data-testid="email-input"
           />
           <Input
-            label="Contrasena"
+            label="Contraseña"
             name="password"
             type="password"
             autoComplete="current-password"
@@ -60,7 +60,7 @@ const Login = ({ setCurrentView, countryCode, redirectTo }: Props) => {
         <ErrorMessage error={message} data-testid="login-error-message" />
         <div className="flex flex-col gap-2">
           <SubmitButton data-testid="sign-in-button" className="w-full mt-6">
-            Iniciar sesion
+            Iniciar sesión
           </SubmitButton>
           <Button
             type="button"

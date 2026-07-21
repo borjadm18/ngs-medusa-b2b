@@ -46,6 +46,9 @@ const toNumber = (value: unknown) => {
     : undefined;
 };
 
+const getLineQuantity = (item: QuoteLineWithPackaging) =>
+  Number(item.quantity || (item as any).detail?.quantity || 0);
+
 const parseDimensionsMm = (value: string | undefined) => {
   if (!value) {
     return undefined;
@@ -95,7 +98,14 @@ export const getQuoteLinePackaging = (
   }
 
   const packageQuantity = purchaseUnit === "box" ? rawPackageQuantity ?? 0 : 0;
-  const estimatedBoxes = quantity / unitsPerBox;
+  const calculatedUnitQuantity =
+    purchaseUnit === "box" && packageQuantity && unitsPerBox
+      ? packageQuantity * unitsPerBox
+      : quantity;
+  const estimatedBoxes =
+    purchaseUnit === "box" && packageQuantity
+      ? packageQuantity
+      : quantity / unitsPerBox;
   const dimensions = parseDimensionsMm(packageDimensions);
   const packageVolumeM3 = dimensions?.volumeM3;
   const totalWeight = packageWeight ? packageWeight * estimatedBoxes : undefined;
@@ -110,7 +120,7 @@ export const getQuoteLinePackaging = (
     purchaseUnit,
     packageQuantity,
     unitsPerBox,
-    unitQuantity: quantity,
+    unitQuantity: calculatedUnitQuantity,
     boxesPerPallet,
     packageWeight,
     packageDimensions,
@@ -148,15 +158,16 @@ export const getQuotePackagingSummary = (
 ) =>
   (items || []).reduce(
     (summary, item) => {
-      const quantity = item.quantity || 0;
+      const quantity = getLineQuantity(item);
       const packaging = getQuoteLinePackaging(item.metadata, quantity);
 
-      summary.totalUnits += quantity;
-
       if (!packaging) {
+        summary.totalUnits += quantity;
         summary.looseUnits += quantity;
         return summary;
       }
+
+      summary.totalUnits += packaging.unitQuantity;
 
       if (packaging.purchaseUnit === "box") {
         summary.boxes += packaging.packageQuantity;
@@ -339,14 +350,15 @@ export const quoteItemsToCsv = (
   ];
 
   const rows = (items || []).map((item) => {
-    const packaging = getQuoteLinePackaging(item.metadata, item.quantity || 0);
+    const quantity = getLineQuantity(item);
+    const packaging = getQuoteLinePackaging(item.metadata, quantity);
 
     return [
       item.id,
       item.product_title || item.title,
       item.variant_title,
       item.variant_sku,
-      item.quantity,
+      quantity,
       item.unit_price,
       item.total,
       packaging?.purchaseUnit ?? "unit",

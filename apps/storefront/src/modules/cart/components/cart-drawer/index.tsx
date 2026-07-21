@@ -144,8 +144,8 @@ const CartDrawer = ({
           <Drawer.Header className="flex self-center">
             <Drawer.Title>
               {totalItems > 0
-                ? `You have ${totalItems} items in your cart`
-                : "Your cart is empty"}
+                ? `Tienes ${totalItems} artículo${totalItems === 1 ? "" : "s"} en el carrito`
+                : "Tu carrito está vacío"}
             </Drawer.Title>
           </Drawer.Header>
           {cart?.approvals && cart.approvals.length > 0 && (
@@ -189,15 +189,15 @@ const CartDrawer = ({
                     <div className="rounded border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-800">
                       <p className="font-semibold text-red-950">
                         {isPendingApproval
-                          ? "Cuenta pendiente de aprobacion"
+                          ? "Cuenta pendiente de aprobación"
                           : "Tarifa B2B privada"}
                       </p>
                       <p>
                         {isPendingApproval
                           ? companyStatus === "rejected"
                             ? "Tu solicitud ha sido rechazada. Contacta con el equipo comercial."
-                            : "Estamos revisando tu alta B2B. Veras precios cuando sea aprobada."
-                          : "Inicia sesion para ver precios y descuentos."}
+                            : "Estamos revisando tu alta B2B. Verás precios cuando sea aprobada."
+                          : "Inicia sesión para ver precios y descuentos."}
                       </p>
                     </div>
                   )}
@@ -224,18 +224,18 @@ const CartDrawer = ({
                         <LockClosedSolidMini />
                         {customer
                           ? isPendingApproval
-                            ? "Pendiente de aprobacion"
+                            ? "Pendiente de aprobación"
                             : spendLimitExceeded
-                            ? "Limite de gasto superado"
+                            ? "Límite de gasto superado"
                             : "Finalizar compra"
-                          : "Inicia sesion para comprar"}
+                          : "Inicia sesión para comprar"}
                       </Button>
                     </LocalizedClientLink>
                     {spendLimitExceeded && (
                       <div className="flex items-center gap-x-2 bg-neutral-100 p-3 rounded-md shadow-borders-base">
                         <ExclamationCircle className="text-orange-500 w-fit overflow-visible" />
                         <p className="text-neutral-950 text-xs">
-                          Este pedido supera tu limite de gasto. Contacta con
+                          Este pedido supera tu límite de gasto. Contacta con
                           tu responsable para aprobarlo.
                         </p>
                       </div>

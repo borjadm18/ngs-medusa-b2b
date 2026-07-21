@@ -40,7 +40,7 @@ const SignInPrompt = () => {
         <Text className="small:text-4xl text-lg text-white text-left">
           Accede para
           <br />
-          comprar mas rapido.
+          comprar más rápido.
         </Text>
         <div className="flex small:flex-row flex-col small:gap-4 gap-2">
           <LocalizedClientLink href="/account?view=register">
@@ -58,7 +58,7 @@ const SignInPrompt = () => {
               className="small:h-10 h-8 small:min-w-36 min-w-24 rounded-full"
               data-testid="sign-in-button"
             >
-              Iniciar sesion
+              Iniciar sesión
             </Button>
           </LocalizedClientLink>
         </div>

@@ -27,7 +27,7 @@ const PendingCustomerApprovals = ({
     >
       <Text className="text-large-semi">Sin aprobaciones pendientes</Text>
       <Text className="text-base-regular">
-        Las solicitudes que requieran aprobacion apareceran aqui.
+        Las solicitudes que requieran aprobación aparecerán aquí.
       </Text>
     </div>
   )

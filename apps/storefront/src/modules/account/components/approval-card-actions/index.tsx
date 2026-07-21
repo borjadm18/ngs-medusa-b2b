@@ -43,7 +43,7 @@ const ApprovalCardActions = ({
 
     const confirmed = await dialog({
       title: "Aprobar carrito",
-      description: "Esta accion no se puede deshacer.",
+      description: "Esta acción no se puede deshacer.",
     })
 
     if (!confirmed) return
@@ -58,7 +58,7 @@ const ApprovalCardActions = ({
 
     const confirmed = await dialog({
       title: "Rechazar carrito",
-      description: "Esta accion no se puede deshacer.",
+      description: "Esta acción no se puede deshacer.",
     })
 
     if (!confirmed) return
@@ -109,7 +109,7 @@ const ApprovalCardActions = ({
           {"·"}
           <Button variant="primary" disabled>
             <LockClosedSolidMini className="inline-block" />
-            Pendiente de aprobacion externa
+            Pendiente de aprobación externa
           </Button>
         </>
       ) : cartWithApprovals.approval_status?.status ===

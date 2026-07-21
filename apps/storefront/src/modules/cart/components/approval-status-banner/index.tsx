@@ -16,7 +16,9 @@ const ApprovalStatusBanner = ({ cart }: { cart: B2BCart }) => {
       {cartApprovalStatus === ApprovalStatusType.PENDING && (
         <>
           <LockClosedSolid className="w-4 h-4" />
-          <Text className="text-left">This cart is locked for approval.</Text>
+          <Text className="text-left">
+            Este carrito está bloqueado pendiente de aprobación.
+          </Text>
         </>
       )}
 
@@ -24,12 +26,13 @@ const ApprovalStatusBanner = ({ cart }: { cart: B2BCart }) => {
         <>
           <XMarkMini className="w-4 h-4" />
           <Text className="text-left">
-            This cart has been rejected. You can re-request approval from the{" "}
+            Este carrito ha sido rechazado. Puedes volver a solicitar
+            aprobación desde la{" "}
             <LocalizedClientLink
               href="/checkout"
               className="text-ui-bg-interactive hover:text-ui-fg-interactive-hover"
             >
-              checkout page
+              página de checkout
             </LocalizedClientLink>
             .
           </Text>
@@ -40,7 +43,7 @@ const ApprovalStatusBanner = ({ cart }: { cart: B2BCart }) => {
         <>
           <CheckMini className="w-4 h-4" />
           <Text className="text-left">
-            This cart has been approved and can now be completed.
+            Este carrito ha sido aprobado y ya puede completarse.
           </Text>
         </>
       )}

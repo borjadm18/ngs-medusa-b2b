@@ -61,15 +61,15 @@ const Summary = ({
         <div className="rounded border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-800">
           <p className="font-semibold text-red-950">
             {isOnboardingBlocked
-              ? "Cuenta pendiente de aprobacion"
+              ? "Cuenta pendiente de aprobación"
               : "Tarifa B2B privada"}
           </p>
           <p>
             {isOnboardingBlocked
               ? companyStatus === "rejected"
                 ? "Tu solicitud ha sido rechazada. Contacta con el equipo comercial."
-                : "Estamos revisando tu alta B2B. Veras precios, descuentos y checkout cuando sea aprobada."
-              : "Inicia sesion para ver subtotales, descuentos, promociones y documentos comerciales."}
+                : "Estamos revisando tu alta B2B. Verás precios, descuentos y checkout cuando sea aprobada."
+              : "Inicia sesión para ver subtotales, descuentos, promociones y documentos comerciales."}
           </p>
         </div>
       )}
@@ -78,9 +78,9 @@ const Summary = ({
         <div className="flex items-center gap-x-2 bg-neutral-100 p-3 rounded-md shadow-borders-base">
           <ExclamationCircle className="text-orange-500 w-fit overflow-visible" />
           <p className="text-neutral-950 text-xs">
-            This order exceeds your spending limit.
+            Este pedido supera tu límite de gasto.
             <br />
-            Please contact your manager for approval.
+            Solicita aprobación a un responsable de tu empresa.
           </p>
         </div>
       )}
@@ -90,9 +90,9 @@ const Summary = ({
             Este carrito requiere presupuesto
           </p>
           <p>
-            {quoteRequiredItems.length} linea
+            {quoteRequiredItems.length} línea
             {quoteRequiredItems.length === 1 ? "" : "s"} necesita
-            {quoteRequiredItems.length === 1 ? "" : "n"} validacion comercial
+            {quoteRequiredItems.length === 1 ? "" : "n"} validación comercial
             antes de finalizar compra.
           </p>
         </div>
@@ -108,11 +108,11 @@ const Summary = ({
           >
             {customer
               ? isOnboardingBlocked
-                ? "Pendiente de aprobacion"
+                ? "Pendiente de aprobación"
                 : spendLimitExceeded
-                ? "Limite de compra superado"
+                ? "Límite de compra superado"
                 : "Finalizar compra"
-              : "Inicia sesion para comprar"}
+              : "Inicia sesión para comprar"}
           </Button>
         </LocalizedClientLink>
       )}

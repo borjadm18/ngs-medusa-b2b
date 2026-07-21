@@ -101,7 +101,7 @@ const AccountNav = ({
                   >
                     <div className="flex items-center gap-x-2">
                       <Package size={20} />
-                      <span>Pedido rapido</span>
+                      <span>Pedido rápido</span>
                     </div>
                     <ChevronDown className="transform -rotate-90" />
                   </LocalizedClientLink>
@@ -156,7 +156,7 @@ const AccountNav = ({
                   >
                     <div className="flex items-center gap-x-2">
                       <ArrowRightOnRectangle />
-                      <span>Cerrar sesion</span>
+                      <span>Cerrar sesión</span>
                     </div>
                     <ChevronDown className="transform -rotate-90" />
                   </button>
@@ -211,7 +211,7 @@ const AccountNav = ({
                 route={route!}
                 data-testid="quick-order-link"
               >
-                Pedido rapido
+                Pedido rápido
               </AccountNavLink>
             </li>
             <li>
@@ -254,7 +254,7 @@ const AccountNav = ({
                 onClick={handleLogout}
                 data-testid="logout-button"
               >
-                Cerrar sesion
+                Cerrar sesión
               </button>
             </li>
           </ul>

@@ -42,7 +42,7 @@ const CompanyForm = ({ cart }: { cart: B2BCart }) => {
               data-testid="company-form-company-radio"
               disabled={isPendingApproval}
             />
-            <span>Order on behalf of {cart?.company.name}</span>
+            <span>Confirmar pedido en nombre de {cart?.company.name}</span>
           </div>
         </RadioGroup.Option>
         <Divider />
@@ -61,7 +61,7 @@ const CompanyForm = ({ cart }: { cart: B2BCart }) => {
               data-testid="company-form-custom-radio"
               disabled={isPendingApproval}
             />
-            <span>Custom checkout</span>
+            <span>Usar datos distintos para este pedido</span>
           </div>
         </RadioGroup.Option>
       </RadioGroup>

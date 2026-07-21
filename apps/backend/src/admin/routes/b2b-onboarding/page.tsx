@@ -28,11 +28,13 @@ const statusColors: Record<string, "orange" | "green" | "red"> = {
 
 const B2BOnboarding = () => {
   const { data, isPending } = useCompanies({
-    fields: "*employees,*employees.customer,*employees.company",
+    fields:
+      "*employees,*employees.customer,*employees.company,*customer_group,*approval_settings",
     limit: 100,
   });
 
   const companies = data?.companies || [];
+  const isLoading = isPending && !data;
   const pendingCompanies = companies.filter(
     (company) => company.onboarding_status === "pending"
   );
@@ -63,7 +65,7 @@ const B2BOnboarding = () => {
             title="Solicitudes pendientes"
             description="Estas empresas aun no tienen acceso comercial completo."
             companies={pendingCompanies}
-            isPending={isPending}
+            isPending={isLoading}
             emptyLabel="No hay altas pendientes."
           />
 
@@ -71,7 +73,7 @@ const B2BOnboarding = () => {
             title="Solicitudes revisadas"
             description="Historico reciente de altas aprobadas o denegadas."
             companies={reviewedCompanies}
-            isPending={isPending}
+            isPending={isLoading}
             emptyLabel="Todavia no hay solicitudes revisadas."
           />
         </div>

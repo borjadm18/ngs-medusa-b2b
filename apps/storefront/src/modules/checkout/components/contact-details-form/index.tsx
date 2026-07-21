@@ -21,10 +21,27 @@ const ContactDetailsForm = ({
     notes: "",
   })
 
-  const countriesInRegion = useMemo(
-    () => cart?.region?.countries?.map((c) => c.iso_2),
-    [cart?.region]
+  const savedPaymentMethods = useMemo(
+    () => cart?.company?.saved_payment_methods || [],
+    [cart?.company?.saved_payment_methods]
   )
+  const paymentMethodOptions = useMemo(() => {
+    const defaults = [
+      { value: "bank_transfer", label: "Transferencia bancaria" },
+      { value: "credit_account", label: "Cuenta de credito" },
+      { value: "saved_sepa", label: "SEPA guardado" },
+      { value: "card_on_file", label: "Tarjeta guardada" },
+    ]
+
+    const saved = savedPaymentMethods
+      .map((method) => ({
+        value: String(method.id || method.code || method.type || ""),
+        label: String(method.label || method.name || method.type || ""),
+      }))
+      .filter((method) => method.value && method.label)
+
+    return saved.length ? saved : defaults
+  }, [savedPaymentMethods])
 
   useEffect(() => {
     if (cart && cart.email) {
@@ -53,9 +70,7 @@ const ContactDetailsForm = ({
   }, [cart])
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLInputElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     setFormData({
       ...formData,
@@ -64,80 +79,117 @@ const ContactDetailsForm = ({
   }
 
   return (
-    <div className="flex flex-col small:grid small:grid-cols-2 gap-4">
-      <Input
-        label="Email"
-        name="email"
-        autoComplete="email"
-        value={formData["email"]}
-        onChange={handleChange}
-        required
-        data-testid="email-input"
-        className="small:col-span-2"
-      />
-      <Input
-        label="Invoice recipient"
-        name="invoice_recipient"
-        autoComplete="family-name"
-        value={formData["invoice_recipient"]}
-        onChange={handleChange}
-        data-testid="invoice-recipient-input"
-      />
-      <Input
-        label="Cost center"
-        name="cost_center"
-        value={formData["cost_center"]}
-        onChange={handleChange}
-        data-testid="cost-center-input"
-      />
-      <Input
-        label="N pedido / PO"
-        name="po_number"
-        value={formData["po_number"]}
-        onChange={handleChange}
-        data-testid="po-number-input"
-      />
-      <Input
-        label="Referencia interna"
-        name="requisition_number"
-        value={formData["requisition_number"]}
-        onChange={handleChange}
-        data-testid="requisition-number-input"
-      />
-      <Input
-        label="Condiciones de pago"
-        name="payment_terms"
-        value={formData["payment_terms"]}
-        onChange={handleChange}
-        data-testid="payment-terms-input"
-      />
-      <Input
-        label="Metodo guardado"
-        name="selected_payment_method"
-        value={formData["selected_payment_method"]}
-        onChange={handleChange}
-        data-testid="saved-payment-method-input"
-      />
-      <Input
-        label="Door code/goods mark"
-        name="door_code"
-        value={formData["door_code"]}
-        onChange={handleChange}
-        data-testid="door-code-input"
-      />
-      <div className="col-span-2">
+    <div className="flex flex-col gap-5">
+      <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
+        <p className="text-sm font-semibold text-neutral-950">
+          Confirmacion empresarial
+        </p>
+        <p className="mt-1 text-sm text-neutral-500">
+          Este pedido se registra para {cart?.company?.name || "la empresa"}.
+          Indica referencia interna, centro de coste y condiciones acordadas.
+        </p>
+      </div>
+
+      <div className="flex flex-col small:grid small:grid-cols-2 gap-4">
         <Input
-          label="Notes"
-          name="notes"
-          value={formData["notes"]}
+          label="Email"
+          name="email"
+          autoComplete="email"
+          value={formData.email}
           onChange={handleChange}
-          data-testid="notes-input"
+          required
+          data-testid="email-input"
           className="small:col-span-2"
         />
-        <label className="text-xs italic text-neutral-500">
-          The note will only appear on the invoice and order confirmation and
-          will not be read by the merchant.
+        <Input
+          label="Destinatario de factura"
+          name="invoice_recipient"
+          autoComplete="organization"
+          value={formData.invoice_recipient}
+          onChange={handleChange}
+          data-testid="invoice-recipient-input"
+        />
+        <Input
+          label="Centro de coste"
+          name="cost_center"
+          value={formData.cost_center}
+          onChange={handleChange}
+          data-testid="cost-center-input"
+        />
+        <Input
+          label="Numero de pedido / PO"
+          name="po_number"
+          value={formData.po_number}
+          onChange={handleChange}
+          data-testid="po-number-input"
+        />
+        <Input
+          label="Referencia interna"
+          name="requisition_number"
+          value={formData.requisition_number}
+          onChange={handleChange}
+          data-testid="requisition-number-input"
+        />
+        <label className="flex flex-col gap-1">
+          <span className="text-xs font-medium text-neutral-700">
+            Condicion de pago acordada
+          </span>
+          <select
+            name="payment_terms"
+            value={formData.payment_terms}
+            onChange={handleChange}
+            data-testid="payment-terms-input"
+            className="h-10 rounded-md border border-neutral-200 bg-white px-3 text-sm outline-none transition focus:border-neutral-950"
+          >
+            <option value="">Selecciona condicion</option>
+            <option value="prepaid">Pago anticipado</option>
+            <option value="bank_transfer">Transferencia bancaria</option>
+            <option value="net_30">Credito 30 dias</option>
+            <option value="net_60">Credito 60 dias</option>
+            <option value="net_90">Credito 90 dias</option>
+            <option value="credit">Credito comercial</option>
+          </select>
         </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-xs font-medium text-neutral-700">
+            Metodo de pago guardado
+          </span>
+          <select
+            name="selected_payment_method"
+            value={formData.selected_payment_method}
+            onChange={handleChange}
+            data-testid="saved-payment-method-input"
+            className="h-10 rounded-md border border-neutral-200 bg-white px-3 text-sm outline-none transition focus:border-neutral-950"
+          >
+            <option value="">Selecciona metodo</option>
+            {paymentMethodOptions.map((method) => (
+              <option key={method.value} value={method.value}>
+                {method.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <Input
+          label="Muelle / codigo de entrega"
+          name="door_code"
+          value={formData.door_code}
+          onChange={handleChange}
+          data-testid="door-code-input"
+        />
+        <div className="col-span-2">
+          <Input
+            label="Notas internas"
+            name="notes"
+            value={formData.notes}
+            onChange={handleChange}
+            data-testid="notes-input"
+            className="small:col-span-2"
+          />
+          <label className="text-xs italic text-neutral-500">
+            Esta informacion ayuda a compras, administracion y logistica a
+            conciliar el pedido.
+          </label>
+        </div>
       </div>
     </div>
   )

@@ -6,7 +6,7 @@ import { notFound } from "next/navigation"
 
 export const metadata: Metadata = {
   title: "Pedido rapido",
-  description: "Anade productos al carrito por SKU o CSV.",
+  description: "Anade productos al carrito introduciendo SKU y cantidad.",
 }
 
 type Props = {
@@ -26,8 +26,8 @@ export default async function QuickOrderPage(props: Props) {
       <div className="mb-6">
         <Heading>Pedido rapido</Heading>
         <p className="mt-2 max-w-2xl text-sm text-neutral-500">
-          Pega referencias, cantidades y unidad de compra para preparar pedidos
-          recurrentes sin navegar por el catalogo.
+          Introduce referencias, cantidades y unidad de compra para preparar
+          pedidos recurrentes sin navegar por el catalogo.
         </p>
       </div>
       <QuickOrderForm regionId={region.id} />

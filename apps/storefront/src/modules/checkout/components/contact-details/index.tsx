@@ -86,7 +86,7 @@ const ContactDetails = ({
               }
             )}
           >
-            Contact Details
+            Datos internos del pedido
             {!isOpen && isCompleted && <CheckCircleSolid />}
           </Heading>
 
@@ -99,7 +99,7 @@ const ContactDetails = ({
                   className="text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
                   data-testid="edit-contact-details-button"
                 >
-                  Edit
+                  Editar
                 </button>
               </Text>
             )}
@@ -117,8 +117,8 @@ const ContactDetails = ({
                   {requiresApproval &&
                   cartApprovalStatus !== ApprovalStatusType.APPROVED &&
                   !customerIsAdmin
-                    ? "Review order"
-                    : "Next step"}
+                    ? "Revisar pedido"
+                    : "Siguiente paso"}
                 </SubmitButton>
                 <ErrorMessage
                   error={message}
@@ -139,11 +139,17 @@ const ContactDetails = ({
                   {cart.email}
                 </Text>
                 {(cart.metadata?.po_number ||
+                  cart.metadata?.cost_center ||
                   cart.metadata?.payment_terms ||
                   cart.metadata?.selected_payment_method) && (
                   <div className="grid gap-1 rounded-md border border-neutral-200 p-3 text-xs text-neutral-700">
                     {cart.metadata?.po_number ? (
                       <span>PO: {cart.metadata.po_number as string}</span>
+                    ) : null}
+                    {cart.metadata?.cost_center ? (
+                      <span>
+                        Centro de coste: {cart.metadata.cost_center as string}
+                      </span>
                     ) : null}
                     {cart.metadata?.payment_terms ? (
                       <span>
@@ -154,7 +160,9 @@ const ContactDetails = ({
                     ) : null}
                     {cart.metadata?.selected_payment_method ? (
                       <span>
-                        Metodo: {cart.metadata.selected_payment_method as string}
+                        Metodo: {formatPaymentMethod(
+                          cart.metadata.selected_payment_method as string
+                        )}
                       </span>
                     ) : null}
                   </div>
@@ -163,7 +171,7 @@ const ContactDetails = ({
                   <div>
                     <Divider />
                     <Text className="txt-medium text-ui-fg-subtle pt-2">
-                      Note: {cart.metadata?.notes as string}
+                      Nota interna: {cart.metadata?.notes as string}
                     </Text>
                   </div>
                 ) : null}
@@ -182,9 +190,21 @@ const formatPaymentTerms = (value: string) => {
   const labels: Record<string, string> = {
     prepaid: "Pago anticipado",
     bank_transfer: "Transferencia bancaria",
-    net_30: "Credito 30 dias",
-    net_60: "Credito 60 dias",
-    credit: "Credito comercial",
+    net_30: "Crédito 30 días",
+    net_60: "Crédito 60 días",
+    net_90: "Credito 90 dias",
+    credit: "Crédito comercial",
+  }
+
+  return labels[value] || value
+}
+
+const formatPaymentMethod = (value: string) => {
+  const labels: Record<string, string> = {
+    bank_transfer: "Transferencia bancaria",
+    saved_sepa: "SEPA guardado",
+    credit_account: "Cuenta de credito",
+    card_on_file: "Tarjeta guardada",
   }
 
   return labels[value] || value

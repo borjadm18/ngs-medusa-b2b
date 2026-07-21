@@ -20,7 +20,7 @@ export const useApprovalsTableColumns = () => {
         cell: ({ getValue }) => <TextCell text={`#${getValue().slice(-4)}`} />,
       }),
       columnHelper.accessor("updated_at", {
-        header: t("Updated at"),
+        header: "Actualizado",
         cell: ({ getValue }) => <DateCell date={getValue()} />,
       }),
       columnHelper.accessor("company.name", {
@@ -28,7 +28,7 @@ export const useApprovalsTableColumns = () => {
         cell: ({ getValue }) => <TextCell text={getValue()} />,
       }),
       columnHelper.accessor("approval_status.status", {
-        header: t("fields.status"),
+        header: "Estado",
         cell: ({ getValue }) => {
           const status = getValue();
           return (
@@ -41,13 +41,13 @@ export const useApprovalsTableColumns = () => {
                   : "purple"
               }
             >
-              {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
+              {formatApprovalStatus(status)}
             </StatusBadge>
           );
         },
       }),
       columnHelper.accessor("items", {
-        header: t("fields.items"),
+        header: "Artículos",
         cell: ({ getValue, row }) => (
           <ItemsPopover
             items={getValue()}
@@ -56,10 +56,21 @@ export const useApprovalsTableColumns = () => {
         ),
       }),
       columnHelper.accessor("actions", {
-        header: t("Actions"),
+        header: "Acciones",
         cell: ({ row }) => <ApprovalActions cart={row.original} />,
       }),
     ],
     [t]
   );
+};
+
+const formatApprovalStatus = (status: ApprovalStatusType) => {
+  switch (status) {
+    case ApprovalStatusType.APPROVED:
+      return "Aprobado";
+    case ApprovalStatusType.REJECTED:
+      return "Rechazado";
+    default:
+      return "Pendiente";
+  }
 };
